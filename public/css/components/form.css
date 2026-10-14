@@ -1,0 +1,91 @@
+/* ==================================================
+   INPUT BASE & INTERACTIVE ELEMENTS (Adaptable al contenedor)
+   ================================================== */
+   input:not([type="checkbox"]):not([type="radio"]),
+   textarea,
+   select {
+       font-family: var(--font-primary);
+       font-size: 14px;
+       line-height: 1.5;
+       width: 100%;
+       max-width: 100%;
+       min-width: 0; /* Permite que se encoja correctamente en Flexbox */
+       padding: 8px 12px;
+   
+       /* Estética adaptable mediante variables CSS */
+       border: 2px solid var(--input-border, var(--border-input));
+       border-radius: 6px;
+       
+       /* 👈 CAMBIO CLAVE: Usa variables de contexto. Si el contenedor no define nada, usa blanco por defecto */
+       background-color: var(--input-bg, var(--color-white));
+       color: var(--input-color, var(--text-main));
+   
+       /* Reset & Comportamiento */
+       outline: none;
+       box-sizing: border-box;
+       transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s, color 0.2s;
+   }
+   
+   /* --- Estados Dinámicos --- */
+   input:not([type="checkbox"]):not([type="radio"]):focus:not([readonly]):not([type="color"]):not([type="range"]), 
+   textarea:focus:not([readonly]),
+   select:focus {
+       border-color: var(--input-focus-border, var(--brand-500));
+   }
+   
+   input[readonly],
+   textarea[readonly] {
+       background-color: var(--gray-50);
+       border-color: var(--gray-200);
+       color: var(--gray-500);
+       cursor: not-allowed;
+   }
+
+   input[type="password"]:not(:placeholder-shown) {
+    /* Verdana oculta mejor los puntos que Montserrat */
+    font-family: "Verdana", sans-serif;
+    letter-spacing: 4px;
+    font-size: 13px;
+}
+
+input[type="password"]::placeholder {
+    font-family: var(--font-main);
+    letter-spacing: normal;
+    font-size: 14px;
+    color: var(--text-soft);
+}
+
+.checkbox-round {
+    width: 20px;
+    height: 20px;
+    background-color: var(--color-white);
+    border: 2px solid var(--gray-300);
+    border-radius: 50%;
+    vertical-align: middle;
+    appearance: none;
+    -webkit-appearance: none;
+    outline: none;
+    cursor: pointer;
+    padding: 0;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.checkbox-round:checked {
+    background-color: #eda500;
+    /* Tu color de resalte */
+    border-color: #eda500;
+}
+
+/* Indicador interno para el check */
+.checkbox-round:checked::after {
+    content: '';
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    width: 6px;
+    height: 6px;
+    background: white;
+    border-radius: 50%;
+}
+

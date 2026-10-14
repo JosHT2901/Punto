@@ -1,0 +1,57 @@
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 26px; /* Altura ligeramente mayor para mejor proporción */
+    cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  
+  /* Ocultamos el checkbox nativo pero mantenemos la accesibilidad */
+  .toggle-switch input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  /* Fondo del interruptor */
+  .toggle-switch-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #cbd5e1; /* Gris moderno (Tailwind slate-300) */
+    border-radius: 26px;
+    transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+  }
+  
+  /* Círculo deslizante */
+  .toggle-switch-handle {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    background-color: #ffffff;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  /* Estado ACTIVADO (Checked) */
+  .toggle-switch input[type="checkbox"]:checked ~ .toggle-switch-background {
+    background-color: var(--brand-600);
+  }
+  
+  /* Movimiento correcto del círculo (Ancho total 50px - Ancho círculo 20px - Márgenes = ~24px) */
+  .toggle-switch input[type="checkbox"]:checked ~ .toggle-switch-background .toggle-switch-handle {
+    transform: translateX(24px);
+  }
+  
+  /* Efecto de foco para accesibilidad por teclado */
+  .toggle-switch input[type="checkbox"]:focus-visible ~ .toggle-switch-background {
+    box-shadow: 0 0 0 3px rgba(153, 176, 165, 0.3);
+  }

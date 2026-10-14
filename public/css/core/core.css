@@ -1,0 +1,27 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    
+}
+
+html {
+ scroll-behavior: smooth;
+ background-color: var(--gray-200);
+}
+body
+{
+    font-family: var( --font-primary);
+}
+
+.wizard-panel-inactivo {
+    opacity: 0.45 !important;
+    pointer-events: none !important;
+    filter: grayscale(15%);
+    transition: opacity 0.3s ease;
+}
+.js-panel-toggle {
+    transition: opacity 0.3s ease;
+}

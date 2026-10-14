@@ -1,0 +1,32 @@
+@import url("./core/core.css");
+
+
+@import url("./components/medidas.css");
+@import url("./components/root.css");
+@import url("./components/form.css");
+@import url("./components/margin.css");
+@import url("./components/flex.css");
+@import url("./components/gap.css");
+@import url("./components/font-size.css");
+@import url("./components/botones.css");
+@import url("./components/font-weight.css");
+@import url("./components/padding.css");
+@import url("./components/background.css");
+@import url("./components/radius.css");
+@import url("./components/position.css");
+@import url("./components/custom-scroll.css");
+@import url("./components/shadow.css");
+@import url("./components/border.css");
+@import url("./components/visibility.css");
+@import url("./components/modal.css");
+@import url("./components/calendario.css");
+@import url("./components/menu-opciones.css");
+@import url("./components/texto.css");
+@import url("./components/pin.css");
+@import url("./components/select.css");
+@import url("./components/switch.css");
+@import url("./components/tooltip.css");
+@import url("./fonts/montserrat.css");
+
+
+@import url("./api/intlTelInput.css");

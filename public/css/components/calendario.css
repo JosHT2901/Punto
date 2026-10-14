@@ -1,0 +1,182 @@
+.calendar-box {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-sizing: border-box;
+}
+
+.calendar-box input.input {
+    flex: 1;
+    height: 35px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 500;
+    color: #1e293b;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    background: #ffffff;
+    outline: none;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+.calendar-datepicker {
+    position: absolute;
+    z-index: 9999;
+    display: none;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    backdrop-filter: blur(var(--blur-strength));
+    -webkit-backdrop-filter: blur(var(--blur-strength));
+    box-sizing: border-box;
+    flex-direction: column;
+    background-color: var(--gray-200);
+    max-width: calc(100vw - 20px); /* Línea corregida */
+}
+
+.calendar-datepicker.view-single { width: 310px; }
+.calendar-datepicker.view-range { width: 100%; }
+
+.calendar-dp-top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+.calendar-dp-time-ico { color: #555; font-size: 16px; opacity: 0.7; }
+.calendar-dp-cal-ico {
+    background: #e3f2fd; color: #1976d2;
+    width: 34px; height: 34px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center; font-size: 16px;
+}
+
+.calendar-months-container {
+    display: flex;
+    gap: 24px;
+    width: 100%;
+}
+
+.calendar-month-block {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 260px;
+}
+
+.calendar-dp-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f1f5f9;
+    border: 1px solid #e0e6ed;
+    border-radius: 10px;
+    height: 38px;
+    padding: 0 6px;
+    margin-bottom: 12px;
+}
+.calendar-dp-month-title {
+    color: #1976d2; font-weight: 700; font-size: 13px; cursor: pointer;
+    padding: 4px 8px; border-radius: 4px; transition: background 0.2s;
+}
+.calendar-dp-month-title:hover {
+    background: #e2e8f0;
+}
+.calendar-dp-arrow {
+    background: transparent; border: none; color: #1976d2;
+    cursor: pointer; font-size: 11px; font-weight: bold;
+    width: 28px; height: 28px; display: flex;
+    align-items: center; justify-content: center; border-radius: 6px;
+}
+.calendar-dp-arrow:hover { background: #e2e8f0; }
+.calendar-dp-arrow.hidden-arrow { visibility: hidden; pointer-events: none; }
+
+/* Grillas Dinámicas */
+.calendar-dp-grid {
+    display: grid;
+    gap: 4px;
+    text-align: center;
+}
+.calendar-dp-grid.grid-days {
+    grid-template-columns: repeat(7, 1fr);
+}
+.calendar-dp-grid.grid-months,
+.calendar-dp-grid.grid-years,
+.calendar-dp-grid.grid-decades {
+    grid-template-columns: repeat(4, 1fr); /* Estructura Windows 4x3 */
+}
+
+.calendar-dp-wday {
+    color: #333333; font-weight: 700; font-size: 12px; padding: 6px 0;
+}
+
+/* Elementos interactivos de las celdas */
+.calendar-dp-day, .calendar-dp-item {
+    height: 34px; line-height: 34px; font-size: 12px;
+    font-weight: 600; color: #444444; cursor: pointer;
+    border-radius: 6px; user-select: none;
+}
+.calendar-dp-item {
+    height: 48px; line-height: 48px; /* Un poco más altos para llenar el espacio 4x3 */
+}
+.calendar-dp-day:hover, .calendar-dp-item:hover { background: #e2e8f0; }
+.calendar-dp-day.empty { visibility: hidden; pointer-events: none; }
+.calendar-dp-item.out-of-bounds { color: #cbd5e1; } /* Años fuera de la década actual */
+
+/* Estado deshabilitado para límites Max y Min */
+.calendar-dp-day.disabled-day, .calendar-dp-item.disabled-day {
+    color: #cbd5e1 !important;
+    background: transparent !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+}
+
+.calendar-dp-day.selected-endpoint, .calendar-dp-item.selected-endpoint {
+    background: #1976d2 !important; color: #ffffff !important;
+    border-radius: 6px !important;
+}
+.calendar-dp-day.in-range {
+    background: #e3f2fd !important; color: #1976d2 !important; border-radius: 0 !important;
+}
+.calendar-dp-day.today-current {
+    border: 1px solid #1976d2; color: #1976d2;
+}
+
+@media (max-width: 640px) {
+    .calendar-datepicker.view-range {
+        width: calc(100vw - 32px) !important; /* Línea corregida */
+        left: 0 !important;
+        right: 0 !important;
+        margin: 8px auto 0 auto !important;
+    }
+    .calendar-months-container {
+        flex-direction: column;
+        gap: 16px;
+    }
+    .calendar-datepicker.view-range #calendar-m1 .hidden-arrow {
+        visibility: visible !important;
+        pointer-events: auto !important;
+    }
+    .calendar-datepicker.view-range #calendar-m2 .hidden-arrow {
+        visibility: visible !important;
+        pointer-events: auto !important;
+    }
+}
+.keyboard-focus
+{
+    background-color: var(--brand-50);
+}
+/* Estilo personalizado para el enfoque mediante teclado */
+.keyboard-focus:focus-visible {
+    outline: 2px solid #0056b3; /* Puedes cambiar el color según tu diseño */
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(0, 86, 179, 0.25); /* Opcional: un efecto de brillo o sombra */
+  }
+  
+  /* Opcional: Eliminar el contorno por defecto del ratón para evitar dobles enfoques */
+  .keyboard-focus:focus:not(:focus-visible) {
+    outline: none;
+    box-shadow: none;
+  }

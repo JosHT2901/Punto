@@ -1,0 +1,210 @@
+[
+    {
+      "id": "601",
+      "descripcion": "General de Ley Personas Morales",
+      "descripcionCorta": "General Personas Morales",
+      "fisica": "No",
+      "moral": "Sí",
+      "fechaDeInicioDeVigencia": "12-11-2016",
+      "fechaDeFinDeVigencia": ""
+    },
+    {
+      "id": "603",
+      "descripcion": "Personas Morales con Fines no Lucrativos",
+      "descripcionCorta": "Morales sin fines de lucro",
+      "fisica": "No",
+      "moral": "Sí",
+      "fechaDeInicioDeVigencia": "12-11-2016",
+      "fechaDeFinDeVigencia": ""
+    },
+    {
+      "id": "605",
+      "descripcion": "Sueldos y Salarios e Ingresos Asimilados a Salarios",
+      "descripcionCorta": "Sueldos y salarios",
+      "fisica": "Sí",
+      "moral": "No",
+      "fechaDeInicioDeVigencia": "12-11-2016",
+      "fechaDeFinDeVigencia": ""
+    },
+    {
+      "id": "606",
+      "descripcion": "Arrendamiento",
+      "descripcionCorta": "Arrendamiento",
+      "fisica": "Sí",
+      "moral": "No",
+      "fechaDeInicioDeVigencia": "12-11-2016",
+      "fechaDeFinDeVigencia": ""
+    },
+    {
+      "id": "607",
+      "descripcion": "Régimen de Enajenación o Adquisición de Bienes",
+      "descripcionCorta": "Enajenación de bienes",
+      "fisica": "Sí",
+      "moral": "No",
+      "fechaDeInicioDeVigencia": "12-11-2016",
+      "fechaDeFinDeVigencia": ""
+    },
+    {
+      "id": "608",
+      "descripcion": "Demás ingresos",
+      "descripcionCorta": "Otros ingresos",
+      "fisica": "Sí",
+      "moral": "No",
+      "fechaDeInicioDeVigencia": "12-11-2016",
+      "fechaDeFinDeVigencia": ""
+    },
+    {
+      "id": "609",
+      "descripcion": "Consolidación",
+      "descripcionCorta": "Consolidación",
+      "fisica": "No",
+      "moral": "Sí",
+      "fechaDeInicioDeVigencia": "12-11-2016",
+      "fechaDeFinDeVigencia": "31-12-2019"
+    },
+    {
+      "id": "610",
+      "descripcion": "Residentes en el Extranjero sin Establecimiento Permanente en México",
+      "descripcionCorta": "Residentes en el extranjero",
+      "fisica": "Sí",
+      "moral": "Sí",
+      "fechaDeInicioDeVigencia": "12-11-2016",
+      "fechaDeFinDeVigencia": ""
+    },
+    {
+      "id": "611",
+      "descripcion": "Ingresos por Dividendos (socios y accionistas)",
+      "descripcionCorta": "Dividendos",
+      "fisica": "Sí",
+      "moral": "No",
+      "fechaDeInicioDeVigencia": "12-11-2016",
+      "fechaDeFinDeVigencia": ""
+    },
+    {
+      "id": "612",
+      "descripcion": "Personas Físicas con Actividades Empresariales y Profesionales",
+      "descripcionCorta": "Actividad empresarial",
+      "fisica": "Sí",
+      "moral": "No",
+      "fechaDeInicioDeVigencia": "12-11-2016",
+      "fechaDeFinDeVigencia": ""
+    },
+    {
+      "id": "614",
+      "descripcion": "Ingresos por intereses",
+      "descripcionCorta": "Intereses",
+      "fisica": "Sí",
+      "moral": "No",
+      "fechaDeInicioDeVigencia": "12-11-2016",
+      "fechaDeFinDeVigencia": ""
+    },
+    {
+      "id": "615",
+      "descripcion": "Régimen de los ingresos por obtención de premios",
+      "descripcionCorta": "Premios",
+      "fisica": "Sí",
+      "moral": "No",
+      "fechaDeInicioDeVigencia": "12-11-2016",
+      "fechaDeFinDeVigencia": ""
+    },
+    {
+      "id": "616",
+      "descripcion": "Sin obligaciones fiscales",
+      "descripcionCorta": "Sin obligaciones",
+      "fisica": "Sí",
+      "moral": "No",
+      "fechaDeInicioDeVigencia": "12-11-2016",
+      "fechaDeFinDeVigencia": ""
+    },
+    {
+      "id": "620",
+      "descripcion": "Sociedades Cooperativas de Producción que optan por diferir sus ingresos",
+      "descripcionCorta": "Cooperativas de producción",
+      "fisica": "No",
+      "moral": "Sí",
+      "fechaDeInicioDeVigencia": "12-11-2016",
+      "fechaDeFinDeVigencia": ""
+    },
+    {
+      "id": "621",
+      "descripcion": "Incorporación Fiscal",
+      "descripcionCorta": "RIF",
+      "fisica": "Sí",
+      "moral": "No",
+      "fechaDeInicioDeVigencia": "12-11-2016",
+      "fechaDeFinDeVigencia": ""
+    },
+    {
+      "id": "622",
+      "descripcion": "Actividades Agrícolas, Ganaderas, Silvícolas y Pesqueras",
+      "descripcionCorta": "Actividades agropecuarias",
+      "fisica": "No",
+      "moral": "Sí",
+      "fechaDeInicioDeVigencia": "12-11-2016",
+      "fechaDeFinDeVigencia": ""
+    },
+    {
+      "id": "623",
+      "descripcion": "Opcional para Grupos de Sociedades",
+      "descripcionCorta": "Grupos de sociedades",
+      "fisica": "No",
+      "moral": "Sí",
+      "fechaDeInicioDeVigencia": "12-11-2016",
+      "fechaDeFinDeVigencia": ""
+    },
+    {
+      "id": "624",
+      "descripcion": "Coordinados",
+      "descripcionCorta": "Coordinados",
+      "fisica": "No",
+      "moral": "Sí",
+      "fechaDeInicioDeVigencia": "12-11-2016",
+      "fechaDeFinDeVigencia": ""
+    },
+    {
+      "id": "625",
+      "descripcion": "Régimen de las Actividades Empresariales con ingresos a través de Plataformas Tecnológicas",
+      "descripcionCorta": "Plataformas tecnológicas",
+      "fisica": "Sí",
+      "moral": "No",
+      "fechaDeInicioDeVigencia": "01-06-2020",
+      "fechaDeFinDeVigencia": ""
+    },
+    {
+      "id": "626",
+      "descripcion": "Régimen Simplificado de Confianza",
+      "descripcionCorta": "RESICO",
+      "fisica": "Sí",
+      "moral": "Sí",
+      "fechaDeInicioDeVigencia": "01-01-2022",
+      "fechaDeFinDeVigencia": ""
+    },
+    {
+      "id": "628",
+      "descripcion": "Hidrocarburos",
+      "descripcionCorta": "Hidrocarburos",
+      "fisica": "No",
+      "moral": "Sí",
+      "fechaDeInicioDeVigencia": "01-01-2024",
+      "fechaDeFinDeVigencia": ""
+    },
+    {
+      "id": "629",
+      "descripcion": "De los Regímenes Fiscales Preferentes y de las Empresas Multinacionales",
+      "descripcionCorta": "Regímenes fiscales preferentes",
+      "fisica": "Sí",
+      "moral": "No",
+      "fechaDeInicioDeVigencia": "01-01-2024",
+      "fechaDeFinDeVigencia": ""
+    },
+    {
+      "id": "630",
+      "descripcion": "Enajenación de acciones en bolsa de valores",
+      "descripcionCorta": "Acciones en bolsa",
+      "fisica": "Sí",
+      "moral": "No",
+      "fechaDeInicioDeVigencia": "01-01-2024",
+      "fechaDeFinDeVigencia": ""
+    }
+  ]
+  

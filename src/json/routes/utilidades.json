@@ -1,0 +1,8 @@
+[
+    {
+      "titulo": "Biblioteca",
+      "icono": "vf-ic_fluent_book_24_filled",
+      "href": "/punto/views/paginas/biblioteca.php",
+      "modulo": "Catálogo"
+    }
+  ]

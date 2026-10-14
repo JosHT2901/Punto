@@ -1,0 +1,13 @@
+/* Ocultar elementos por completo */
+.d-none {
+    display: none;
+}
+
+/* Opcional: Clases genéricas para estados de visibilidad */
+.is-hidden {
+    display: none;
+}
+
+.is-visible {
+    display: block;
+}

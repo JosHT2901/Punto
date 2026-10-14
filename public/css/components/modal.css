@@ -1,0 +1,47 @@
+/* --------------------------------------------------
+   Estilos Optimizados para Modal y Spinner
+-------------------------------------------------- */
+
+/* Overlay oscuro con efecto de transparencia */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    overflow-y: auto; /* Permite scroll vertical si el contenido excede la pantalla */
+    padding: 2rem 1rem;
+    background-color: rgba(0, 0, 0, 0.5); /* 👈 Faltaba el fondo oscuro translúcido */
+    backdrop-filter: blur(2px); /* Opcional: da un efecto elegante de desenfoque al fondo */
+}
+
+/* Wrapper que decide centrar o no */
+.modal-wrapper {
+    min-height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center; /* Centra vertical y horizontalmente si cabe */
+    box-sizing: border-box;
+}
+
+/* Modal blanco con estilos visuales completos */
+.modal-content {
+    width: 400px;
+    max-width: 100%;
+    background-color: #ffffff; /* 👈 Fondo blanco para la tarjeta */
+    border-radius: 12px;       /* 👈 Bordes redondeados modernos */
+    padding: 1.5rem;           /* 👈 Espacio interno para que el contenido no pegue a las orillas */
+    box-sizing: border-box;
+}
+
+/* Spinner de carga */
+.spinner-cargando {
+    width: 45px;
+    height: 45px;
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-left-color: #03618d; /* Tu color azul de marca */
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}

@@ -1,0 +1,163 @@
+/* ==========================================================================
+UTILIDADES DE TEXTO
+========================================================================== */
+
+/* --- Alineación Horizontal --- */
+.text-center {
+    text-align: center !important;
+}
+
+.text-left {
+    text-align: left !important;
+}
+
+.text-right {
+    text-align: right !important;
+}
+
+.text-justify {
+    text-align: justify !important;
+}
+
+/* --- Pesos y Estilos --- */
+.text-bold {
+    font-weight: 700 !important;
+}
+
+.text-bolder {
+    font-weight: 900 !important;
+}
+
+.text-light {
+    font-weight: 300 !important;
+}
+
+.text-normal {
+    font-weight: 400 !important;
+}
+
+.text-italic {
+    font-style: italic !important;
+}
+
+/* --- Transformación (Mayúsculas/Minúsculas) --- */
+.text-uppercase {
+    text-transform: uppercase !important;
+}
+
+.text-lowercase {
+    text-transform: lowercase !important;
+}
+
+.text-capitalize {
+    text-transform: capitalize !important;
+}
+
+/* --- Colores Semánticos (Basados en estados) --- */
+.text-primary {
+    color: #007bff !important;
+}
+
+/* Azul Corporativo */
+.text-success {
+    color: #28a745 !important;
+}
+
+/* Verde - Aprobado/Disponible */
+.text-danger {
+    color: #dc3545 !important;
+}
+
+/* Rojo - Error/Agotado */
+.text-warning {
+    color: #ffc107 !important;
+}
+
+/* Amarillo - Pendiente/Stock Bajo */
+.text-info {
+    color: #17a2b8 !important;
+}
+
+/* Celeste - Información */
+.text-muted {
+    color: #6c757d !important;
+}
+
+/* Gris - Texto secundario */
+.text-white {
+    color: #ffffff !important;
+}
+
+.text-dark {
+    color: #343a40 !important;
+}
+
+.text-brand-blue {
+    color: #03618d !important;
+}
+
+/* --- Tamaños de Fuente --- */
+.text-xs {
+    font-size: 0.75rem !important;
+}
+
+/* Muy pequeño (IDs, fechas) */
+.text-sm {
+    font-size: 0.875rem !important;
+}
+
+/* Pequeño (Descripciones) */
+.text-md {
+    font-size: 1rem !important;
+}
+
+/* Normal */
+.text-lg {
+    font-size: 1.25rem !important;
+}
+
+/* Grande (Subtítulos) */
+.text-xl {
+    font-size: 1.5rem !important;
+}
+
+/* Extra grande (Títulos) */
+
+/* --- Decoración y Control de Desbordamiento --- */
+.text-underline {
+    text-decoration: underline !important;
+}
+
+.text-none {
+    text-decoration: none !important;
+}
+
+/* --- Altura de Línea (Espaciado vertical entre renglones) --- */
+.lh-1 {
+    line-height: 1 !important;
+}
+
+.lh-sm {
+    line-height: 1.25 !important;
+}
+
+.lh-base {
+    line-height: 1.5 !important;
+}
+
+.lh-lg {
+    line-height: 2 !important;
+}
+
+/* --- Espaciado entre letras --- */
+.ls-tight {
+    letter-spacing: -0.05em !important;
+}
+
+.ls-normal {
+    letter-spacing: 0 !important;
+}
+
+.ls-wide {
+    letter-spacing: 0.1em !important;
+}

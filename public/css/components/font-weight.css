@@ -1,0 +1,19 @@
+/* ==================================================
+   FONT WEIGHT UTILITIES
+   ================================================== */
+
+   .fw-100 { font-weight: 100 !important; } /* Thin / Hairline */
+   .fw-200 { font-weight: 200 !important; } /* Extra Light / Ultra Light */
+   .fw-300 { font-weight: 300 !important; } /* Light */
+   .fw-400 { font-weight: 400 !important; } /* Normal / Regular */
+   .fw-500 { font-weight: 500 !important; } /* Medium */
+   .fw-600 { font-weight: 600 !important; } /* Semi Bold / Demi Bold */
+   .fw-700 { font-weight: 700 !important; } /* Bold */
+   .fw-800 { font-weight: 800 !important; } /* Extra Bold */
+   .fw-900 { font-weight: 900 !important; } /* Black / Heavy */
+   
+   /* --- Alias comunes --- */
+   .fw-light   { font-weight: 300 !important; }
+   .fw-normal  { font-weight: 400 !important; }
+   .fw-medium  { font-weight: 500 !important; }
+   .fw-bold    { font-weight: 700 !important; }

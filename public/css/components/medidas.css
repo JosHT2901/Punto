@@ -1,0 +1,718 @@
+/* ==================================================
+   SIZE UTILITIES
+   Width / Height / Object-fit
+   ================================================== */
+
+/* =========================
+   WIDTH – AUTO / CONTENT
+   ========================= */
+   .w-auto {
+    width: auto;
+}
+
+.w-fit {
+    width: fit-content;
+}
+
+.w-min {
+    width: min-content;
+}
+
+.w-max {
+    width: max-content;
+}
+
+/* =========================
+   WIDTH – PERCENTAGES
+   ========================= */
+.w-p-0 {
+    width: 0%;
+}
+
+.w-p-10 {
+    width: 10%;
+}
+
+.w-p-20 {
+    width: 20%;
+}
+
+.w-p-25 {
+    width: 25%;
+}
+
+.w-p-30 {
+    width: 30%;
+}
+
+.w-p-33 {
+    width: 33.3333%;
+}
+
+.w-p-40 {
+    width: 40%;
+}
+
+.w-p-50 {
+    width: 50%;
+}
+
+.w-p-60 {
+    width: 60%;
+}
+
+.w-p-66 {
+    width: 66.6667%;
+}
+
+.w-p-70 {
+    width: 70%;
+}
+
+.w-p-75 {
+    width: 75%;
+}
+
+.w-p-80 {
+    width: 80%;
+}
+
+.w-p-90 {
+    width: 90%;
+}
+
+.w-p-95 {
+    width: 95%;
+}
+
+.w-p-100 {
+    width: 100%;
+}
+
+/* =========================
+   WIDTH – VIEWPORT
+   ========================= */
+.w-vw-25 {
+    width: 25vw;
+}
+
+.w-vw-50 {
+    width: 50vw;
+}
+
+.w-vw-75 {
+    width: 75vw;
+}
+
+.w-vw-100 {
+    width: 100vw;
+}
+
+/* =========================
+   WIDTH – PX
+   ========================= */
+.w-10 {
+    width: 10px;
+}
+
+.w-20 {
+    width: 20px;
+}
+
+.w-25 {
+    width: 25px;
+}
+
+.w-30 {
+    width: 30px;
+}
+
+.w-35 {
+    width: 35px;
+}
+
+.w-40 {
+    width: 40px;
+}
+
+.w-50 {
+    width: 50px;
+}
+
+.w-60 {
+    width: 60px;
+}
+
+.w-70 {
+    width: 70px;
+}
+
+.w-80 {
+    width: 80px;
+}
+
+.w-90 {
+    width: 90px;
+}
+
+.w-100 {
+    width: 100px;
+}
+
+.w-120 {
+    width: 120px;
+}
+
+.w-140 {
+    width: 140px;
+}
+
+.w-150 {
+    width: 150px;
+}
+
+.w-160 {
+    width: 160px;
+}
+
+.w-180 {
+    width: 180px;
+}
+
+.w-200 {
+    width: 200px;
+}
+
+.w-240 {
+    width: 240px;
+}
+
+.w-280 {
+    width: 280px;
+}
+
+.w-300 {
+    width: 300px;
+}
+
+.w-320 {
+    width: 320px;
+}
+
+.w-360 {
+    width: 360px;
+}
+
+.w-400 {
+    width: 400px;
+}
+
+.w-480 {
+    width: 480px;
+}
+
+.w-560 {
+    width: 560px;
+}
+
+.w-640 {
+    width: 640px;
+}
+
+.w-768 {
+    width: 768px;
+}
+
+.w-1024 {
+    width: 1024px;
+}
+
+/* =========================
+   MIN / MAX WIDTH
+   ========================= */
+.min-w-0 {
+    min-width: 0;
+}
+
+.min-w-100 {
+    min-width: 100px;
+}
+
+.min-w-200 {
+    min-width: 200px;
+}
+
+.min-w-390 {
+    min-width: 390px;
+}
+
+.min-w-400 {
+    min-width: 400px;
+}
+
+.min-w-700 {
+    min-width: 700px;
+}
+
+.min-w-full {
+    min-width: 100%;
+}
+
+.max-w-320 {
+    max-width: 320px;
+}
+
+.max-w-640 {
+    max-width: 640px;
+}
+
+.max-w-1024 {
+    max-width: 1024px;
+}
+
+.max-w-full {
+    max-width: 100%;
+}
+
+/* ==================================================
+   HEIGHT
+   ================================================== */
+
+/* =========================
+   HEIGHT – AUTO / CONTENT
+   ========================= */
+.h-auto {
+    height: auto;
+}
+
+.h-fit {
+    height: fit-content;
+}
+
+.h-min {
+    height: min-content;
+}
+
+.h-max {
+    height: max-content;
+}
+
+/* =========================
+   HEIGHT – PERCENTAGES
+   ========================= */
+.h-p-0 {
+    height: 0%;
+}
+
+.h-p-10 {
+    height: 10%;
+}
+
+.h-p-20 {
+    height: 20%;
+}
+
+.h-p-25 {
+    height: 25%;
+}
+
+.h-p-30 {
+    height: 30%;
+}
+
+.h-p-33 {
+    height: 33.3333%;
+}
+
+.h-p-40 {
+    height: 40%;
+}
+
+.h-p-50 {
+    height: 50%;
+}
+
+.h-p-60 {
+    height: 60%;
+}
+
+.h-p-66 {
+    height: 66.6667%;
+}
+
+.h-p-70 {
+    height: 70%;
+}
+
+.h-p-75 {
+    height: 75%;
+}
+
+.h-p-80 {
+    height: 80%;
+}
+
+.h-p-90 {
+    height: 90%;
+}
+
+.h-p-100 {
+    height: 100%;
+}
+
+/* =========================
+   HEIGHT – VIEWPORT
+   ========================= */
+.h-vh-25 {
+    height: 25vh;
+}
+
+.h-vh-50 {
+    height: 50vh;
+}
+
+.h-vh-75 {
+    height: 75vh;
+}
+
+.h-vh-100 {
+    height: 100vh;
+}
+
+/* =========================
+   HEIGHT – PX
+   ========================= */
+.h-5 {
+    height: 5px;
+}
+
+.h-10 {
+    height: 10px;
+}
+
+.h-15 {
+    height: 15px;
+}
+
+.h-20 {
+    height: 20px;
+}
+
+.h-25 {
+    height: 25px;
+}
+
+.h-30 {
+    height: 30px;
+}
+
+.h-35 {
+    height: 35px;
+}
+
+.h-40 {
+    height: 40px;
+}
+
+.h-50 {
+    height: 50px;
+}
+
+.h-60 {
+    height: 60px;
+}
+
+.h-70 {
+    height: 70px;
+}
+
+.h-75 {
+    height: 75px;
+}
+
+.h-80 {
+    height: 80px;
+}
+
+.h-90 {
+    height: 90px;
+}
+
+.h-100 {
+    height: 100px;
+}
+
+.h-110 {
+    height: 110px;
+}
+
+.h-120 {
+    height: 120px;
+}
+
+.h-150 {
+    height: 150px;
+}
+
+.h-200 {
+    height: 200px;
+}
+
+.h-300 {
+    height: 300px;
+}
+
+.h-400 {
+    height: 400px;
+}
+
+.h-500 {
+    height: 500px;
+}
+
+.h-640 {
+    height: 640px;
+}
+
+.h-768 {
+    height: 768px;
+}
+
+/* =========================
+   MIN / MAX HEIGHT
+   ========================= */
+.min-h-0 {
+    min-height: 0;
+}
+
+.min-h-100 {
+    min-height: 100px;
+}
+
+.min-h-200 {
+    min-height: 200px;
+}
+
+.min-h-500 {
+    min-height: 500px;
+}
+
+.min-h-550 {
+    min-height: 550px;
+}
+
+.min-h-600 {
+    min-height: 600px;
+}
+
+.min-h-full {
+    min-height: 100%;
+}
+
+.min-h-screen {
+    min-height: 100vh;
+}
+
+.max-h-320 {
+    max-height: 320px;
+}
+
+.max-h-640 {
+    max-height: 640px;
+}
+
+.max-h-screen {
+    max-height: 100vh;
+}
+
+/* ==================================================
+   WIDTH – CALC (percentage - px)
+   ================================================== */
+
+/* 100% - PX */
+.w-calc-100-10 {
+    width: calc(100% - 10px);
+}
+
+.w-calc-100-20 {
+    width: calc(100% - 20px);
+}
+
+.w-calc-100-25 {
+    width: calc(100% - 25px);
+}
+
+.w-calc-100-30 {
+    width: calc(100% - 30px);
+}
+
+.w-calc-100-40 {
+    width: calc(100% - 40px);
+}
+
+.w-calc-100-50 {
+    width: calc(100% - 50px);
+}
+
+.w-calc-100-60 {
+    width: calc(100% - 60px);
+}
+
+.w-calc-100-70 {
+    width: calc(100% - 70px);
+}
+
+.w-calc-100-80 {
+    width: calc(100% - 80px);
+}
+
+.w-calc-100-90 {
+    width: calc(100% - 90px);
+}
+
+.w-calc-100-95 {
+    width: calc(100% - 95px);
+}
+
+.w-calc-100-100 {
+    width: calc(100% - 100px);
+}
+
+.w-calc-100-120 {
+    width: calc(100% - 120px);
+}
+
+.w-calc-100-150 {
+    width: calc(100% - 150px);
+}
+
+.w-calc-100-200 {
+    width: calc(100% - 200px);
+}
+
+.w-calc-100-300 {
+    width: calc(100% - 300px);
+}
+
+/* 50% - PX */
+.w-calc-50-10 {
+    width: calc(50% - 10px);
+}
+
+.w-calc-50-20 {
+    width: calc(50% - 20px);
+}
+
+.w-calc-50-30 {
+    width: calc(50% - 30px);
+}
+
+.w-calc-50-40 {
+    width: calc(50% - 40px);
+}
+
+.w-calc-50-50 {
+    width: calc(50% - 50px);
+}
+
+@media (min-width: 768px) {
+    .w-md-p-50 {
+        width: calc(50%) !important;
+    }
+}
+
+/* ==================================================
+   HEIGHT – CALC (percentage - px)
+   ================================================== */
+.h-calc-100-5 {
+    height: calc(100% - 5px);
+}
+
+/* 100% - PX */
+.h-calc-100-10 {
+    height: calc(100% - 10px);
+}
+
+.h-calc-100-20 {
+    height: calc(100% - 20px);
+}
+
+.h-calc-100-30 {
+    height: calc(100% - 30px);
+}
+
+.h-calc-100-40 {
+    height: calc(100% - 40px);
+}
+
+.h-calc-100-50 {
+    height: calc(100% - 50px);
+}
+
+.h-calc-100-60 {
+    height: calc(100% - 60px);
+}
+
+.h-calc-100-70 {
+    height: calc(100% - 70px);
+}
+
+.h-calc-100-80 {
+    height: calc(100% - 80px);
+}
+
+.h-calc-100-90 {
+    height: calc(100% - 90px);
+}
+
+.h-calc-100-100 {
+    height: calc(100% - 100px);
+}
+
+.h-calc-100-120 {
+    height: calc(100% - 120px);
+}
+
+.h-calc-100-140 {
+    height: calc(100% - 140px);
+}
+
+/* 50% - PX */
+.h-calc-50-10 {
+    height: calc(50% - 10px);
+}
+
+.h-calc-50-20 {
+    height: calc(50% - 20px);
+}
+
+.h-calc-50-30 {
+    height: calc(50% - 30px);
+}
+
+.h-calc-50-40 {
+    height: calc(50% - 40px);
+}
+
+.h-calc-50-50 {
+    height: calc(50% - 50px);
+}
+
+/* =========================
+   OBJECT FIT
+   ========================= */
+.object-cover {
+    object-fit: cover;
+}
+
+.object-contain {
+    object-fit: contain;
+}
+
+.object-fill {
+    object-fit: fill;
+}
+
+.object-scale-down {
+    object-fit: scale-down;
+}

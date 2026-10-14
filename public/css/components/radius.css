@@ -1,0 +1,99 @@
+/* ==================================================
+   BORDER RADIUS UTILITIES
+   ================================================== */
+
+/* =========================
+   RADIUS – BASE & GLOBALS
+   ========================= */
+   .rounded-none   { border-radius: 0 !important; }
+   .rounded-xs     { border-radius: 2px !important; }
+   .rounded-sm     { border-radius: 4px !important; }
+   .rounded        { border-radius: 6px !important; }
+   .rounded-md     { border-radius: 8px !important; }
+   .rounded-lg     { border-radius: 12px !important; }
+   .rounded-xl     { border-radius: 16px !important; }
+   .rounded-2xl    { border-radius: 20px !important; }
+   .rounded-3xl    { border-radius: 24px !important; }
+   .rounded-full   { border-radius: 9999px !important; }
+   .rounded-circle { border-radius: 50% !important; }
+   
+   /* =========================
+      RADIUS – PX (MÚLTIPLOS DE 2)
+      ========================= */
+   .rounded-2      { border-radius: 2px !important; }
+   .rounded-4      { border-radius: 4px !important; }
+   .rounded-6      { border-radius: 6px !important; }
+   .rounded-8      { border-radius: 8px !important; }
+   .rounded-10     { border-radius: 10px !important; }
+   .rounded-12     { border-radius: 12px !important; }
+   .rounded-14     { border-radius: 14px !important; }
+   .rounded-16     { border-radius: 16px !important; }
+   .rounded-18     { border-radius: 18px !important; }
+   .rounded-20     { border-radius: 20px !important; }
+   
+   /* =========================
+      RADIUS – PX (MÚLTIPLOS DE 4)
+      ========================= */
+   .rounded-24     { border-radius: 24px !important; }
+   .rounded-28     { border-radius: 28px !important; }
+   .rounded-32     { border-radius: 32px !important; }
+   .rounded-36     { border-radius: 36px !important; }
+   .rounded-40     { border-radius: 40px !important; }
+   .rounded-44     { border-radius: 44px !important; }
+   .rounded-48     { border-radius: 48px !important; }
+   
+   /* =========================
+      RADIUS – EXTRA GRANDES
+      ========================= */
+   .rounded-56     { border-radius: 56px !important; }
+   .rounded-64     { border-radius: 64px !important; }
+   .rounded-72     { border-radius: 72px !important; }
+   .rounded-80     { border-radius: 80px !important; }
+   .rounded-96     { border-radius: 96px !important; }
+   .rounded-128    { border-radius: 128px !important; }
+   
+   /* =========================
+      RADIUS – PORCENTAJE
+      ========================= */
+   .rounded-p-25   { border-radius: 25% !important; }
+   .rounded-p-50   { border-radius: 50% !important; }
+   .rounded-p-75   { border-radius: 75% !important; }
+   .rounded-p-100  { border-radius: 100% !important; }
+   
+   /* =========================
+      RADIUS – SIDES (LADOS COMPLETOS)
+      ========================= */
+   .rounded-t-8    { border-top-left-radius: 8px !important; border-top-right-radius: 8px !important; }
+   .rounded-t-16   { border-top-left-radius: 16px !important; border-top-right-radius: 16px !important; }
+   
+   .rounded-b-8    { border-bottom-left-radius: 8px !important; border-bottom-right-radius: 8px !important; }
+   .rounded-b-16   { border-bottom-left-radius: 16px !important; border-bottom-right-radius: 16px !important; }
+   
+   .rounded-l-8    { border-top-left-radius: 8px !important; border-bottom-left-radius: 8px !important; }
+   .rounded-l-16   { border-top-left-radius: 16px !important; border-bottom-left-radius: 16px !important; }
+   
+   .rounded-r-8    { border-top-right-radius: 8px !important; border-bottom-right-radius: 8px !important; }
+   .rounded-r-16   { border-top-right-radius: 16px !important; border-bottom-right-radius: 16px !important; }
+   
+   /* =========================
+      RADIUS – CORNERS (ESQUINAS INDIVIDUALES)
+      ========================= */
+   .rounded-tl-4   { border-top-left-radius: 4px !important; }
+   .rounded-tr-4   { border-top-right-radius: 4px !important; }
+   .rounded-bl-4   { border-bottom-left-radius: 4px !important; }
+   .rounded-br-4   { border-bottom-right-radius: 4px !important; }
+   
+   .rounded-tl-8   { border-top-left-radius: 8px !important; }
+   .rounded-tr-8   { border-top-right-radius: 8px !important; }
+   .rounded-bl-8   { border-bottom-left-radius: 8px !important; }
+   .rounded-br-8   { border-bottom-right-radius: 8px !important; }
+   
+   .rounded-tl-16  { border-top-left-radius: 16px !important; }
+   .rounded-tr-16  { border-top-right-radius: 16px !important; }
+   .rounded-bl-16  { border-bottom-left-radius: 16px !important; }
+   .rounded-br-16  { border-bottom-right-radius: 16px !important; }
+   
+   /* =========================
+      RADIUS – INHERIT
+      ========================= */
+   .rounded-inherit { border-radius: inherit !important; }

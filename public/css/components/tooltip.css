@@ -1,0 +1,28 @@
+.aquo-tooltip {
+    display: none;
+    position: absolute;
+    background: #ffffff;
+    color: #333333;
+    padding: 12px;
+    border-radius: 6px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    border: 1px solid #e0e0e0;
+    font-size: 13px;
+    line-height: 1.4;
+    z-index: 20000;
+    max-width: 250px;
+    word-wrap: break-word;
+    pointer-events: none;
+    
+    /* Transición suave para fundido (fade) */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+/* Clase que activa la visibilidad controlada por la API */
+.aquo-tooltip.is-visible {
+    display: block;
+    opacity: 1;
+    visibility: visible;
+}

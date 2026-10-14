@@ -1,0 +1,54 @@
+/* ==================================================
+   CUSTOM SCROLLBAR UTILITY
+   ================================================== */
+
+   .custom-scroll::-webkit-scrollbar {
+    -webkit-appearance: none;
+    width: 6px;
+    height: 6px;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+    background-color: var(--gray-400);
+    border-radius: 9999px;
+    transition: background-color 0.2s ease;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb:hover {
+    background-color: var(--gray-500);
+}
+
+.custom-scroll::-webkit-scrollbar-thumb:active {
+    background-color: var(--gray-600, var(--text-sub));
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+    background-color: transparent;
+    border-radius: 9999px;
+}
+
+.custom-scroll::-webkit-scrollbar-button,
+.custom-scroll::-webkit-scrollbar-button:increment,
+.custom-scroll::-webkit-scrollbar-button:decrement {
+    display: none !important;
+}
+
+.overflow-auto
+{
+    overflow: auto;
+}
+.overflow-hidden
+{
+    overflow: hidden;
+}
+
+.ocultar-scroll {
+    overflow: auto;
+    scrollbar-width: none;      /* Firefox */
+    -ms-overflow-style: none;   /* IE / Edge viejo */
+}
+
+/* Chrome, Safari, Opera y Edge moderno */
+.ocultar-scroll::-webkit-scrollbar {
+    display: none;
+}

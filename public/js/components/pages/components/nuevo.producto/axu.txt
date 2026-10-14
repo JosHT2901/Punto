@@ -1,0 +1,483 @@
+// Definimos la variable global indicando que inicia bloqueado
+window.sku_block = true;
+const accionesMarcas = ['marca_guardada', 'marca_editada', 'marcas_creadas'];
+
+accionesMarcas.forEach(accion => {
+    $.messenger.on(accion, async function (data, sourceWindow, origin) {
+        console.log(`Evento [${accion}] recibido en el padre:`, data);
+
+        // Validamos si debemos ocultar el botón masivo
+        if (data && data.mostrar_boton_varias === false) {
+            $("#gestionar-marca-masivo").hide();
+        }
+
+        try {
+            // Obtenemos las marcas actualizadas del servidor
+            const marcasActualizadas = await ObtenerMarcasAPI();
+
+            // Actualizamos la variable global de window
+            window.marcas = marcasActualizadas;
+
+            // Re-pintamos el custom select con las nuevas marcas
+            PintarSelectMarcas();
+
+        } catch (error) {
+            console.error("Error al actualizar las marcas en el padre:", error);
+        }
+
+        // Cerramos el modal de forma controlada
+        if (typeof ModalAPI !== 'undefined' && typeof ModalAPI.cerrar === 'function') {
+            setTimeout(() => {
+                ModalAPI.cerrar();
+            }, 1000);
+        }
+    });
+});
+$(document).ready(function (e) {
+    let inicializado = false;
+
+    // --- Función Principal InicializarNuevoProducto ---
+    function InicializarNuevoProducto() {
+        if (window.inicializado_producto) return;
+        window.inicializado_producto = true;
+
+        const $inputSku = $("#producto-input-sku");
+        const $btnBlock = $("#producto-boton-block-sku");
+        const $icono = $btnBlock.find('i');
+
+        // --- ESTADO INICIAL: BLOQUEADO ---
+        ActualizarEstadoSku($inputSku, $btnBlock, $icono, true);
+
+        // --- MANEJADOR DE CLIC (TOGGLE) ---
+        $btnBlock.off('click').on('click', function (e) {
+            e.preventDefault();
+            ActualizarEstadoSku($inputSku, $btnBlock, $icono, !window.sku_block);
+        });
+
+        // --- GENERAR CÓDIGO DE BARRAS ---
+    
+
+        // --- INICIALIZAR COMPONENTES Y SELECTS ---
+        EventosInputs();
+        PintarSelectCategorias();
+        PintarSelectMarcas();
+
+        // --- BOTÓN NUEVA MARCA (IFRAME) ---
+        $("#nuevo-producto-boton-marca").off('click').on('click', function () {
+            CrearVentanaIframe(
+                'Nueva marca',
+                'gestionar.marcas.php',
+                '450px',
+                true,
+                true,
+                function (iframeElement) {
+                    $.messenger.send(iframeElement, 'datos_iniciales', {
+                        mostrar_boton_varias: false
+                    });
+                }
+            );
+        });
+
+        InicializarGaleria()
+        const claves = window.claves_productos.map(item => ({
+            id: item.id,
+            valor: `${item.id} - ${item.descripcion}`
+        }));
+        AutocompletarGenerico('#producto-input-sat', claves);
+        console.log(window.impuestos)
+        PintarSelectImpuestos()
+        // Obtén el ID de la categoría seleccionada (ya sea de un select, variable o input)
+        const idCategoriaSeleccionada = 1
+
+        // Inicializar ambas tablas al cargar
+        renderizarTablaPreciosVenta();
+        renderizarTablaExistencias()
+        renderizarTablaSectores()
+        // Botón para probar la extracción de todos los valores capturados
+        $(document).on('click', '#btn-guardar', function (e) {
+            e.preventDefault();
+
+            const valoresCapturados = AtributoManager.obtenerValores();
+            console.log("Valores estructurados de todos los atributos:", valoresCapturados);
+        });
+    }
+
+    // Verificamos si los datos globales ya están cargados al iniciar
+    if (window.marcas && window.sku) {
+        InicializarNuevoVariable = InicializarNuevoProducto(); // Manteniendo flujo original
+    }
+
+    // Escucha alternativa cuando los datos carguen de manera asíncrona externa
+    $(document).off('datosListos.nuevoProducto').on('datosListos.nuevoProducto', function () {
+        InicializarNuevoProducto();
+    });
+});
+
+// Variables globales de costos
+let costoTotalCompra = 1200.00;
+let piezasTotalesCompra = 1000;
+let costoBaseUnitarioGlobal = 1.20;
+
+// Arreglo con la propiedad 'vinculado' (true = calculado automáticamente, false = costo independiente manual)
+let presentacionesVenta = [{
+        id: 1,
+        empaque: 'Pieza',
+        equivalencia: 1,
+        vinculado: true, // Vinculado al costo global
+        costoUnitario: 1.20,
+        gananciaPorcentaje: 50.0,
+        precioVenta: 1.80
+    },
+    {
+        id: 2,
+        empaque: 'Paquete (50 pzas)',
+        equivalencia: 50,
+        vinculado: true, // Vinculado
+        costoUnitario: 60.00,
+        gananciaPorcentaje: 40.0,
+        precioVenta: 84.00
+    },
+    {
+        id: 3,
+        empaque: 'Bolsa Suelta',
+        equivalencia: 1,
+        vinculado: false, // Desvinculado (costo libre e independiente)
+        costoUnitario: 3.50,
+        gananciaPorcentaje: 42.85,
+        precioVenta: 5.00
+    }
+];
+
+// Función para actualizar el costo base global
+function actualizarCostoBaseGlobal() {
+    let costoTotal = parseFloat($('#producto-input-costo-total').val()) || 0;
+    let piezas = parseInt($('#producto-input-piezas-compra').val()) || 1;
+
+    costoTotalCompra = costoTotal;
+    piezasTotalesCompra = piezas > 0 ? piezas : 1;
+    costoBaseUnitarioGlobal = costoTotalCompra / piezasTotalesCompra;
+
+    $('#lbl-costo-base-unitario').text(`$${costoBaseUnitarioGlobal.toFixed(4)}`);
+
+    // Recalcular filas que estén vinculadas
+    presentacionesVenta.forEach((item, index) => {
+        if (item.vinculado) {
+            item.costoUnitario = costoBaseUnitarioGlobal * item.equivalencia;
+            let nuevoPrecio = item.costoUnitario * (1 + (item.gananciaPorcentaje / 100));
+            item.precioVenta = parseFloat(nuevoPrecio.toFixed(2));
+        }
+    });
+    renderizarTablaPreciosVenta();
+}
+
+// Renderizar la tabla de Ganancias y Precios de Venta (Paso 5)
+function renderizarTablaPreciosVenta() {
+    // --- TABLA 1: Configuración, Equivalencia y Costos ---
+    const cabecerasCostos = [{
+            field: 'empaque',
+            label: 'Empaque / Nivel',
+            width: '40%',
+            render: (valor, row, index) => `
+                <input type="text" class="form-control form-control-sm input-empaque" data-index="${index}" value="${valor}" placeholder="Ej. Paquete">
+            `
+        },
+        {
+            field: 'equivalencia',
+            label: 'Equiv.',
+            width: '20%',
+            align: 'center',
+            render: (valor, row, index) => `
+                <input type="number" class="form-control form-control-sm text-center input-equiv" data-index="${index}" value="${valor}">
+            `
+        },
+        {
+            field: 'vinculado',
+            label: 'Estado',
+            width: '20%',
+            align: 'center',
+            render: (valor, row, index) => {
+                let icono = valor ? '<i class="ph ph-link text-primary fs-5"></i>' : '<i class="ph ph-link-break text-danger fs-5"></i>';
+                let titulo = valor ? 'Vinculado al costo global (Clic para desvincular)' : 'Desvinculado / Costo Libre (Clic para vincular)';
+                let claseBtn = valor ? 'btn-outline-primary' : 'btn-outline-danger';
+                return `
+                    <button type="button" class="btn btn-sm ${claseBtn} btn-toggle-vinculo rounded-circle p-1" data-index="${index}" title="${titulo}" style="width: 30px; height: 30px;">
+                        ${icono}
+                    </button>
+                `;
+            }
+        },
+        {
+            field: 'costoUnitario',
+            label: 'Costo Unit. ($)',
+            width: '20%',
+            align: 'right',
+            render: (valor, row, index) => {
+                let disabledAttr = row.vinculado ? 'disabled bg-light' : '';
+                return `
+                    <input type="number" step="0.01" class="form-control form-control-sm text-end fw-600 text-secondary input-costo-unitario ${disabledAttr}" data-index="${index}" value="${valor.toFixed(2)}">
+                `;
+            }
+        }
+    ];
+
+    // --- TABLA 2: Márgenes y Precios Finales ---
+    const cabecerasPrecios = [{
+            field: 'empaque',
+            label: 'Empaque / Nivel',
+            width: '30%',
+            render: (valor) => `<span class="fw-600 text-slate-700 fs-3">${valor || 'N/D'}</span>`
+        },
+        {
+            field: 'gananciaPorcentaje',
+            label: 'Ganancia (%)',
+            width: '35%',
+            align: 'center',
+            render: (valor, row, index) => `
+                <div class="flex gap-2">
+                    <input type="number" step="0.1" class="form-control text-center input-ganancia" data-index="${index}" value="${valor}">
+                    <span class="rounded-8 bg-brand-soft p-2 text-brand-blue fw-600 fs-3 flex justify-center items-center">%</span>
+                </div>
+            `
+        },
+        {
+            field: 'precioVenta',
+            label: 'Precio Venta ($)',
+            width: '35%',
+            align: 'right',
+            render: (valor, row, index) => `
+                <input type="number" step="0.01" class="form-control form-control-sm text-end fw-bold text-success input-precio-venta" data-index="${index}" value="${valor.toFixed(2)}">
+            `
+        }
+    ];
+
+    // Renderizamos ambas tablas usando los IDs correctos
+    TableService.render('contenedor-tabla-costos', cabecerasCostos, presentacionesVenta);
+    TableService.render('contenedor-tabla-precios', cabecerasPrecios, presentacionesVenta);
+
+    renderizarTablaCodigosSat(); // Sincronizar tabla secundaria
+}
+
+// Renderizar la tabla independiente de Códigos de Barras y Claves SAT (Paso 6)
+function renderizarTablaCodigosSat() {
+    const cabeceras = [{
+            field: 'empaque',
+            label: 'Empaque / Nivel',
+            width: '30%',
+            render: (valor) => `<span class="fw-600 text-secondary">${valor || 'Sin nombre'}</span>`
+        },
+        {
+            field: 'equivalencia',
+            label: 'Equiv.',
+            width: '15%',
+            align: 'center',
+            render: (valor) => `<span class="text-muted">${valor}</span>`
+        },
+        {
+            field: 'codigoBarras',
+            label: 'Código de Barras',
+            width: '35%',
+            render: (valor, row, index) => `
+                    <input type="text" class="form-control form-control-sm input-codigo" data-index="${index}" value="${valor}" placeholder="Código de barras">
+                `
+        },
+        {
+            field: 'claveSat',
+            label: 'Clave S.A.T.',
+            width: '20%',
+            render: (valor, row, index) => `
+                    <input type="text" class="form-control form-control-sm input-mayus input-sat" data-index="${index}" value="${valor}" placeholder="SAT">
+                `
+        }
+    ];
+
+    TableService.render('contenedor-tabla-codigos-sat', cabeceras, presentacionesVenta);
+}
+
+
+// Eventos para la sección de Costos y Compra global
+$(document).on('input', '#producto-input-costo-total, #producto-input-piezas-compra', function () {
+    actualizarCostoBaseGlobal();
+});
+
+// Evento para alternar entre Vinculado y Desvinculado con el botón de cadena
+$(document).on('click', '.btn-toggle-vinculo', function () {
+    const index = $(this).data('index');
+    let item = presentacionesVenta[index];
+
+    // Alternar estado
+    item.vinculado = !item.vinculado;
+
+    if (item.vinculado) {
+        // Si pasa a estar vinculado, se recalcula automáticamente con base en el costo global y equivalencia
+        item.costoUnitario = costoBaseUnitarioGlobal * item.equivalencia;
+        let nuevoPrecio = item.costoUnitario * (1 + (item.gananciaPorcentaje / 100));
+        item.precioVenta = parseFloat(nuevoPrecio.toFixed(2));
+    }
+
+    renderizarTablaPreciosVenta();
+});
+
+// Eventos interactivos en la tabla de Precios y Costos (Paso 5)
+$(document).on('input', '.input-empaque, .input-equiv, .input-costo-unitario, .input-ganancia, .input-precio-venta', function () {
+    const index = $(this).data('index');
+    const valor = $(this).val();
+    let item = presentacionesVenta[index];
+
+    if ($(this).hasClass('input-empaque')) {
+        item.empaque = valor;
+        renderizarTablaCodigosSat();
+    }
+    if ($(this).hasClass('input-equiv')) {
+        item.equivalencia = parseInt(valor) || 0;
+        if (item.vinculado) {
+            item.costoUnitario = costoBaseUnitarioGlobal * item.equivalencia;
+            let nuevoPrecio = item.costoUnitario * (1 + (item.gananciaPorcentaje / 100));
+            item.precioVenta = parseFloat(nuevoPrecio.toFixed(2));
+        }
+        renderizarTablaCodigosSat();
+        renderizarTablaPreciosVenta();
+    }
+    if ($(this).hasClass('input-costo-unitario') && !item.vinculado) {
+        // Edición manual de costo (solo permitido si está desvinculado)
+        item.costoUnitario = parseFloat(valor) || 0.00;
+        let nuevoPrecio = item.costoUnitario * (1 + (item.gananciaPorcentaje / 100));
+        item.precioVenta = parseFloat(nuevoPrecio.toFixed(2));
+        $(`.input-precio-venta[data-index="${index}"]`).val(item.precioVenta.toFixed(2));
+    }
+    if ($(this).hasClass('input-ganancia')) {
+        item.gananciaPorcentaje = parseFloat(valor) || 0;
+        let nuevoPrecio = item.costoUnitario * (1 + (item.gananciaPorcentaje / 100));
+        item.precioVenta = parseFloat(nuevoPrecio.toFixed(2));
+        $(`.input-precio-venta[data-index="${index}"]`).val(item.precioVenta.toFixed(2));
+    }
+    if ($(this).hasClass('input-precio-venta')) {
+        item.precioVenta = parseFloat(valor) || 0.00;
+        if (item.costoUnitario > 0) {
+            let margenCalculado = ((item.precioVenta - item.costoUnitario) / item.costoUnitario) * 100;
+            item.gananciaPorcentaje = parseFloat(margenCalculado.toFixed(2));
+            $(`.input-ganancia[data-index="${index}"]`).val(item.gananciaPorcentaje);
+        }
+    }
+});
+
+// Eventos para la sección independiente de Códigos y SAT (Paso 6)
+$(document).on('input', '.input-codigo, .input-sat', function () {
+    const index = $(this).data('index');
+    const valor = $(this).val();
+
+    if ($(this).hasClass('input-codigo')) {
+        presentacionesVenta[index].codigoBarras = valor;
+    }
+    if ($(this).hasClass('input-sat')) {
+        presentacionesVenta[index].claveSat = valor;
+    }
+});
+
+// Botón para agregar una nueva presentación
+$('#btn-agregar-presentacion').on('click', function () {
+    presentacionesVenta.push({
+        id: Date.now(),
+        empaque: '',
+        equivalencia: 1,
+        vinculado: true,
+        costoUnitario: costoBaseUnitarioGlobal,
+        gananciaPorcentaje: 35.0,
+        precioVenta: parseFloat((costoBaseUnitarioGlobal * 1.35).toFixed(2))
+    });
+    renderizarTablaPreciosVenta();
+});
+
+
+function renderizarTablaExistencias() {
+    // 1. Definimos las cabeceras de la tabla de existencias
+    const cabeceras = [{
+            field: 'nombre',
+            label: 'Sucursal',
+            width: '60%',
+            render: (valor, row) => `
+                <div class="flex flex-column">
+                    <span class="fw-600 text-slate-800 fs-3">${valor || 'Sin nombre'}</span>
+                    <span class="text-muted fs-2">Tipo: ${row.tipo || 'GENERAL'}</span>
+                </div>
+            `
+        },
+        {
+            field: 'existencia',
+            label: 'Existencias / Stock',
+            width: '40%',
+            align: 'center',
+            render: (valor, row, index) => {
+                const sucursalId = row.id || row.ID;
+                const stockActual = row.existencia !== undefined ? row.existencia : 0;
+
+                return `
+                    <div style="max-width: 160px; margin: 0 auto;">
+                        <input type="number" 
+                               step="1" 
+                               min="0" 
+                               class="form-control form-control-sm text-center input-existencia-sucursal fw-600 text-primary" 
+                               data-sucursal-id="${sucursalId}" 
+                               data-index="${index}" 
+                               value="${stockActual}" 
+                               placeholder="0">
+                    </div>
+                `;
+            }
+        }
+    ];
+    console.log(window.sucursales)
+
+    // 2. Usamos window.sucursales como los datos de las filas de la tabla
+    const datosSucursales = window.sucursales && Array.isArray(window.sucursales) ? window.sucursales : [];
+
+    // 3. Renderizamos la tabla usando el TableService en el contenedor correspondiente
+    TableService.render('contenedor-existencias', cabeceras, datosSucursales, {
+        emptyMessage: 'No hay sucursales registradas para asignar existencias.'
+    });
+}
+
+function renderizarTablaSectores() {
+    // 1. Definimos las cabeceras: Sucursal y Ubicación del Producto
+    const cabeceras = [
+        {
+            field: 'nombre',
+            label: 'Sucursal',
+            width: '50%',
+            render: (valor, row) => `
+                <div class="flex flex-column">
+                    <span class="fw-600 text-slate-800 fs-3">${valor || 'Sin nombre'}</span>
+                    <span class="text-muted fs-2">Tipo: ${row.tipo || 'GENERAL'}</span>
+                </div>
+            `
+        },
+        {
+            field: 'ubicacion',
+            label: 'Ubicación del Producto',
+            width: '50%',
+            align: 'center',
+            render: (valor, row, index) => {
+                const sucursalId = row.id || row.ID;
+                const ubicacionActual = row.ubicacion !== undefined && row.ubicacion !== null ? row.ubicacion : '';
+
+                return `
+                    <div style="max-width: 240px; margin: 0 auto;">
+                        <input type="text" 
+                               class="form-control form-control-sm text-center input-mayus input-ubicacion-sucursal fw-600 text-slate-700" 
+                               data-sucursal-id="${sucursalId}" 
+                               data-index="${index}" 
+                               value="${ubicacionActual}" 
+                               placeholder="Ej. Pasillo 3, Estante B">
+                    </div>
+                `;
+            }
+        }
+    ];
+
+    // 2. Obtenemos las sucursales cargadas globalmente
+    const datosSucursales = window.sucursales && Array.isArray(window.sucursales) ? window.sucursales : [];
+
+    // 3. Renderizamos la tabla usando TableService apuntando al contenedor de sectores/ubicaciones
+    TableService.render('contenedor-sectores', cabeceras, datosSucursales, {
+        emptyMessage: 'No hay sucursales registradas para asignar ubicaciones.'
+    });
+}

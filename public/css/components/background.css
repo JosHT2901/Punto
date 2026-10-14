@@ -1,0 +1,117 @@
+/* ==================================================
+   BACKGROUND UTILITIES
+   ================================================== */
+
+/* Base & Neutros */
+.bg-white       { background-color: var(--color-white) !important; }
+.bg-black       { background-color: var(--color-black) !important; }
+.bg-transparent { background-color: transparent !important; }
+.bg-page        { background-color: var(--bg-page) !important; }
+.bg-blue-03618d { background-color: var(--blue-03618d) !important; }
+
+/* Grayscale */
+.bg-gray-50     { background-color: var(--gray-50) !important; }
+.bg-gray-100    { background-color: var(--gray-100) !important; }
+.bg-gray-200    { background-color: var(--gray-200) !important; }
+.bg-gray-300    { background-color: var(--gray-300) !important; }
+.bg-gray-400    { background-color: var(--gray-400) !important; }
+.bg-gray-800    { background-color: var(--gray-800) !important; }
+.bg-gray-900    { background-color: var(--gray-900) !important; }
+
+/* Brand */
+.bg-brand       { background-color: var(--brand-600) !important; }
+.bg-brand-soft  { background-color: var(--brand-50) !important; }
+.bg-brand-dark  { background-color: var(--brand-700) !important; }
+
+/* Semánticos (Status) */
+.bg-success       { background-color: var(--success) !important; }
+.bg-success-dark  { background-color: var(--success-dark) !important; }
+.bg-success-soft  { background-color: var(--success-soft) !important; }
+
+.bg-warning       { background-color: var(--warning) !important; }
+.bg-warning-soft  { background-color: var(--warning-soft) !important; }
+.bg-warning-dark  { background-color: var(--warning-dark) !important; }
+
+.bg-danger        { background-color: var(--danger) !important; }
+.bg-danger-soft   { background-color: var(--danger-soft) !important; }
+.bg-danger-dark   { background-color: var(--danger-dark) !important; }
+
+/* Verdes Temáticos */
+.bg-emerald       { background-color: var(--green-emerald) !important; }
+.bg-emerald-dark  { background-color: var(--green-emerald-dark) !important; }
+.bg-emerald-soft  { background-color: var(--green-emerald-soft) !important; }
+
+.bg-lime          { background-color: var(--green-lime) !important; }
+.bg-lime-dark     { background-color: var(--green-lime-dark) !important; }
+.bg-lime-soft     { background-color: var(--green-lime-soft) !important; }
+
+.bg-forest        { background-color: var(--green-forest) !important; }
+.bg-forest-dark   { background-color: var(--green-forest-dark) !important; }
+.bg-forest-soft   { background-color: var(--green-forest-soft) !important; }
+
+.bg-teal          { background-color: var(--green-teal, #14b8a6) !important; }
+.bg-teal-dark     { background-color: var(--green-teal-dark) !important; }
+.bg-teal-soft     { background-color: var(--green-teal-soft) !important; }
+
+/* Acentos / Etiquetas */
+.bg-option,
+.activo         { background-color: var(--btn-option-bg) !important; }
+.bg-indigo      { background-color: #6366f1 !important; }
+
+/* Hover Effects */
+.hover-bg-light:hover { 
+    background-color: var(--gray-100) !important; 
+    transition: background-color 0.2s ease; 
+}
+.hover-bg-brand:hover { 
+    background-color: var(--brand-700) !important; 
+    transition: background-color 0.2s ease; 
+}
+
+
+/* ==================================================
+   TEXT UTILITIES
+   ================================================== */
+
+/* Base */
+.text-white     { color: var(--color-white); }
+.text-black     { color: var(--color-black) !important; }
+
+/* Grayscale & Tipografía General */
+.text-main      { color: var(--text-main) !important; }    /* #111827 */
+.text-sub       { color: var(--text-sub) !important; }     /* #4b5563 */
+.text-soft      { color: var(--text-soft) !important; }    /* #9ca3af */
+
+.text-gray-100  { color: var(--gray-100) !important; }
+.text-gray-300  { color: var(--gray-300) !important; }
+.text-gray-500  { color: var(--gray-500) !important; }
+.text-gray-700  { color: var(--gray-700) !important; }
+
+/* Brand Text */
+.text-brand     { color: var(--brand-600) !important; }
+.text-brand-dark { color: var(--brand-800) !important; }
+
+/* Status Text */
+.text-success       { color: var(--success-dark) !important; }
+.text-success-dark  { color: var(--success-dark) !important; }
+.text-warning       { color: var(--warning-dark) !important; }
+.text-danger        { color: var(--danger-dark) !important; }
+.text-forest        { color: var(--green-forest) !important; } /* Ideal para leer sobre fondos -soft */
+
+/* Links & Options */
+.text-link { 
+    color: var(--brand-500) !important; 
+    text-decoration: none; 
+}
+.text-link:hover { 
+    text-decoration: underline; 
+}
+.text-option    { color: var(--btn-option-text) !important; }
+.text-blue-03618d { color: var(--blue-03618d) !important; }
+
+/* ==================================================
+   BORDER UTILITIES (Extracto complementario)
+   ================================================== */
+.border-white {
+    border: 1px solid var(--color-white) !important;
+}

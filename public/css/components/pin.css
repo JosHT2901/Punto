@@ -1,0 +1,21 @@
+.input-pin-digito {
+    width: 45px;          /* Más angosto */
+    height: 60px;         /* Más alto */
+    font-size: 24px !important;      /* Letra grande */
+    text-align: center;   /* Dígito centrado */
+    font-weight: 600;
+    border-radius: 8px;
+    outline: none;
+    transition: all 0.2s ease-in-out;
+    padding: 8px 12px;
+   
+    /* Estética adaptable mediante variables CSS */
+    border: 2px solid var(--input-border, var(--border-input));
+    border-radius: 6px;
+}
+
+/* Opcional: Estilo cuando el input está enfocado */
+.input-pin-digito:focus {
+    border-color: var(--primary-color, #007bff);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+}

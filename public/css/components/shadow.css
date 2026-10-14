@@ -1,0 +1,78 @@
+:root {
+    /* Color base para las sombras - control centralizado */
+    --sd-rgb: 0, 0, 0;
+    --sd-opacity-1: 0.06;
+    --sd-opacity-2: 0.10;
+
+    /* ==================================================
+       SHADOW VARIABLES (Layered for Realism)
+       ================================================== */
+
+    /* EXTRA SMALL: Para botones o inputs sutiles */
+    --shadow-xs: 0 1px 2px rgba(var(--sd-rgb), 0.05), 
+                 0 0 0 1px rgba(var(--sd-rgb), 0.05);
+
+    /* SMALL: Para cards de inventario o elementos pequeños */
+    --shadow-sm: 0 1px 3px rgba(var(--sd-rgb), 0.10), 
+                 0 1px 2px rgba(var(--sd-rgb), 0.06);
+
+    /* MEDIUM: El estándar para contenedores y modales */
+    --shadow-md: 0 4px 6px -1px rgba(var(--sd-rgb), 0.12), 
+                 0 2px 4px -1px rgba(var(--sd-rgb), 0.07);
+
+    /* LARGE: Para dropdowns y menús flotantes */
+    --shadow-lg: 0 10px 15px -3px rgba(var(--sd-rgb), 0.12), 
+                 0 4px 6px -2px rgba(var(--sd-rgb), 0.05);
+
+    /* EXTRA LARGE: Para modales grandes o elementos elevados */
+    --shadow-xl: 0 20px 25px -5px rgba(var(--sd-rgb), 0.15), 
+                 0 10px 10px -5px rgba(var(--sd-rgb), 0.04);
+
+    /* INTERACTIVE: El efecto de elevación al pasar el mouse */
+    --shadow-hover: 0 12px 20px -5px rgba(var(--sd-rgb), 0.15), 
+                    0 0 0 1px rgba(var(--sd-rgb), 0.05);
+
+    /* FOCUS: Específico para resaltar el input activo (Azul corporativo) */
+    --shadow-focus: 0 0 0 4px rgba(3, 97, 141, 0.15);
+
+    /* INSET: Para efecto de hundido (barras de progreso o botones presionados) */
+    --shadow-inset: inset 0 2px 4px rgba(var(--sd-rgb), 0.06);
+
+    /* LATERALS: Ideales para Sidebars o paneles laterales */
+    --shadow-right: 4px 0 10px -3px rgba(var(--sd-rgb), 0.10);
+    --shadow-left: -4px 0 10px -3px rgba(var(--sd-rgb), 0.10);
+    --shadow-bottom: 0 4px 6px -2px rgba(var(--sd-rgb), 0.05);
+}
+
+/* ==================================================
+   SHADOW CLASSES
+   ================================================== */
+
+.shadow-none    { box-shadow: none !important; }
+.shadow-xs      { box-shadow: var(--shadow-xs) !important; }
+.shadow-sm      { box-shadow: var(--shadow-sm) !important; }
+.shadow-md      { box-shadow: var(--shadow-md) !important; }
+.shadow-lg      { box-shadow: var(--shadow-lg) !important; }
+.shadow-xl      { box-shadow: var(--shadow-xl) !important; }
+.shadow-inset   { box-shadow: var(--shadow-inset) !important; }
+
+/* Especiales / Laterales */
+.shadow-right   { box-shadow: var(--shadow-right) !important; }
+.shadow-left    { box-shadow: var(--shadow-left) !important; }
+.shadow-bottom  { box-shadow: var(--shadow-bottom) !important; }
+.shadow-focus   { box-shadow: var(--shadow-focus) !important; }
+
+/* Comportamiento Dinámico */
+.shadow-hover { 
+    transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out; 
+}
+.shadow-hover:hover { 
+    box-shadow: var(--shadow-hover) !important; 
+    transform: translateY(-1px);
+}
+
+/* Para botones de opciones o elementos interactivos */
+.shadow-active:active {
+    box-shadow: var(--shadow-inset) !important;
+    transform: translateY(0);
+}

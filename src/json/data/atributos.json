@@ -1,0 +1,114 @@
+{
+  "catalogo_tipos_datos": [
+    {
+      "codigo": "texto",
+      "etiqueta": "Texto Libre",
+      "requiere_opciones": false,
+      "requiere_unidad": false,
+      "descripcion": "Campo de texto para descripciones, nombres o valores cortos.",
+      "validaciones": {
+        "longitud_maxima": 255,
+        "patron": "string"
+      }
+    },
+    {
+      "codigo": "textarea",
+      "etiqueta": "Párrafo / Texto Largo",
+      "requiere_opciones": false,
+      "requiere_unidad": false,
+      "descripcion": "Campo de texto extendido para observaciones o notas detalladas.",
+      "validaciones": {
+        "longitud_maxima": 1000,
+        "patron": "string"
+      }
+    },
+    {
+      "codigo": "numero",
+      "etiqueta": "Número / Cantidad",
+      "requiere_opciones": false,
+      "requiere_unidad": false,
+      "descripcion": "Valores numéricos libres, enteros o con decimales.",
+      "validaciones": {
+        "min": 0,
+        "max": 999999,
+        "decimales": 2
+      }
+    },
+    {
+      "codigo": "peso",
+      "etiqueta": "Peso (kg, g, lb)",
+      "requiere_opciones": false,
+      "requiere_unidad": true,
+      "unidades_disponibles": ["kg", "g", "lb", "oz", "ton"],
+      "descripcion": "Campo numérico optimizado para peso con unidad automática.",
+      "validaciones": {
+        "min": 0.001,
+        "decimales": 3
+      }
+    },
+    {
+      "codigo": "volumen",
+      "etiqueta": "Volumen / Capacidad (Litros, ml)",
+      "requiere_opciones": false,
+      "requiere_unidad": true,
+      "unidades_disponibles": ["lt", "ml", "gal", "oz_fluida"],
+      "descripcion": "Campo numérico para líquidos o capacidades (ideal para desechables o líquidos).",
+      "validaciones": {
+        "min": 0.01,
+        "decimales": 2
+      }
+    },
+    {
+      "codigo": "longitud",
+      "etiqueta": "Longitud / Medida (cm, m, mm)",
+      "requiere_opciones": false,
+      "requiere_unidad": true,
+      "unidades_disponibles": ["cm", "m", "mm", "pulg", "yd"],
+      "descripcion": "Campo numérico para dimensiones, diámetros o alturas (ej. bolsas, contenedores).",
+      "validaciones": {
+        "min": 0.01,
+        "decimales": 2
+      }
+    },
+    {
+      "codigo": "seleccion",
+      "etiqueta": "Lista de Selección (Única)",
+      "requiere_opciones": true,
+      "requiere_unidad": false,
+      "descripcion": "Menú desplegable con opciones fijas configurables.",
+      "tipo_componente": "select"
+    },
+    {
+      "codigo": "seleccion_multiple",
+      "etiqueta": "Lista de Selección Múltiple",
+      "requiere_opciones": true,
+      "requiere_unidad": false,
+      "descripcion": "Permite seleccionar varias opciones simultáneamente (ej. sabores, características).",
+      "tipo_componente": "checkbox_group"
+    },
+    {
+      "codigo": "color",
+      "etiqueta": "Selector de Color",
+      "requiere_opciones": false,
+      "requiere_unidad": false,
+      "descripcion": "Selector visual de color (genera chips interactivos HEX/RGB).",
+      "tipo_componente": "color_picker"
+    },
+    {
+      "codigo": "booleano",
+      "etiqueta": "Sí / No (Interruptor)",
+      "requiere_opciones": false,
+      "requiere_unidad": false,
+      "descripcion": "Casilla de verificación o interruptor de activación (Verdadero/Falso).",
+      "tipo_componente": "toggle"
+    },
+    {
+      "codigo": "fecha",
+      "etiqueta": "Fecha de Caducidad / Vencimiento",
+      "requiere_opciones": false,
+      "requiere_unidad": false,
+      "descripcion": "Selector de calendario para control de lotes y perecederos.",
+      "tipo_componente": "datepicker"
+    }
+  ]
+}

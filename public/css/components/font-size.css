@@ -1,0 +1,45 @@
+/* ==================================================
+   FONT SIZE UTILITIES (REM)
+   ================================================== */
+/* Base reference: 1rem = 16px (por defecto del navegador) */
+
+/* =========================
+   EXTRA PEQUEÑO
+   ========================= */
+   .fs-0  { font-size: 0.5rem !important; }   /* 8px  */
+   .fs-1  { font-size: 0.625rem !important; } /* 10px */
+   .fs-2  { font-size: 0.75rem !important; }  /* 12px */
+   .fs-3  { font-size: 0.875rem !important; } /* 14px */
+   
+   /* =========================
+      NORMAL / CUERPO
+      ========================= */
+   .fs-4  { font-size: 1rem !important; }     /* 16px */
+   .fs-5  { font-size: 1.125rem !important; } /* 18px */
+   .fs-6  { font-size: 1.25rem !important; }  /* 20px */
+   .fs-7  { font-size: 1.375rem !important; } /* 22px */
+   .fs-8  { font-size: 1.5rem !important; }   /* 24px */
+   
+   /* =========================
+      GRANDE / SUBTÍTULOS
+      ========================= */
+   .fs-9   { font-size: 1.75rem !important; } /* 28px */
+   .fs-10  { font-size: 2rem !important; }    /* 32px */
+   .fs-11  { font-size: 2.25rem !important; } /* 36px */
+   .fs-12  { font-size: 2.5rem !important; }  /* 40px */
+   .fs-13  { font-size: 3rem !important; }    /* 48px */
+   
+   /* =========================
+      EXTRA GRANDE / TÍTULOS
+      ========================= */
+   .fs-14  { font-size: 3.5rem !important; }  /* 56px */
+   .fs-15  { font-size: 4rem !important; }    /* 64px */
+   .fs-16  { font-size: 4.5rem !important; }  /* 72px */
+   .fs-17  { font-size: 5rem !important; }    /* 80px */
+   .fs-18  { font-size: 6rem !important; }    /* 96px */
+   
+   /* =========================
+      UTILIDADES COMUNES
+      ========================= */
+   .fs-inherit { font-size: inherit !important; }
+   .fs-unset   { font-size: unset !important; }
