@@ -29,6 +29,12 @@ $accion = trim($_POST['accion'] ?? '');
 // Mapeo de acciones permitidas
 $accionesPermitidas = [
     'obtener_productos_completos'         => 'Obtener_Todos_Productos_Completos',
+    'gestionar_producto'=>'Gestionar_Producto',
+    'guardar_borrador'=>'Guardar_Borrador_Producto',
+    'obtener_borradores'=>'Obtener_Borradores_Productos',
+    'obtener_detalle_borrador'=>'Obtener_Borrador_Producto_Detalle',
+    'eliminar_borrador'=>'Eliminar_Borrador_Producto',
+    'eliminar_borradores_masivo'=>'Eliminar_Borradores_Masivos'
 ];
 
 // Ejecutar el despachador central

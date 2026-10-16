@@ -77,15 +77,17 @@ function ajaxConParametrosXHR(url, data = {}, esFormData = false, opciones = {})
             response: null
         });
 
-        if (esFormData) {
+        // Envío seguro según el tipo de datos
+        if (esFormData || data instanceof FormData) {
+            // IMPORTANTE: Cuando es FormData, NO establecemos setRequestHeader('Content-Type'). 
+            // El navegador calcula el boundary multipart automáticamente.
             xhr.send(data);
         } else {
             xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
-            xhr.send($.param(data));
+            xhr.send(typeof $.param === 'function' ? $.param(data) : data);
         }
     });
 }
-
 /**
  * Descarga archivos mediante AJAX permitiendo enviar parámetros POST y soporte opcional para FormData.
  */

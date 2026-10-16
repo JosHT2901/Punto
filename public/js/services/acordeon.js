@@ -1,15 +1,18 @@
 /**
- * Servicio de Wizard en Cascada / Acordeón Inteligente
- * Funciona de manera reutilizable sin escribir lógica adicional por formulario.
+ * Servicio genérico de Wizard en Cascada / Acordeón Inteligente.
+ * Reutilizable en cualquier vista sin lógica de negocio hardcodeada.
+ * 
+ * @param {Object} [options] - Opciones de configuración opcionales.
+ * @param {Function} [options.onValidate] - Callback opcional para validar antes de avanzar: ($currentCard, esSiguiente) => boolean
  */
-function InicializarWizardAcordeon() {
+function InicializarWizardAcordeon(options = {}) {
+    const { onValidate = null } = options;
     
     // Selectores válidos para enfocar
     const inputsSelector = 'input:not([type="hidden"]):not([disabled]):not([readonly]), input[readonly].input, select:not([disabled])';
 
     // Función auxiliar ultra robusta para forzar el foco
     function enfocarPrimerInput($card) {
-        // Damos tiempo a que el navegador libere el foco del botón y pinte el panel
         setTimeout(() => {
             const $primerInput = $card.find(inputsSelector).first();
             if ($primerInput.length) {
@@ -26,10 +29,18 @@ function InicializarWizardAcordeon() {
 
     // Función auxiliar para cambiar de paso de forma fluida
     function cambiarPaso($btn, esSiguiente) {
-        $btn.blur(); // Quitamos el foco al botón para que no robe el cursor
+        $btn.blur(); // Quitamos el foco al botón
 
         const $wizard = $btn.closest('.js-wizard-container');
         const $currentCard = $btn.closest('.js-acordeon-container');
+
+        // Si es el botón siguiente y se pasó una función de validación externa, la evaluamos
+        if (esSiguiente && typeof onValidate === 'function') {
+            const esValido = onValidate($currentCard, esSiguiente);
+            if (esValido === false) {
+                return; // Frena el avance si la validación devuelve false
+            }
+        }
         
         // Encontrar tarjeta siguiente o anterior
         const $targetCard = esSiguiente 
@@ -47,9 +58,8 @@ function InicializarWizardAcordeon() {
             $currentPanel.stop(true, true).slideUp(200);
             $currentIcon.removeClass('is-rotated');
 
-            // 2. Abrir panel de destino y mover el scroll en paralelo de forma limpia
+            // 2. Abrir panel de destino y mover el scroll en paralelo
             $targetPanel.stop(true, true).slideDown(250, function() {
-                // Callback inmediato al terminar el slideDown
                 enfocarPrimerInput($targetCard);
             });
 
@@ -57,7 +67,7 @@ function InicializarWizardAcordeon() {
 
             // Desplazamiento suave de la página
             $('html, body').stop(true, true).animate({
-                scrollTop: $targetCard.offset().top - 20 // Dejamos un pequeño margen superior de respiro
+                scrollTop: $targetCard.offset().top - 20
             }, 300);
         }
     }

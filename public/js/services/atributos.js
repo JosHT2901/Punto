@@ -72,7 +72,6 @@ window.AtributoManager = (function ($) {
                 `;
             }
 
-            // Cada atributo ocupa aprox el 50% de la fila (calc 50% con espacio de separación)
             return `
                 <div class="row-gap-0 flex flex-column atributo-item animate-fade-in mb-4 px-2" style="flex: 0 0 50%; max-width: 50%; box-sizing: border-box;" data-atributo-id="${id}" data-tipo="${tipo}">
                     <label class="block mb-1 fs-3 fw-600 pl-2 text-slate-700">${label}</label>
@@ -213,7 +212,7 @@ window.AtributoManager = (function ($) {
                         InsertarCustomSelect({
                             contenedor: `#contenedor-unidad-${attr.id}`,
                             id: `unidad-${attr.id}`,
-                            placeholder: opcionesUnidades[0] ? opcionesUnidades[0].text : 'Unidad...',
+                            placeholder: opcionesUnidades[0] ? opcionesUnunits[0]?.text || 'Unidad...' : 'Unidad...',
                             opciones: opcionesUnidades,
                             buscador: false
                         });
@@ -241,8 +240,19 @@ window.AtributoManager = (function ($) {
                     valor = $item.find('.atributo-valor').val();
                 } else if (configTipo.requiere_unidad) {
                     valor = $item.find('.atributo-valor').val();
-                    const $unidadSelect =$item.find('.custom-select-input, select, input[id^="unidad-"]');
-                    unidad = $unidadSelect.length ? $unidadSelect.val() : null;
+                    
+                    // Búsqueda ultra robusta para capturar el valor del CustomSelect dinámico
+                    const $unidadContainer =$item.find(`#contenedor-unidad-${id}`);
+                    unidad = $unidadContainer.find('input[type="hidden"], select').val() 
+                             || $unidadContainer.find('.custom-select-input, .selected-value').val() 
+                             || $unidadContainer.find('.custom-select-text, .selected-text, .dropdown-toggle, .form-select').text().trim()
+                             || $item.find(`input[id^="unidad-"]`).val() 
+                             || null;
+
+                    // Si captura etiquetas HTML o placeholders por defecto, los limpiamos
+                    if (!unidad || unidad === 'Unidad...' || unidad === '') {
+                        unidad = null;
+                    }
                 } else if (tipo === 'booleano') {
                     valor = $item.find('.atributo-valor').is(':checked');
                 } else if (tipo === 'fecha') {
@@ -270,7 +280,15 @@ window.AtributoManager = (function ($) {
                 });
             });
 
-            return resultado;
+            // Filtro flexible: descarta campos completamente vacíos, permitiendo avanzar sin llenarlos obligatoriamente
+            return resultado.filter(item => {
+                if (item.valor === null || item.valor === undefined) return false;
+                if (typeof item.valor === 'string' && item.valor.trim() === '') return false;
+                if (typeof item.valor === 'number' && item.valor === 0) return false;
+                if (typeof item.valor === 'boolean' && item.valor === false) return false;
+                if (Array.isArray(item.valor) && item.valor.length === 0) return false;
+                return true;
+            });
         }
     };
 })(jQuery);

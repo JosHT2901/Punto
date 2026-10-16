@@ -29,6 +29,35 @@ class JsonResponse {
     }
 
     /**
+     * Envía una respuesta estandarizada para procesos masivos (eliminación, actualización, etc.).
+     * 
+     * @param string $mensaje Mensaje general del proceso.
+     * @param array $processed Arreglo de elementos procesados con éxito (con sus detalles: id, nombre, sku, etc.).
+     * @param array $failed Arreglo de elementos que fallaron (con su id y motivo).
+     * @param int $code Código de estado HTTP (200 por defecto).
+     */
+    public static function massive(string $mensaje, array $processed, array $failed, int $code = 200): void {
+        $total = count($processed) + count($failed);
+        
+        $data = [
+            "stats" => [
+                "total"   => $total,
+                "success" => count($processed),
+                "error"   => count($failed)
+            ],
+            "results" => [
+                "processed" => $processed,
+                "failed"    => $failed
+            ]
+        ];
+
+        // Determinamos el estado 'ok' global (true si al menos hubo un éxito o si el total es 0)
+        $ok = count($processed) > 0 || $total === 0;
+
+        self::send($ok, $mensaje, $data, $code);
+    }
+
+    /**
      * Procesa y envía la respuesta final al cliente.
      * 
      * @param bool $ok Estado de la respuesta.
@@ -58,8 +87,6 @@ class JsonResponse {
 
         try {
             // 5. Codificación segura
-            // JSON_UNESCAPED_UNICODE: Mantiene acentos y eñes legibles.
-            // JSON_THROW_ON_ERROR: Lanza una excepción si hay un fallo al serializar datos circulares o malformados.
             echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
             // Fallback de emergencia si el array no se pudo convertir a JSON

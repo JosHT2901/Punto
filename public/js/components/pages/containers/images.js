@@ -1,5 +1,5 @@
 function SeleccionarImagen() {
-    const basePath = typeof UI_CONFIG !== 'undefined' ? UI_CONFIG.ASSETS_PATH : '../../assets/icon/';
+    const basePath = typeof UI_CONFIG !== 'undefined' ? UI_CONFIG.ASSETS_PATH : '../../assets/images/';
     const imagenes = [
         basePath + 'paleta.png',
         basePath + 'astronauta.png',

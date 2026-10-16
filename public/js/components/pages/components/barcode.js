@@ -219,15 +219,27 @@ function InsertarSelectCamaras(devices) {
 }
 
 function ImprimirMensajeErrorBarCodeScanner(texto) {
-    const componenteError = Contenedor_Con_Imagen('camera.png', texto, 'h-p-100', 'h-100', true);
     const $contenedorPrincipal =$("#bar-code-contenedor-principal");
-    
-    $contenedorPrincipal.html(componenteError);
 
-    $contenedorPrincipal.find('.btn-reintentar, button').attr('onclick', '').off('click').on('click', function (e) {
-        e.preventDefault();
-        $contenedorPrincipal.html(ESTRUCTURA_ORIGINAL_SCANNER);
-        InicializarAccionesInterfaz();
-        IniciarScannerCodigoBarras().catch(err => console.error("Error al reintentar flujo:", err));
-    });
+    // Estructura estilizada sin botón de reintento
+    const componenteError = `
+        <div class="w-p-100 h-p-100 flex flex-column items-center justify-center p-4">
+            <div class="flex flex-column items-center justify-center gap-4 p-5 text-center bg-white rounded-16 shadow-lg border border-gray-200" style="max-width: 480px; width: 100%; animation: fadeIn 0.3s ease-in-out;">
+                
+                <!-- Contenedor del icono con fondo decorativo -->
+                <div class="rounded-circle flex-center p-4 bg-red-soft text-danger position-relative" style="width: 88px; height: 88px;">
+                    <img src="../../../public/images/camera.png" alt="Cámara" style="width: 42px; height: 42px; object-fit: contain; filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.1));">
+                </div>
+
+                <!-- Títulos y descripción orientados a guiar al usuario -->
+                <div class="flex flex-column gap-2">
+                    <h3 class="text-dark fw-700 fs-6 tracking-tight mb-0">No se pudo acceder a la cámara</h3>
+                    <p class="fs-3 text-secondary fw-500 line-height-base mb-0 px-2">${texto}</p>
+                </div>
+                
+            </div>
+        </div>
+    `;
+
+    $contenedorPrincipal.html(componenteError);
 }

@@ -23,6 +23,7 @@
 <script src="../../../public/js/services/atributos.js"></script>
 <script src="../../../public/js/services/timeline.js"></script>
 <script src="../../../public/js/services/memoria.js"></script>
+<script src="../../../public/js/services/seguridad.js"></script>
 <script src="../../../public/js/config/ui.config.js"></script>
 <script src="../../../public/js/components/pages/containers/images.js"></script>
 <script src="../../../public/js/ajax/components/helpers/codigo_postal.js"></script>
@@ -33,3 +34,6 @@
 <script src="../../../public/js/utils/helpers.js"></script>
 
 <script src="../../../src/controllers/js/ajax.js"></script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
