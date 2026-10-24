@@ -6,7 +6,9 @@ require_once __DIR__ . '/../helpers/time.php';
 require_once __DIR__ . '/../helpers/auditoria.php';
 require_once __DIR__ . '/../../../config/auditoria.php';
 require_once __DIR__ . '/../helpers/cifrado.php';
+require_once __DIR__ . '/../helpers/paginacion.services.php';
 require_once __DIR__ . '/../auth/check_permiso.php';
+require_once __DIR__ . '/../helpers/exportar_universal.php';
 require_once __DIR__ . '/../../../config/sesion_example.php';
 function DespacharAccion($accionesPermitidas) {
     try {

@@ -1,15 +1,16 @@
 /*************************************************
- * CUSTOM SELECT - MOTOR PROFESIONAL (V3.5.2)
- * - Soporte para texto multilínea en opciones
- * - Soporte para limpiar valor con setValue('', '')
- * - Bloqueo/Desbloqueo funcional con pointer-events y opacidad
+ * CUSTOM SELECT - MOTOR PROFESIONAL (V3.5.4)
+ * - Truncamiento con puntos suspensivos (...) en la selección
+ * - Soporte para tooltip con texto completo
+ * - Opciones multilínea en el menú desplegable
  *************************************************/
 (function () {
     const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
             if (mutation.attributeName === 'disabled' || mutation.attributeName === 'class') {
-                const $target =$(mutation.target);
-                const isDisabled = $target.is(':disabled') || $target.hasClass('disabled');$target.toggleClass('disabled', isDisabled);
+                const $target = $(mutation.target);
+                const isDisabled = $target.is(':disabled') || $target.hasClass('disabled');
+                $target.toggleClass('disabled', isDisabled);
                 if (isDisabled) {
                     $target.css({ 'pointer-events': 'none', 'opacity': '0.6' });
                     closeSelect($target);
@@ -21,11 +22,13 @@
     });
 
     function ajustarOpcionesIndividualmente($select) {
-        const $optionsContainer =$select.find('.custom-select-options');
+        const $optionsContainer = $select.find('.custom-select-options');
         if (!$optionsContainer.is(':visible')) return;
 
-        const $opciones = $select.find('.custom-option:visible');$opciones.each(function() {
-            const $opt = $(this);$opt.css({ 
+        const $opciones = $select.find('.custom-option:visible');
+        $opciones.each(function() {
+            const $opt = $(this);
+            $opt.css({ 
                 'font-size': '14px', 
                 'white-space': 'normal', 
                 'word-wrap': 'break-word',
@@ -44,39 +47,45 @@
 
     function initCustomSelectEvents() {
         $(document).on('mousedown', '.custom-select-trigger', function (e) {
-            const $select =$(this).closest('.custom-select');
-            // Verificación estricta de bloqueo
+            const $select = $(this).closest('.custom-select');
             if ($select.hasClass('disabled') || $select.css('pointer-events') === 'none') return;
             e.preventDefault(); 
             
-            const isOpen = $select.hasClass('open');$('.custom-select.open').not($select).each(function() { closeSelect($(this)); });
+            const isOpen = $select.hasClass('open');
+            $('.custom-select.open').not($select).each(function() { closeSelect($(this)); });
 
             if (isOpen) {
                 closeSelect($select);
             } else {
                 $select.addClass('open');
-                const $options = $select.find('.custom-select-options');$options.show().css({ 'display': 'flex', 'flex-direction': 'column' });
-                posicionarDropdown($select[0],$options[0]);
+                const $options = $select.find('.custom-select-options');
+                $options.show().css({ 'display': 'flex', 'flex-direction': 'column' });
+                posicionarDropdown($select[0], $options[0]);
                 ajustarOpcionesIndividualmente($select);
                 window.addEventListener('scroll', handleGlobalScroll, true);
 
-                const $input =$select.find('.custom-select-search-input');
+                const $input = $select.find('.custom-select-search-input');
                 if ($input.length) { 
-                    setTimeout(() => $input.val('').focus(), 50);$select.find('.custom-option').show(); 
+                    setTimeout(() => $input.val('').focus(), 50);
+                    $select.find('.custom-option').show(); 
                 }
             }
         });
 
-        $(document).on('click', '.custom-select-trigger', e => {             e.preventDefault();             e.stopPropagation();         });$(document).on('click', '.custom-select-search', e => {
+        $(document).on('click', '.custom-select-trigger', e => { e.preventDefault(); e.stopPropagation(); });
+        $(document).on('click', '.custom-select-search', e => {
             e.preventDefault();
             e.stopPropagation();
         });
 
         $(document).on('input', '.custom-select-search-input', function () {
             const value = $(this).val().toLowerCase().trim();
-            const $select =$(this).closest('.custom-select');
-            const $opciones = $select.find('.custom-option');$opciones.each(function () {
-                const text = $(this).text().toLowerCase();$(this).toggle(text.indexOf(value) > -1);
+            const $select = $(this).closest('.custom-select');
+            const $opciones = $select.find('.custom-option');
+            
+            $opciones.each(function () {
+                const text = $(this).text().toLowerCase();
+                $(this).toggle(text.indexOf(value) > -1);
             });
             
             clearTimeout(this.t);
@@ -84,16 +93,17 @@
         });
 
         $(document).on('click', '.custom-option', function (e) {
-            const $el =$(this);
-            const $select =$el.closest('.custom-select');
+            const $el = $(this);
+            const $select = $el.closest('.custom-select');
             if ($select.hasClass('disabled') || $select.css('pointer-events') === 'none') return;
             e.stopPropagation();
             
             const value = $el.data('value');
-            const text = $el.text().trim();
+            const text = $el.attr('title') || $el.text().trim();
             
             setValue($select, value, text);
-            closeSelect($select);$select.focus();
+            closeSelect($select);
+            $select.focus();
             
             setTimeout(() => {
                 const event = $.Event('keydown', { 
@@ -101,7 +111,8 @@
                     keyCode: 13, 
                     isTrigger: true 
                 });
-                $select.trigger(event);$select.trigger('change');
+                $select.trigger(event);
+                $select.trigger('change');
             }, 60);
 
             const callback = $select.data('onchange');
@@ -117,8 +128,8 @@
         const trigger = selectEl.querySelector('.custom-select-trigger');
         const rect = trigger.getBoundingClientRect();
         const margen = 8;
-        const $list =$(optionsEl).find('.custom-options-list');
-        const $search =$(optionsEl).find('.custom-select-search');
+        const $list = $(optionsEl).find('.custom-options-list');
+        const $search = $(optionsEl).find('.custom-select-search');
 
         Object.assign(optionsEl.style, {
             position: 'fixed',
@@ -146,26 +157,37 @@
     }
 
     function setValue($select, value, text) {
+        const $textSpan = $select.find('.custom-select-text');
+        
         if (value === '' || value === null || value === undefined) {
             const placeholder = $select.attr('data-placeholder') || 'Selecciona...';
-            $select.attr('data-value', '');$select.find('.custom-select-text').text(placeholder).addClass('placeholder').css({ 
+            $select.attr('data-value', '');
+            $textSpan.text(placeholder).removeAttr('title').addClass('placeholder').css({ 
                 'white-space': 'nowrap', 
                 'overflow': 'hidden', 
                 'text-overflow': 'ellipsis' 
             });
-            $select.find('.custom-select-trigger').css({ 'height': '100\%', 'min-height': '100\%' });$select.find('.custom-option').removeClass('active');
+            $select.find('.custom-select-trigger').css({ 'height': '100%', 'min-height': '100%' });
+            $select.find('.custom-option').removeClass('active');
             return;
         }
 
         $select.attr('data-value', String(value));
-        $select.find('.custom-select-text').text(text).removeClass('placeholder').css({              'white-space': 'normal',              'overflow': 'visible',              'text-overflow': 'unset'          });$select.find('.custom-select-trigger').css({ 'height': '100%', 'min-height': '100%' });
+        // 🌟 Truncado con puntos suspensivos (...) y tooltip en el elemento seleccionado
+        $textSpan.text(text).attr('title', text).removeClass('placeholder').css({ 
+            'white-space': 'nowrap', 
+            'overflow': 'hidden', 
+            'text-overflow': 'ellipsis' 
+        });
+        $select.find('.custom-select-trigger').css({ 'height': '100%', 'min-height': '100%' });
 
         $select.find('.custom-option').removeClass('active').filter(function() {
             return String($(this).data('value')) === String(value);
         }).addClass('active');
     }
 
-    function closeSelect($select) {$select.removeClass('open').find('.custom-select-options').hide();
+    function closeSelect($select) {
+        $select.removeClass('open').find('.custom-select-options').hide();
         if ($('.custom-select.open').length === 0) {
             window.removeEventListener('scroll', handleGlobalScroll, true);
         }
@@ -178,7 +200,7 @@
     window.CustomSelect = {
         getValue(selector) { return $(selector).attr('data-value') || ''; },
         setValue(selector, value, triggerChange = true) {
-            const $select =$(selector);
+            const $select = $(selector);
             if (!$select.length) return false;
 
             if (value === '' || value === null || value === undefined) {
@@ -191,12 +213,12 @@
                 return true;
             }
 
-            const $option =$select.find('.custom-option').filter(function() {
+            const $option = $select.find('.custom-option').filter(function() {
                 return String($(this).data('value')) === String(value);
             });
             if (!$option.length) return false;
             
-            setValue($select, value,$option.text().trim());
+            setValue($select, value, $option.attr('title') || $option.text().trim());
             if (triggerChange) {
                 const callback = $select.data('onchange');
                 if (typeof callback === 'function') callback(value);
@@ -205,7 +227,7 @@
             return true;
         },
         reset(selector, triggerChange = false) {
-            const $select =$(selector);
+            const $select = $(selector);
             if (!$select.length) return;
             setValue($select, '', '');
             if (triggerChange) {
@@ -215,7 +237,7 @@
             }
         },
         disabled(selector, estado = true) {
-            const $select =$(selector);
+            const $select = $(selector);
             if (!$select.length) return;
             if (estado) {
                 $select.addClass('disabled').css({ 'pointer-events': 'none', 'opacity': '0.6' });
@@ -238,12 +260,10 @@ function InsertarCustomSelect(config) {
     const valIni = opIni ? opIni.value : '';
     const txtIni = opIni ? opIni.text : placeholder;
 
-    const estilosDisabled = disabled ? 'disabled; pointer-events: none; opacity: 0.6;' : '';
-
     const html = `
         <div class="custom-select ${disabled ? 'disabled' : ''}" id="${id}" data-value="${valIni}" data-placeholder="${placeholder}" style="${disabled ? 'pointer-events: none; opacity: 0.6;' : ''}">
             <div class="custom-select-trigger" style="min-height:100%; display:flex; align-items:center; border:2px solid #ccc; border-radius:4px; background:#fff; cursor:pointer; padding: 5px 10px; user-select:none; height:auto;">
-                <span class="custom-select-text ${!opIni ? 'placeholder' : ''}" style="flex:1; ${!opIni ? 'white-space:nowrap; overflow:hidden; text-overflow:ellipsis;' : 'white-space:normal;'} font-size:14px; line-height:1.2;">${txtIni}</span>
+                <span class="custom-select-text ${!opIni ? 'placeholder' : ''}" ${opIni ? `title="${txtIni}"` : ''} style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:14px; line-height:1.2;">${txtIni}</span>
                 <i class="vf-ic_fluent_caret_down_24_filled" style="font-size:12px; margin-left:10px; flex-shrink:0;"></i>
             </div>
             <div class="custom-select-options" style="display:none; background:#fff; border:2px solid #ccc; border-radius:4px; z-index:9999; overflow:hidden;">
@@ -253,7 +273,7 @@ function InsertarCustomSelect(config) {
                 </div>` : ''}
                 <div class="custom-options-list contenedor" style="flex-grow:1;">
                     ${opciones.map(op => `
-                        <div class="custom-option ${op.selected ? 'active' : ''}" data-value="${op.value}" style="padding:10px; cursor:pointer; font-size:14px; transition: background 0.2s; white-space:normal; word-wrap:break-word; border-bottom:1px solid #f0f0f0;">${op.text}</div>
+                        <div class="custom-option ${op.selected ? 'active' : ''}" data-value="${op.value}" title="${op.text}" style="padding:10px; cursor:pointer; font-size:14px; transition: background 0.2s; white-space:normal; word-wrap:break-word; word-break:break-word; border-bottom:1px solid #f0f0f0;">${op.text}</div>
                     `).join('')}
                 </div>
             </div>
@@ -261,7 +281,7 @@ function InsertarCustomSelect(config) {
     `;
 
     $(contenedor).append(html);
-    const $el =$('#' + id);
+    const $el = $('#' + id);
     if (typeof onChange === 'function') $el.data('onchange', onChange);
     window.CustomSelect._observe($el[0]);
 }

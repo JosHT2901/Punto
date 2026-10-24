@@ -6,10 +6,10 @@ $(document).ready(async function () {
 
         // Cargamos en paralelo las variables del sistema y los esquemas fiscales
         const [variablesResponse, esquemasResponse] = await Promise.all([
-            ajaxConParametros('../../../src/controllers/php/controllers/ajustes.php', {
+            window.AjaxService.enviar('../../../src/controllers/php/controllers/ajustes.php', {
                 accion: 'obtener_variables'
             }),
-            ajaxConParametros('../../../src/controllers/php/controllers/impuestos.php', {
+            window.AjaxService.enviar('../../../src/controllers/php/controllers/impuestos.php', {
                 accion: 'obtener_esquemas_fiscales'
             })
         ]);
@@ -61,7 +61,7 @@ async function Guardar_Gestion_Esquema_Impuesto(datosEsquema) {
         }
 
         // Realizar la petición AJAX al controlador correspondiente
-        const respuesta = await ajaxConParametros('../../../src/controllers/php/controllers/impuestos.php', datosEsquema);
+        const respuesta = await window.AjaxService.enviar('../../../src/controllers/php/controllers/impuestos.php', datosEsquema);
 
         if (typeof OcultarCargando === 'function') {
             OcultarCargando();

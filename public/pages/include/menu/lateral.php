@@ -22,7 +22,7 @@ if (!is_array($utilidades)) {
 
 ?>
 <div class="w-300 h-vh-100 box-sizing p-2 flex flex-column bg-gray-100 position-absolute top-0 overflow-auto d-none"
-id="menu-contenedor-lateral">
+id="menu-contenedor-lateral" style="z-index: 10000;">
     <!-- Contenedor Izquierdo: Botón Menú + Saludo -->
     <div class="flex items-center gap-2">
         <!-- 1. Botón Abrir Menú -->

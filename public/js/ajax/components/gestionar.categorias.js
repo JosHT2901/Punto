@@ -5,7 +5,7 @@ $(document).ready(async function () {
         // Ejecutamos ambas peticiones en paralelo mediante Promise.all
         const [respuestaAtributos, respuestaCategorias] = await Promise.all([ 
             CargarJSON('../../../src/json/data/atributos.json'),
-            ajaxConParametros('../../../src/controllers/php/controllers/categorias.php', {
+            window.AjaxService.enviar('../../../src/controllers/php/controllers/categorias.php', {
                 accion: 'obtener_categorias'
             })
         ]);
@@ -52,7 +52,7 @@ async function Guardar_Gestion_Categorias(datosGuardar) {
         MostrarCargando('Procesando información...', false); 
 
         // Ajusta la ruta del controlador de PHP según tu estructura de carpetas
-        const respuesta = await ajaxConParametros('../../../src/controllers/php/controllers/categorias.php', {
+        const respuesta = await window.AjaxService.enviar('../../../src/controllers/php/controllers/categorias.php', {
             accion: 'gestionar_categorias',
             data: datosGuardar
         });

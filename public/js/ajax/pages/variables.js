@@ -7,7 +7,7 @@ $(document).ready(async function () {
         // Cargamos en paralelo el archivo JSON de monedas y la petición AJAX de ajustes
         const [monedasResponse, variablesResponse] = await Promise.all([
             CargarJSON('../../../src/json/data/moneda.json'),
-            ajaxConParametros('../../../src/controllers/php/controllers/ajustes.php', {
+            window.AjaxService.enviar('../../../src/controllers/php/controllers/ajustes.php', {
                 accion: 'obtener_variables'
             })
         ]);
@@ -73,7 +73,7 @@ async function Guardar_Gestion_Variables(data) {
             MostrarCargando('Guardando variables...', false);
         }
 
-        const respuesta = await ajaxConParametros('../../../src/controllers/php/controllers/ajustes.php', datosVariables);
+        const respuesta = await window.AjaxService.enviar('../../../src/controllers/php/controllers/ajustes.php', datosVariables);
 
         if (typeof OcultarCargando === 'function') {
             OcultarCargando();

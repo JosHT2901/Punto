@@ -6,8 +6,7 @@
  * 
  * @return array Arreglo con todos los productos y sus respectivas colecciones.
  */
-function Obtener_Todos_Productos_Completos(): array
-{
+function Obtener_Todos_Productos_Completos(): void {
     try {
         // 1. Obtener todos los productos principales con sus datos básicos, categoría, marca, fiscal y costos de compra
         $sqlPrincipal = "SELECT 
@@ -26,51 +25,58 @@ function Obtener_Todos_Productos_Completos(): array
 
         $productos = Consultar_PDO($sqlPrincipal);
 
-        if (!is_array($productos) || empty($productos)) {
-            return [];
+        if (!is_array($productos)) {
+            JsonResponse::error("No se pudo obtener el listado de productos.", null, 500);
+            return;
+        }
+
+        // Si está vacío, podemos retornar un array vacío con un mensaje de éxito o controlado
+        if (empty($productos)) {
+            JsonResponse::success("No se encontraron productos registrados", [], 200);
+            return;
         }
 
         // 2. Iterar sobre cada producto para adjuntar sus colecciones hijas de manera optimizada
         foreach ($productos as &$producto) {
             $productoId = $producto['ID'];
 
-            // Adjuntar imágenes (Paso 3)
+            // Adjuntar imágenes
             $producto['Imagenes'] = Consultar_PDO(
                 "SELECT ID, Url, Es_Portada, Orden FROM producto_imagenes WHERE Producto_ID = :id ORDER BY Orden ASC",
                 [':id' => $productoId]
             ) ?: [];
 
-            // Adjuntar equivalencias de medida (Paso 6)
+            // Adjuntar equivalencias de medida
             $producto['Equivalencias'] = Consultar_PDO(
                 "SELECT ID, Presentacion, Factor_Equivalencia, Costo_Unitario FROM producto_equivalencias WHERE Producto_ID = :id",
                 [':id' => $productoId]
             ) ?: [];
 
-            // Adjuntar precios de venta y márgenes (Paso 7)
+            // Adjuntar precios de venta y márgenes
             $producto['Precios'] = Consultar_PDO(
                 "SELECT ID, Nivel_Precio, Margen_Porcentaje, Precio_Venta FROM producto_precios WHERE Producto_ID = :id",
                 [':id' => $productoId]
             ) ?: [];
 
-            // Adjuntar atributos dinámicos (Paso 8)
+            // Adjuntar atributos dinámicos
             $producto['Atributos'] = Consultar_PDO(
                 "SELECT ID, Atributo_Nombre, Valor FROM producto_atributos WHERE Producto_ID = :id",
                 [':id' => $productoId]
             ) ?: [];
 
-            // Adjuntar ubicaciones en sucursales (Paso 9)
+            // Adjuntar ubicaciones en sucursales
             $producto['Ubicaciones'] = Consultar_PDO(
                 "SELECT ID, Sucursal_ID, Pasillo, Anaquel, Nivel FROM producto_ubicaciones WHERE Producto_ID = :id",
                 [':id' => $productoId]
             ) ?: [];
 
-            // Adjuntar existencias e inventario (Paso 10)
+            // Adjuntar existencias e inventario
             $producto['Existencias'] = Consultar_PDO(
                 "SELECT ID, Sucursal_ID, Stock_Actual, Stock_Minimo, Stock_Maximo FROM producto_existencias WHERE Producto_ID = :id",
                 [':id' => $productoId]
             ) ?: [];
 
-            // Adjuntar códigos de barras y SAT por empaque (Paso 11)
+            // Adjuntar códigos de barras y SAT por empaque
             $producto['Codigos_SAT'] = Consultar_PDO(
                 "SELECT ID, Presentacion, Codigo_Barras, Clave_SAT FROM producto_codigos_sat WHERE Producto_ID = :id",
                 [':id' => $productoId]
@@ -78,10 +84,12 @@ function Obtener_Todos_Productos_Completos(): array
         }
         unset($producto); // Romper la referencia del foreach
 
-        return $productos;
+        // 3. Retorno estandarizado mediante JsonResponse
+        JsonResponse::success("Productos obtenidos correctamente", $productos, 200);
+
     } catch (Throwable $e) {
         error_log("Error crítico al obtener el listado completo de productos: " . $e->getMessage());
-        return [];
+        JsonResponse::error("Ocurrió un error inesperado al consultar los productos.", null, 500);
     }
 }
 

@@ -9,6 +9,7 @@
     include_once __DIR__ . '/../include/include.php';  
     include_once __DIR__ . '/../include/script.php';
     include_once __DIR__ . '/../include/modal/script.php';
+
     ?>
 </head>
 
@@ -20,6 +21,7 @@
             include_once __DIR__ . "/../include/menu/menu.php";
             include_once __DIR__ . "/../include/menu/lateral.php";
             include_once __DIR__ . "/../include/menu/sesion.php";
+            include_once __DIR__ . '/../include/menu/script.php';
             ?>
         </div>
         <div class="w-p-100 h-calc-100-60">

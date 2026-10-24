@@ -42,8 +42,7 @@ function Gestionar_Variables_Sistema(array $datos): void {
             JsonResponse::error('No hay una sesión activa. Por favor, inicia sesión nuevamente.', null, 401);
         }
 
-        // 4. Validar permisos usando el nombre de permiso correcto ('variables.editar')
-        if (!TienePermiso($pdo, 'variables.editar')) {
+        if (!TienePermiso($pdo, 'editar_variables')) {
             JsonResponse::error('No cuentas con los permisos necesarios para modificar las variables del sistema.', null, 403);
         }
 

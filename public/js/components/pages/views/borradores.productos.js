@@ -85,7 +85,7 @@ function RenderizarBorradores() {
     $contenedor.html(htmlBorradores);
 
     const total = window.borradores.length;
-    $contador.text(`${total} producto${total === 1 ? '' : 's'}`);
+    $contador.text(`${total} borrador${total === 1 ? '' : 'es'}`);
 }
 
 function EventosBorradores() {

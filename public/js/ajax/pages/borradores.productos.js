@@ -6,7 +6,7 @@ async function ObtenerBorradores() {
     try {
         MostrarCargando('Cargando borradores...', false);
 
-        const respuesta = await ajaxConParametros('../../../src/controllers/php/controllers/productos.php', {
+        const respuesta = await window.AjaxService.enviar('../../../src/controllers/php/controllers/productos.php', {
             accion: 'obtener_borradores'
         });
 
@@ -28,7 +28,7 @@ async function Eliminar_Borrador(id_borrador) {
     try {
         MostrarCargando('Eliminando borrador...', false);
 
-        const respuesta = await ajaxConParametros('../../../src/controllers/php/controllers/productos.php', {
+        const respuesta = await window.AjaxService.enviar('../../../src/controllers/php/controllers/productos.php', {
             accion: 'eliminar_borrador',
             borrador_id: id_borrador
         });
@@ -65,7 +65,7 @@ async function Eliminar_Borradores_Masivo(seleccion) {
 
         MostrarCargando('Eliminando borradores seleccionados...', false);
 
-        const respuesta = await ajaxConParametros('../../../src/controllers/php/controllers/productos.php', {
+        const respuesta = await window.AjaxService.enviar('../../../src/controllers/php/controllers/productos.php', {
             accion: 'eliminar_borradores_masivo',
             ids: seleccion
         });

@@ -38,19 +38,19 @@ ob_start();
                     <div class="row-gap-0 flex flex-column">
                         <label for="crear-cliente-input-nombre" class="block mb-1 fs-3 fw-600 pl-2">Nombre (s)</label>
                         <div class="flex items-center gap-2">
-                            <input type="text" name="nombre" class="w-p-100 h-40 input-mayus input-100" id="crear-cliente-input-nombre" placeholder="Nombre" autocomplete="off" maxlength="200">
+                            <input type="text" name="nombre" class="w-p-100 h-40 input-mayus input-100 input-alfanumerico" id="crear-cliente-input-nombre" placeholder="Nombre" autocomplete="off" maxlength="200">
                         </div>
                     </div>
                     <div class="row-gap-0 flex flex-column">
                         <label for="crear-cliente-input-apellido-paterno" class="block mb-1 fs-3 fw-600 pl-2">Apellido paterno</label>
                         <div class="flex items-center gap-2">
-                            <input type="text" name="apellido_paterno" class="w-p-100 h-40 input-mayus input-100" id="crear-cliente-input-apellido-paterno" placeholder="Apellido paterno" autocomplete="off" maxlength="200">
+                            <input type="text" name="apellido_paterno" class="w-p-100 h-40 input-mayus input-100 input-alfanumerico" id="crear-cliente-input-apellido-paterno" placeholder="Apellido paterno" autocomplete="off" maxlength="200">
                         </div>
                     </div>
                     <div class="row-gap-0 flex flex-column">
                         <label for="crear-cliente-input-apellido-materno" class="block mb-1 fs-3 fw-600 pl-2">Apellido materno</label>
                         <div class="flex items-center gap-2">
-                            <input type="text" name="apellido_materno" class="w-p-100 h-40 input-mayus input-100" id="crear-cliente-input-apellido-materno" placeholder="Apellido materno" autocomplete="off" maxlength="200">
+                            <input type="text" name="apellido_materno" class="w-p-100 h-40 input-mayus input-100 input-alfanumerico" id="crear-cliente-input-apellido-materno" placeholder="Apellido materno" autocomplete="off" maxlength="200">
                         </div>
                     </div>
                 </div>
@@ -70,9 +70,9 @@ ob_start();
                     <div class="row-gap-0 flex flex-column">
                         <label for="crear-cliente-input-rfc" class="block mb-1 fs-3 fw-600 pl-2">R.F.C.</label>
                         <div class="flex items-center gap-2">
-                            <input type="text" name="rfc" class="w-p-100 h-40 input-mayus" id="crear-cliente-input-rfc" placeholder="Ingresa el R.F.C." autocomplete="off" maxlength="13">
-                            <div class="flex items-center justify-between px-2" style="white-space: nowrap;">
-                                <span class="fs-3 fw-600 mr-2">R.F.C. genérico</span>
+                            <input type="text" name="rfc" class="w-p-100 h-40 input-mayus input-alfanumerico" id="crear-cliente-input-rfc" placeholder="Ingresa el R.F.C." autocomplete="off" maxlength="13">
+                            <div class="flex items-center justify-between px-2 flex flex-column " style="white-space: nowrap;" id="contenedor-check-rfc-generico">
+                                <span class="fs-2 fw-600 mr-2">Genérico</span>
                                 <label class="toggle-switch pointer mx-1">
                                     <input type="checkbox" id="cliente-input-rfc-generico">
                                     <div class="toggle-switch-background">
@@ -125,7 +125,7 @@ ob_start();
                     <div class="row-gap-0 flex flex-column">
                         <label for="crear-cliente-input-correo" class="block fw-500 mb-1 fs-3 fw-600 pl-2">Correo</label>
                         <div class="flex items-center gap-2">
-                            <input type="text" name="correo" class="w-p-100 h-40 input-mayus input-100" id="crear-cliente-input-correo" placeholder="Ingresa un correo electrónico" autocomplete="off" maxlength="200">
+                            <input type="text" name="correo" class="w-p-100 h-40 input-mayus input-100 input-correo" id="crear-cliente-input-correo" placeholder="Ingresa un correo electrónico" autocomplete="off" maxlength="200">
                         </div>
                         <span class="my-1 fw-600 text-danger fs-3" id="crear-cliente-span-correo"></span>
                     </div>

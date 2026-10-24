@@ -1,5 +1,5 @@
 /* =============================================
-    FABRICA DE CONTROLADORES DE SELECCIÓN (Optimizado)
+    FABRICA DE CONTROLADORES DE SELECCIÓN (Optimizado y Robusto)
 ============================================= */
 const CrearSeleccionController = (nombreControlador) => {
     const seleccionadas = new Set();
@@ -9,7 +9,6 @@ const CrearSeleccionController = (nombreControlador) => {
 
     const setConfig = (opciones = {}) => {
         let checkAll = opciones.checkAllId || null;
-        // Aseguramos que el ID del checkAll siempre tenga el '#' si se provee
         if (checkAll && !checkAll.startsWith('#') && !checkAll.startsWith('.')) {
             checkAll = '#' + checkAll;
         }
@@ -33,8 +32,10 @@ const CrearSeleccionController = (nombreControlador) => {
 
     const sincronizarDOM = () => {
         const root = config.scope instanceof jQuery ? config.scope[0] : config.scope;
+        if (!root) return;
+
         root.querySelectorAll(config.checkItemClass).forEach(check => {
-            const id = check.dataset.id;
+            const id = String(check.dataset.id || '');
             if (!id) return;
 
             const activo = seleccionadas.has(id);
@@ -51,8 +52,8 @@ const CrearSeleccionController = (nombreControlador) => {
     const actualizarCheckAll = () => {
         if (!config.checkAllId) return;
         const root = config.scope instanceof jQuery ? config.scope[0] : config.scope;
+        if (!root) return;
         
-        // Buscamos dentro del scope o en todo el documento de forma segura
         const checkAll = root.querySelector(config.checkAllId) || document.querySelector(config.checkAllId);
         const habilitados = root.querySelectorAll(`${config.checkItemClass}:not(:disabled)`);
         
@@ -63,20 +64,21 @@ const CrearSeleccionController = (nombreControlador) => {
             return;
         }
 
-        const todosSeleccionados = [...habilitados].every(c => seleccionadas.has(c.dataset.id));
-        const algunoSeleccionado = [...habilitados].some(c => seleccionadas.has(c.dataset.id));
+        const todosSeleccionados = [...habilitados].every(c => seleccionadas.has(String(c.dataset.id)));
+        const algunoSeleccionado = [...habilitados].some(c => seleccionadas.has(String(c.dataset.id)));
 
         checkAll.checked = todosSeleccionados;
-        // Opcional profesional: Estado intermedio (indeterminate) si hay algunos seleccionados pero no todos
         checkAll.indeterminate = algunoSeleccionado && !todosSeleccionados;
     };
 
     const seleccionarTodo = (marcar = true) => {
         const root = config.scope instanceof jQuery ? config.scope[0] : config.scope;
+        if (!root) return;
+
         const habilitados = root.querySelectorAll(`${config.checkItemClass}:not(:disabled)`);
         
         habilitados.forEach(check => {
-            const id = check.dataset.id;
+            const id = String(check.dataset.id || '');
             if (id) {
                 marcar ? seleccionadas.add(id) : seleccionadas.delete(id);
             }
@@ -97,7 +99,7 @@ const CrearSeleccionController = (nombreControlador) => {
             }
 
             e.stopPropagation();
-            const id = this.dataset.id;
+            const id = String(this.dataset.id || '');
             if (!id) return;
 
             const marcado = this.checked;
@@ -123,7 +125,7 @@ const CrearSeleccionController = (nombreControlador) => {
                 const check = this.querySelector(config.checkItemClass);
                 if (!check || check.disabled) return;
     
-                const id = check.dataset.id;
+                const id = String(check.dataset.id || '');
                 if (!id) return;
 
                 const nuevoEstado = !seleccionadas.has(id);
@@ -134,10 +136,9 @@ const CrearSeleccionController = (nombreControlador) => {
             }
         });
     
-        // 3. Check All (Corregido con delegación segura usando el selector con #)
+        // 3. Check All
         if (config.checkAllId) {
             $(document).off(`change${namespaceEventos}_all`).on(`change${namespaceEventos}_all`, config.checkAllId, function() {
-                // Validamos que el evento pertenezca al scope si se requiere
                 seleccionarTodo(this.checked);
             });
         }
@@ -158,7 +159,15 @@ const CrearSeleccionController = (nombreControlador) => {
             sincronizarDOM();
             notificar(null, false);
         },
-        existe: (id) => seleccionadas.has(id)
+        existe: (id) => seleccionadas.has(String(id)),
+        // Método seguro para inyectar IDs externos masivos normalizados a String
+        agregar: (id) => {
+            if (id !== undefined && id !== null && String(id).trim() !== '') {
+                seleccionadas.add(String(id));
+                sincronizarDOM();
+                notificar(String(id), true);
+            }
+        }
     };
 };
 
@@ -170,7 +179,7 @@ window.NavegacionTarjetasController = CrearSeleccionController('Navegacion');
     UI: ACTUALIZADOR DE CONTADORES (Optimizado)
 ============================================= */
 function ActualizarContadorGenerico(contenedor, controller) {
-    const $cont =$(contenedor);
+    const $cont = $(contenedor);
     const total = controller.total();
     
     if (total > 0) {

@@ -5,7 +5,7 @@ $(document).ready(async function () {
         // Ejecutamos ambas peticiones en paralelo
         let [localidades, sucursales] = await Promise.all([
             CargarJSON('../../../src/json/data/localidades.json'),
-            ajaxConParametros('../../../src/controllers/php/controllers/sucursales.php', {
+            window.AjaxService.enviar('../../../src/controllers/php/controllers/sucursales.php', {
                 accion: 'obtener_sucursales'
             })
         ]);
@@ -37,7 +37,7 @@ async function Guardar_Gestion_Sucursal(datosGuardar) {
     try {
         MostrarCargando('Procesando información...', false); 
 
-        const respuesta = await ajaxConParametros('../../../src/controllers/php/controllers/sucursales.php', {
+        const respuesta = await window.AjaxService.enviar('../../../src/controllers/php/controllers/sucursales.php', {
             accion: 'gestionar_sucursales',
             data: datosGuardar
         });

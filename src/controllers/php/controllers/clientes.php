@@ -31,6 +31,11 @@ $accionesPermitidas = [
     'obtener_clientes'         => 'Obtener_Clientes',
     'gestionar_cliente'=>'Gestionar_Cliente',
     'generar_codigo_cliente'=>'Generar_Codigo_Cliente',
+    'obtener_clientes_paginados'=>'Obtener_Clientes_Paginados',
+    'importar_clientes'=>'Importar_Clientes',
+    'eliminar_clientes'=>'Eliminar_Clientes',
+    'obtener_informacion_cliente'=>'Obtener_Informacion_Cliente',
+    'exportar_clientes'=>'Exportar_Clientes'
 ];
 
 // Ejecutar el despachador central

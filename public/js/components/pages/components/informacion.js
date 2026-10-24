@@ -1,4 +1,6 @@
+
 $.messenger.on('informacion', function(response) {
+    console.log(response)
     try {
         if (typeof MostrarCargando === 'function') {
             MostrarCargando('Obteniendo información del proceso...', false);
@@ -22,7 +24,6 @@ $.messenger.on('informacion', function(response) {
         }
     }
 });
-
 function Procesar_Resumen(data) {
     try {
         const payload = data || {};
@@ -56,65 +57,49 @@ function Procesar_Resumen(data) {
             $.each(processed, function (index, item) {
                 const idItem = (typeof item === 'object' && item !== null) ? (item.id || item.codigo || '---') : item;
                 const nombreItem = (typeof item === 'object' && item !== null) ? (item.nombre || item.titulo || item.descripcion || `Elemento #${idItem}`) : `Elemento #${item}`;
-                const etiquetaSecundaria = (typeof item === 'object' && item !== null && (item.sku || item.codigo)) ? `SKU: ${item.sku || item.codigo}` : `ID: ${idItem}`;
+                const etiquetaSecundaria = (typeof item === 'object' && item !== null && (item.sku || item.codigo)) ? `SKU: ${item.sku || item.codigo}` : `CÓDIGO: ${idItem}`;
 
                 const htmlExito = `
-                <div class="w-p-100 bg-white p-3 my-2 rounded-12 border border-slate-200 shadow-sm flex items-center justify-between gap-3 transition-all">
-                    <!-- Columna Izquierda: Información principal -->
-                    <div class="flex-1 flex items-center gap-3 min-w-140">
-                        <div class="w-40 h-40 rounded-8 bg-emerald-50 flex items-center justify-center shrink-0 text-emerald-600">
-                            <i class="vf-ic_fluent_checkmark_circle_24_filled fs-6"></i>
-                        </div>
+                <div class="w-p-100 bg-white p-4 my-3 rounded-16 border border-slate-100 shadow-xs hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-between gap-3 relative overflow-hidden">
                         <div class="flex flex-column justify-center">
-                            <span class="fw-700 text-slate-900 fs-2 mb-0.5">${nombreItem}</span>
-                            <span class="fw-500 text-slate-500 fs-1">${etiquetaSecundaria}</span>
+                            <span class="fw-700 text-brand-blue fs-2 mb-1">${nombreItem}</span>
+                            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-6 bg-slate-100 text-slate-600 fs-1 fw-600 w-fit">
+                                <i class="vf-ic_fluent_tag_24_regular fs-1 text-slate-400"></i> ${etiquetaSecundaria}
+                            </span>
                         </div>
-                    </div>
-                    <!-- Columna Derecha: Estado o fecha -->
-                    <div class="flex-1 flex items-center justify-end gap-2 text-right">
-                        <span class="badge-estado rounded-full py-1 px-3 fs-1 fw-600 bg-emerald-50 text-emerald-700 border border-emerald-200/60">Procesado</span>
-                    </div>
                 </div>`;
                 $contenedorProcesados.append(htmlExito);
             });
         } else {
             $contenedorProcesados.html(`
-                <div class="w-p-100 py-3 text-center text-slate-400 fs-1 italic">
-                    No hay elementos procesados exitosamente.
+                <div class="w-p-100 py-5 text-center text-slate-400 fs-1 italic bg-slate-50/70 rounded-14 border border-dashed border-slate-200">
+                    no hay elementos procesados exitosamente.
                 </div>
             `);
         }
 
-        // --- 4. RENDERIZAR FALLIDOS / ERRORES (Con tu estilo exacto solicitado) ---
+        // --- 4. RENDERIZAR FALLIDOS / ERRORES (Sin la etiqueta estricta de "Error") ---
         if (failed.length > 0) {
             $.each(failed, function (index, item) {
                 const idItem = (typeof item === 'object' && item !== null) ? (item.id || item.codigo || '---') : item;
                 const nombreItem = (typeof item === 'object' && item !== null) ? (item.nombre || item.titulo || `Elemento #${idItem}`) : `Elemento #${item}`;
-                const motivoError = (typeof item === 'object' && item !== null && item.reason) ? item.reason : 'Motivo de falla';
+                const motivoError = (typeof item === 'object' && item !== null && item.reason) ? item.reason : 'motivo de falla';
 
                 const htmlError = `
-                <div class="w-p-100 bg-white p-3 my-2 rounded-12 border border-slate-200 shadow-sm flex items-center justify-between gap-3 transition-all">
-                    <!-- Columna Izquierda: Información principal -->
-                    <div class="flex-1 flex items-center gap-3 min-w-140">
-                        <div class="w-40 h-40 rounded-8 bg-red-50 flex items-center justify-center shrink-0 text-red-600">
-                            <i class="vf-ic_fluent_warning_24_filled fs-6"></i>
+                <div class="w-p-100 bg-white p-4 my-3 rounded-16 border border-slate-100 shadow-xs hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-between gap-3 relative overflow-hidden">
+                        <div class="flex flex-column justify-center w-p-100">
+                            <span class="fw-700 text-brand-blue fs-2 mb-1">${nombreItem}</span>
+                            <span class="fw-500 text-red-600 fs-1 reason-error leading-relaxed bg-red-50/40 px-2.5 py-1 rounded-8 border border-red-100/60 flex items-center gap-1.5 w-fit">
+                                <i class="vf-ic_fluent_info_24_regular text-red-500"></i> ${motivoError}
+                            </span>
                         </div>
-                        <div class="flex flex-column justify-center">
-                            <span class="fw-700 text-slate-900 fs-2 mb-0.5">${nombreItem}</span>
-                            <span class="fw-500 text-red-600 fs-1 reason-error">${motivoError}</span>
-                        </div>
-                    </div>
-                    <!-- Columna Derecha: Estado o fecha -->
-                    <div class="flex-1 flex items-center justify-end gap-2 text-right">
-                        <span class="badge-estado rounded-full py-1 px-3 fs-1 fw-600 bg-red-50 text-red-700 border border-red-200/60">Error</span>
-                    </div>
                 </div>`;
                 $contenedorErrores.append(htmlError);
             });
         } else {
             $contenedorErrores.html(`
-                <div class="w-p-100 py-3 text-center text-slate-400 fs-1 italic">
-                    Sin errores registrados en este proceso.
+                <div class="w-p-100 py-5 text-center text-slate-400 fs-1 italic bg-slate-50/70 rounded-14 border border-dashed border-slate-200">
+                    sin errores registrados en este proceso.
                 </div>
             `);
         }
@@ -129,7 +114,7 @@ function Procesar_Resumen(data) {
         }
         console.error("Error al procesar resumen masivo:", error);
         if (typeof MostrarMensaje === 'function') {
-            MostrarMensaje('Ocurrió un error al procesar el resumen en pantalla.', false, false, false);
+            MostrarMensaje('ocurrió un error al procesar el resumen en pantalla.', false, false, false);
         }
     }
 }

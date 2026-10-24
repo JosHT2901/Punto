@@ -5,10 +5,10 @@ $(document).ready(async function () {
         const [localidadesData, regimenesData, listaClientes,numeroCliente] = await Promise.all([
             CargarJSON('../../../src/json/data/localidades.json'),
             CargarJSON('../../../src/json/data/regimenes.json'),
-            ajaxConParametros('../../../src/controllers/php/controllers/clientes.php', {
+            window.AjaxService.enviar('../../../src/controllers/php/controllers/clientes.php', {
                 accion: 'obtener_clientes'
             }),
-            ajaxConParametros('../../../src/controllers/php/controllers/clientes.php', {
+            window.AjaxService.enviar('../../../src/controllers/php/controllers/clientes.php', {
                 accion: 'generar_codigo_cliente'
             })
         ]);
@@ -128,7 +128,7 @@ async function Guardar_Gestion_Cliente() {
         // 7. Ejecutar petición AJAX de guardado / actualización
         MostrarCargando(idCliente ? 'Actualizando cliente...' : 'Guardando cliente...', false);
 
-        const respuesta = await ajaxConParametros('../../../src/controllers/php/controllers/clientes.php', datosCliente);
+        const respuesta = await window.AjaxService.enviar('../../../src/controllers/php/controllers/clientes.php', datosCliente);
 
         OcultarCargando();
 

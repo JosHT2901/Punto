@@ -22,14 +22,13 @@
             else if (target.contentWindow) {
                 win = target.contentWindow;
             } 
-            // 3. Búsqueda a través de jQuery
+            // 3. Búsqueda a través de jQuery (soporta iframe directo o contenedor modal que envuelve al iframe)
             else {
                 const $el =$(target);
                 if ($el.length > 0) {
-                    if ($el.is('iframe') &&$el[0].contentWindow) {
-                        win = $el[0].contentWindow;
-                    } else if ($el[0].contentWindow) {
-                        win = $el[0].contentWindow;
+                    let $iframe =$el.is('iframe') ? $el :$el.find('iframe');
+                    if ($iframe.length > 0 &&$iframe[0].contentWindow) {
+                        win = $iframe[0].contentWindow;
                     }
                 }
             }
@@ -50,15 +49,15 @@
         },
 
         /**
-         * Suscribe una función a una acción específica
+         * Suscribe una función a una acción específica evitando acumulaciones.
+         * Sobrescribe el callback anterior para la misma acción para mantener una única instancia activa.
          */
         on: function(action, callback) {
             if (typeof callback !== 'function') return this;
 
-            if (!_subscribers[action]) {
-                _subscribers[action] = [];
-            }
-            _subscribers[action].push(callback);
+            // Reemplazamos el arreglo con una única instancia para evitar que los mensajes se dupliquen o acumulen
+            _subscribers[action] = [callback];
+            
             return this; 
         },
 

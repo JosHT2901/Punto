@@ -56,8 +56,8 @@ function Gestionar_Sucursales(array $datos): void {
         $idSucursal = !empty($datos['id']) ? intval($datos['id']) : 0;
         $tipoOperacion = ($idSucursal > 0 || (isset($datos['tipo_operacion']) && $datos['tipo_operacion'] === 'editar')) ? 'editar' : 'crear';
 
-        // 5. Validar permisos usando la nomenclatura correcta de tu tabla permisos ('sucursales.crear' / 'sucursales.editar')
-        $permisoRequerido = ($tipoOperacion === 'editar') ? 'sucursales.editar' : 'sucursales.crear';
+      
+        $permisoRequerido = ($tipoOperacion === 'editar') ? 'editar_sucursales' : 'crear_sucursales';
         
         if (!TienePermiso($pdo, $permisoRequerido)) {
             JsonResponse::error('No cuentas con los permisos necesarios para realizar esta acción.', null, 403);

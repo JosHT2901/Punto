@@ -2,7 +2,7 @@
 
 async function ObtenerCategoriasAPI() {
     try {
-        const respuesta = await ajaxConParametros('../../../src/controllers/php/controllers/categorias.php', {
+        const respuesta = await window.AjaxService.enviar('../../../src/controllers/php/controllers/categorias.php', {
             accion: 'obtener_categorias'
         });
         return respuesta?.data || [];
@@ -14,7 +14,7 @@ async function ObtenerCategoriasAPI() {
 
 async function ObtenerMarcasAPI() {
     try {
-        const respuesta = await ajaxConParametros('../../../src/controllers/php/controllers/marcas.php', {
+        const respuesta = await window.AjaxService.enviar('../../../src/controllers/php/controllers/marcas.php', {
             accion: 'obtener_marcas'
         });
         return respuesta?.data || [];
@@ -26,7 +26,7 @@ async function ObtenerMarcasAPI() {
 
 async function ObtenerSkuAPI() {
     try {
-        const respuesta = await ajaxConParametros('../../../src/controllers/php/controllers/codigos.php', {
+        const respuesta = await window.AjaxService.enviar('../../../src/controllers/php/controllers/codigos.php', {
             accion: 'generar_sku'
         });
         return respuesta?.data || '';
@@ -38,7 +38,7 @@ async function ObtenerSkuAPI() {
 
 async function ObtenerImpuestosAPI() {
     try {
-        const respuesta = await ajaxConParametros('../../../src/controllers/php/controllers/impuestos.php', {
+        const respuesta = await window.AjaxService.enviar('../../../src/controllers/php/controllers/impuestos.php', {
             accion: 'obtener_esquemas_fiscales'
         });
         return respuesta?.data || [];
@@ -50,7 +50,7 @@ async function ObtenerImpuestosAPI() {
 
 async function ObtenerSucursalesAPI() {
     try {
-        const respuesta = await ajaxConParametros('../../../src/controllers/php/controllers/sucursales.php', {
+        const respuesta = await window.AjaxService.enviar('../../../src/controllers/php/controllers/sucursales.php', {
             accion: 'obtener_sucursales'
         });
         return respuesta?.data || [];
@@ -62,7 +62,7 @@ async function ObtenerSucursalesAPI() {
 
 async function ObtenerAtributosAPI() {
     try {
-        const respuesta = await ajaxConParametros('../../../src/controllers/php/controllers/categorias.php', {
+        const respuesta = await window.AjaxService.enviar('../../../src/controllers/php/controllers/categorias.php', {
             accion: 'obtener_atributos'
         });
         return respuesta?.data || [];
@@ -74,7 +74,7 @@ async function ObtenerAtributosAPI() {
 
 async function ObtenerProductosAPI() {
     try {
-        const respuesta = await ajaxConParametros('../../../src/controllers/php/controllers/productos.php', {
+        const respuesta = await window.AjaxService.enviar('../../../src/controllers/php/controllers/productos.php', {
             accion: 'obtener_productos_completos'
         });
         return respuesta?.data || [];
@@ -85,7 +85,7 @@ async function ObtenerProductosAPI() {
 }
 async function ObtenerAjustesAPI() {
     try {
-        const respuesta = await ajaxConParametros('../../../src/controllers/php/controllers/ajustes.php', {
+        const respuesta = await window.AjaxService.enviar('../../../src/controllers/php/controllers/ajustes.php', {
             accion: 'obtener_variables'
         });
 
@@ -134,7 +134,7 @@ async function CargarDatosIniciales(dispararEvento = true) {
 
         // Si hay un ID de borrador en la URL, añadimos la promesa para obtenerlo al final del arreglo
         if (IdBorrador) {
-            const promesaBorrador = ajaxConParametros('../../../src/controllers/php/controllers/productos.php', {
+            const promesaBorrador = window.AjaxService.enviar('../../../src/controllers/php/controllers/productos.php', {
                 accion: 'obtener_detalle_borrador',
                 id_borrador: IdBorrador
             });
@@ -242,7 +242,7 @@ async function Generar_Codigo_Barras() {
     try {
         MostrarCargando('Generando código...', false);
         
-        const respuesta = await ajaxConParametros('../../../src/controllers/php/controllers/codigos.php', {
+        const respuesta = await window.AjaxService.enviar('../../../src/controllers/php/controllers/codigos.php', {
             accion: 'generar_codigo_barras'
         });
         console.log(respuesta)
@@ -307,7 +307,7 @@ async function Guardar_Gestion_Producto(payload) {
         }
 
         // 6. Ejecutar la petición utilizando la función XHR nativa pura
-        const respuesta = await ajaxConParametrosXHR(
+        const respuesta = await window.AjaxService.enviarXHR(
             '../../../src/controllers/php/controllers/productos.php', 
             formData, 
             true // esFormData = true (omite $.param y evita que jQuery toque los binarios)
@@ -416,7 +416,7 @@ async function Guardar_Borrador_Producto() {
         }
 
         // 3. Enviamos los datos junto con el ID del borrador limpio
-        const respuesta = await ajaxConParametros('../../../src/controllers/php/controllers/productos.php', {
+        const respuesta = await window.AjaxService.enviar('../../../src/controllers/php/controllers/productos.php', {
             accion: 'guardar_borrador',
             borrador_id: idBorradorActual, 
             data: payloadBorrador

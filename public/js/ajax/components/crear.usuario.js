@@ -3,7 +3,7 @@ $(document).ready(async function () {
     try {
         MostrarCargando('Obteniendo información...', false);
 
-        let respuesta = await ajaxConParametros('../../../src/controllers/php/controllers/usuarios.php', {
+        let respuesta = await window.AjaxService.enviar('../../../src/controllers/php/controllers/usuarios.php', {
             accion: 'obtener_usuarios'
         });
 
@@ -45,7 +45,7 @@ $("#crear-usuario-boton-generar-usuario").on('click', async function(e) {
     };
 
     try {
-        const respuesta = await ajaxConParametros('../../../src/controllers/php/controllers/usuarios.php', {
+        const respuesta = await window.AjaxService.enviar('../../../src/controllers/php/controllers/usuarios.php', {
             accion: 'generar_nombre_usuario',
             data: datosEnvio
         });
@@ -110,7 +110,7 @@ async function Guardar_Informacion_Usuario() {
     try {
         MostrarCargando('Procesando información...', false); 
 
-        const respuesta = await ajaxConParametros('../../../src/controllers/php/controllers/usuarios.php', {
+        const respuesta = await window.AjaxService.enviar('../../../src/controllers/php/controllers/usuarios.php', {
             accion: 'gestionar_usuario',
             data: datosEnvio
         });

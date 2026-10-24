@@ -21,9 +21,16 @@ function MostrarCargando(texto = 'Cargando...', transparencia = true) {
  * Quita el modal de carga de forma segura asegurando la transición
  */
 function OcultarCargando() {
-    // Si tu ModalAPI permite cerrar de forma limpia, ejecutamos directo o validamos la instancia
     try {
-        ModalAPI.cerrar();
+        if (typeof ModalAPI !== 'undefined' && typeof ModalAPI.cerrar === 'function') {
+            ModalAPI.cerrar();
+        }
+        
+        // Validar si existe el elemento antes de removerlo
+        const $contenedorCarga = $("#contenedor-carga");
+        if ($contenedorCarga.length) {
+            $contenedorCarga.remove();
+        }
     } catch (e) {
         console.log("Error al cerrar modal de carga:", e);
     }

@@ -63,7 +63,7 @@ ob_start();
             <div class="h-40 flex rounded-md bg-warning-soft justify-center items-center fw-600 text-warning shrink-0 mb-1">
                 <span>Errores</span>
             </div>
-            <div class="flex-1 overflow-auto custom-scroll" id="seccion-errores-lista" style="max-height:200px>
+            <div class="flex-1 overflow-auto custom-scroll" id="errores-lista" style="max-height:200px">
                
             </div>
         </div>
@@ -77,4 +77,4 @@ $contenido_componente = ob_get_clean();
 // 4. Llamamos a nuestro layout especializado para componentes
 include_once __DIR__ . '/../layouts/componente.php';
 ?>
-<script src="../../../public/js/components/pages/components/informacion.js" defer></script>
+<script src="../../../public/js/components/pages/components/informacion.js"></script>

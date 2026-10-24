@@ -50,8 +50,8 @@ function Eventos_Pagina_Identificacion() {
     $("#boton-scan-codigo").off('click').on('click', function (e) {
         CrearVentanaIframe(
             'Escanear código',
-            'barcode.php',
-            '450px',
+            '../components/barcode.php',
+            '460px',
             true,
             true
         );
@@ -385,8 +385,8 @@ function Eventos_Pagina_Claves() {
             // Abrimos la ventana iframe del escáner
             CrearVentanaIframe(
                 'Escanear código',
-                'barcode.php',
-                '450px',
+                '../components/barcode.php',
+                '460px',
                 true,
                 true
             );

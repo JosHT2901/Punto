@@ -128,14 +128,12 @@ const InputService = {
         });
     },
 
-    /**
-     * Permite letras, números y espacios (limpia espacios múltiples)
-     */
     alfanumericoConEspacios(selector) {
         $(document).on('input.inputServiceAlfaEspacios', selector, function () {
             const $el = $(this);
             let valor = $el.val();
-            let filtrado = valor.replace(/[^a-zA-Z0-9 ]/g, '').replace(/ {2,}/g, ' ');
+            // 💡 Se añadieron á, é, í, ó, ú, Á, É, Í, Ó, Ú, ñ y Ñ
+            let filtrado = valor.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ0-9 ]/g, '').replace(/ {2,}/g, ' ');
             if (filtrado.startsWith(' ')) {
                 filtrado = filtrado.trimStart();
             }

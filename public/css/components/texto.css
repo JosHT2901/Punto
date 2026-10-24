@@ -161,3 +161,11 @@ UTILIDADES DE TEXTO
 .ls-wide {
     letter-spacing: 0.1em !important;
 }
+
+.word-break-all {
+    word-break: break-word; /* Rompe solo si es necesario */
+    overflow-wrap: break-word;
+    white-space: normal;    /* Permite múltiples líneas */
+    line-height: 1.4;
+    display: block;
+}

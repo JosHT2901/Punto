@@ -2,7 +2,7 @@ $(document).ready(async function () {
     try {
         MostrarCargando('Obteniendo información...', false);
 
-        let respuesta = await ajaxConParametros('../../../src/controllers/php/controllers/marcas.php', {
+        let respuesta = await window.AjaxService.enviar('../../../src/controllers/php/controllers/marcas.php', {
             accion: 'obtener_marcas'
         });
         console.log(respuesta)
@@ -26,7 +26,7 @@ async function Guardar_Gestion_Marcas(datosGuardar) {
     try {
         MostrarCargando('Procesando información...', false); 
 
-        const respuesta = await ajaxConParametros('../../../src/controllers/php/controllers/marcas.php', {
+        const respuesta = await window.AjaxService.enviar('../../../src/controllers/php/controllers/marcas.php', {
             accion: 'gestionar_marcas',
             data: datosGuardar
         });

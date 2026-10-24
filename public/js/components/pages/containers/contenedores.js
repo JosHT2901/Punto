@@ -15,23 +15,37 @@ function Contenedor_No_Resultados(texto, contenedor) {
     const $contenedor =$(contenedor);
     if (!$contenedor.length) return;
 
-    $contenedor.empty();
+    // 1. Buscamos si el bloque de no resultados ya fue inyectado previamente
+    let $noResultados =$contenedor.find('#contenedor-no-resultados');
     const imagenSeleccionada = SeleccionarImagen();
-    
-    $contenedor.addClass('position-relative').html(`
-        <div class="w-p-100 h-calc-100-20 my-px-10 flex justify-center items-center position-absolute top-0 left-0" id="contenedor-no-resultados">
-            <div class="w-p-100 box-sizing px-px-5 flex justify-center items-center">
-                <div class="w-p-100">
-                    <div class="w-p-100 h-150 flex justify-center items-center">
-                        <img src="${imagenSeleccionada}" class="h-p-100" style="object-fit: contain;" alt="Sin resultados"/>
-                    </div>
-                    <div class="w-p-100 my-px-10 flex justify-center items-center fw-700">
-                        <span>${texto}</span>
+
+    if ($noResultados.length === 0) {
+        // 2. Si no existe, lo inyectamos dinámicamente una sola vez
+        $contenedor.addClass('position-relative');
+        
+        const htmlNoResultados = `
+            <div class="flex-1 w-p-100 h-p-100 my-px-10 flex justify-center items-center position-absolute top-0 left-0" id="contenedor-no-resultados" style="z-index: 5;">
+                <div class="w-p-100 box-sizing px-px-5 flex justify-center items-center">
+                    <div class="w-p-100">
+                        <div class="w-p-100 h-150 flex justify-center items-center">
+                            <img src="${imagenSeleccionada}" class="h-p-100 js-img-no-resultados" style="object-fit: contain;" alt="Sin resultados"/>
+                        </div>
+                        <div class="w-p-100 my-px-10 flex justify-center items-center fw-700">
+                            <span class="js-text-no-resultados">${texto}</span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    `);
+        `;
+        $contenedor.append(htmlNoResultados);
+    } else {
+        // 3. Si ya existe, actualizamos y quitamos el d-none
+        $noResultados.find('.js-img-no-resultados').attr('src', imagenSeleccionada);
+        $noResultados.find('.js-text-no-resultados').text(texto);$noResultados.removeClass('d-none');
+    }
+
+    // Ocultamos las tarjetas anteriores si las hubiera
+    $contenedor.find('.card-universal').addClass('d-none');
 }
 
 /**
@@ -43,7 +57,7 @@ function Contenedor_Agregar(texto, contenedor) {
     const $contenedor =$(contenedor);
     if (!$contenedor.length) return;
 
-    const basePath = typeof UI_CONFIG !== 'undefined' ? UI_CONFIG.ASSETS_PATH : '../../assets/icon/';
+    const basePath = typeof UI_CONFIG !== 'undefined' ? UI_CONFIG.IMAGE_PATH : '../../icons/';
     
     $contenedor.empty();$contenedor.addClass('position-relative');
 

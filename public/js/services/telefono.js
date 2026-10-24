@@ -16,17 +16,17 @@ const TelefonosUI = {
         mx: 10, // México
         us: 10, // Estados Unidos
         ca: 10, // Canadá
-        es: 9, // España
+        es: 9,  // España
         co: 10, // Colombia
         ar: 10, // Argentina
-        pe: 9, // Perú
-        cl: 9, // Chile
-        br: 11 // Brasil
+        pe: 9,  // Perú
+        cl: 9,  // Chile
+        br: 11  // Brasil
     },
 
     /**
      * Inicializa uno o varios selectores de teléfono
-     * @param {string|jQuery} selector - ID, clase o elemento jQuery
+     * @param {string|jQuery} selector ID, clase o elemento jQuery
      * @returns {Array|Object|null} Instancia(s) de intlTelInput o null
      */
     init: function (selector) {
@@ -56,20 +56,17 @@ const TelefonosUI = {
             // Guardar la instancia en el data del elemento
             $el.data('iti', iti);
 
+            // Bandera interna para evitar conflictos al setear valores programáticamente
+            $el.data('isSettingValue', false);
+
             // Función para actualizar el límite dinámico según el país seleccionado
             const aplicarLimitePais = () => {
                 const countryData = iti.getSelectedCountryData();
                 const iso = countryData && countryData.iso2 ? countryData.iso2.toLowerCase() : 'mx';
-                const maxLen = self.longitudesMaximas[iso] || 15; // 15 como respaldo general seguro
+                const maxLen = self.longitudesMaximas[iso] || 15;
 
-                // Aplicar atributo maxlength nativo de HTML y guardar referencia
-                $el.attr('maxlength', maxLen);
-
-                // Recortar el valor actual si excede el nuevo límite al cambiar de país
-                let valorLimpio = $el.val().replace(/\D/g, '');
-                if (valorLimpio.length > maxLen) {
-                    $el.val(valorLimpio.substring(0, maxLen));
-                }
+                // Margen holgado en el maxlength de HTML para permitir espacios/guiones del formateador
+                $el.attr('maxlength', maxLen + 5);
             };
 
             // Aplicar límite inicial
@@ -80,8 +77,11 @@ const TelefonosUI = {
                 aplicarLimitePais();
             });
 
-            // Filtrar letras y bloquear estrictamente al rebasar el límite mientras escribe
+            // Filtrar letras y validar longitud mientras el usuario escribe manualmente
             $el.off('input.itiPhone').on('input.itiPhone', function () {
+                // Si estamos asignando el valor por código, ignoramos el filtro estricto temporalmente
+                if ($el.data('isSettingValue')) return;
+
                 let valorLimpio = this.value.replace(/\D/g, '');
                 const countryData = iti.getSelectedCountryData();
                 const iso = countryData && countryData.iso2 ? countryData.iso2.toLowerCase() : 'mx';
@@ -89,9 +89,9 @@ const TelefonosUI = {
 
                 if (valorLimpio.length > maxLen) {
                     valorLimpio = valorLimpio.substring(0, maxLen);
+                    // Actualizamos el input con el corte exacto
+                    this.value = valorLimpio;
                 }
-
-                this.value = valorLimpio;
             });
 
             instancias.push(iti);
@@ -99,9 +99,10 @@ const TelefonosUI = {
 
         return $elements.length === 1 ? instancias[0] : instancias;
     },
+
     /**
      * Limpia el valor del teléfono y restablece el país por defecto
-     * @param {string|jQuery} selector - ID o clase del input
+     * @param {string|jQuery} selector ID o clase del input
      */
     limpiar: function (selector) {
         const $el = $(selector);
@@ -109,33 +110,44 @@ const TelefonosUI = {
 
         const iti = $el.data('iti');
         if (iti) {
-            // Borra el input y regresa al país por defecto inicial
             $el.val('');
             iti.setCountry(this.configDefault.initialCountry);
         } else {
             $el.val('');
         }
     },
+
     /**
-     * Establece el valor del teléfono y actualiza la bandera automáticamente
-     * @param {string|jQuery} selector - ID o clase del input
-     * @param {string} valor - El número (con o sin prefijo, ej. +521234567890)
+     * Establece el valor del teléfono y actualiza la bandera automáticamente sin recortes
+     * @param {string|jQuery} selector ID o clase del input
+     * @param {string} valor El número (con o sin prefijo, ej. +522461112233)
      */
     setValor: function (selector, valor) {
         const $el = $(selector);
         if (!$el.length) return;
 
+        const valorLimpio = valor ? valor.toString().trim() : '';
         const iti = $el.data('iti');
-        if (iti && valor) {
-            iti.setNumber(valor.toString().trim());
+
+        if (iti && valorLimpio) {
+            // Activamos el candado para evitar que el evento 'input' interfiera
+            $el.data('isSettingValue', true);
+
+            // Asignamos el número completo al plugin
+            iti.setNumber(valorLimpio);
+
+            // Liberamos el candado después de que el DOM procese el valor
+            setTimeout(() => {
+                $el.data('isSettingValue', false);
+            }, 100);
         } else {
-            $el.val(valor || '');
+            $el.val(valorLimpio);
         }
     },
 
     /**
      * Obtiene el número con formato internacional (ej. +521234567890)
-     * @param {string|jQuery} selector - ID o clase del input
+     * @param {string|jQuery} selector ID o clase del input
      * @returns {string}
      */
     getValor: function (selector) {
@@ -143,12 +155,12 @@ const TelefonosUI = {
         if (!$el.length) return '';
 
         const iti = $el.data('iti');
-        return iti ? iti.getNumber() : $el.val().trim();
+        return iti && iti.isValidNumber() ? iti.getNumber() : $el.val().trim();
     },
 
     /**
      * Valida si el número es correcto y cumple con la longitud exacta del país seleccionado
-     * @param {string|jQuery} selector - ID o clase del input
+     * @param {string|jQuery} selector ID o clase del input
      * @returns {boolean}
      */
     esValido: function (selector) {

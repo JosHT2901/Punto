@@ -24,7 +24,25 @@
 <script src="../../../public/js/services/timeline.js"></script>
 <script src="../../../public/js/services/memoria.js"></script>
 <script src="../../../public/js/services/seguridad.js"></script>
+<script src="../../../public/js/services/filtros.js"></script>
+<script src="../../../public/js/services/pages/CarouselButtonsNav.js"></script>
+<script src="../../../public/js/services/pages/CardTemplateService.js"></script>
+<script src="../../../public/js/services/pages/Opciones.js"></script>
+<script src="../../../public/js/services/permisos.js"></script>
+<script src="../../../public/js/services/paginador/PaginadorNumerosService.js"></script>
+<script src="../../../public/js/services/pages/SelectionBarService.js"></script>
+<script src="../../../public/js/services/VerticalSubmenuNav.js"></script>
+<script src="../../../public/js/services/buscador.js"></script>
+<script src="../../../public/js/services/UrlStateSyncService.js"></script>
+<script src="../../../public/js/services/DragDropService.js"></script>
+<script src="../../../public/js/services/ondaLoader.js"></script>
+
 <script src="../../../public/js/config/ui.config.js"></script>
+<script src="../../../public/js/services/FileIconService.js"></script>
+<script src="../../../public/js/services/FileUploadService.js"></script>
+<script src="../../../public/js/services/pages/EliminarService.js"></script>
+<script src="../../../public/js/services/pages/HabilitarService.js"></script>
+<script src="../../../public/js/services/pages/ExportacionService.js"></script>
 <script src="../../../public/js/components/pages/containers/images.js"></script>
 <script src="../../../public/js/ajax/components/helpers/codigo_postal.js"></script>
 <script src="../../../public/js/components/pages/containers/contenedores.js"></script>
@@ -34,6 +52,8 @@
 <script src="../../../public/js/utils/helpers.js"></script>
 
 <script src="../../../src/controllers/js/ajax.js"></script>
-
+<script src="../../../public/js/ajax/pages/main/init.js"></script>
+<script src="../../../public/js/components/pages/main/init.js"></script>
+<script src="../../../public/js/components/pages/main/funciones.js"></script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
