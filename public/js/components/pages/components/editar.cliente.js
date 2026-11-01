@@ -16,7 +16,7 @@ const esperarDatosIniciales = new Promise((resolve) => {
 $(document).ready(function () {
 
     InputService.aMayusculas('.input-mayus');
-    InputService.maxLength('.input-100', 200);
+    InputService.maxLength('.input-100', 100);
     InputService.alfanumericoConEspacios(".input-alfanumerico");
     InputService.correo(".input-correo");
 

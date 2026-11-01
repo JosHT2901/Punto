@@ -35,5 +35,16 @@ const ValidacionService = {
         if (!correo) return false;
         const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return regexEmail.test(correo.trim());
+    },
+    /**
+     * Valida la estructura de un Sitio Web / URL
+     * @param {string} url 
+     * @returns {boolean}
+     */
+    validarSitioWeb(url) {
+        if (!url) return false;
+        // Expresión regular que acepta URLs con http(s):// o directamente dominios (ej. ejemplo.com, www.sitio.com.mx/path)
+        const regexWeb = /^(https?:\/\/)?([\w\-]+(\.[\w\-]+)+)([\w\-.,@?^=%&amp;:/~+#]*[\w\-@?^=%&amp;/~+#])?$/i;
+        return regexWeb.test(url.trim());
     }
 };

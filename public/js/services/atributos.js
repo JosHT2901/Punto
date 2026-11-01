@@ -85,7 +85,8 @@ window.AtributoManager = (function ($) {
 
     $(document).ready(function () {
         if ($.messenger && typeof $.messenger.on === 'function') {
-            $.messenger.on('resultado_opcion', function (data, sourceWindow, origin) {
+            $.messenger.on('nombre_atributo', function (data, sourceWindow, origin) {
+                console.log(data)
                 if (!data || !data.opcion) return;
                 
                 if (typeof ModalAPI !== 'undefined' && ModalAPI.cerrar) {
@@ -132,6 +133,7 @@ window.AtributoManager = (function ($) {
                             label: 'Ingresa la opción',
                             placeholder: 'Ej. Escribe aquí...',
                             type_input: 'text',
+                            evento:'nombre_atributo',
                             mensajes: { vacio: 'Ingresa una opción válida', error: '' }
                         };
                         $.messenger.send(iframeElement, 'datos_iniciales', datos);

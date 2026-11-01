@@ -4,5 +4,11 @@
       "icono": "vf-ic_fluent_person_board_24_filled",
       "href": "/punto_1/public/pages/views/clientes.php",
       "modulo": "Clientes"
+    },
+    {
+      "titulo": "Usuarios",
+      "icono": "vf-ic_fluent_person_24_filled",
+      "href": "/punto_1/public/pages/views/usuarios.php",
+      "modulo": "Clientes"
     }
 ]

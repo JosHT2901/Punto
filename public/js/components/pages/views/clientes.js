@@ -205,9 +205,6 @@ function CargarClientes() {
                 console.error("Error al filtrar clientes:", error);
                 OcultarCargando();
                 MostrarMensaje('Ocurrió un error', false, false, false);
-                setTimeout(() => {
-                    ModalAPI.cerrar();
-                }, 1000);
             });
     } catch (error) {
         console.log(error);

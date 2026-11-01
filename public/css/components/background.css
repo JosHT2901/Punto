@@ -55,7 +55,10 @@
 
 /* Acentos / Etiquetas */
 .bg-option,
-.activo         { background-color: var(--btn-option-bg) !important; }
+.activo         {
+background-color: var(--btn-option-bg) !important; 
+color: var(--brand-600) !important;
+}
 .bg-indigo      { background-color: #6366f1 !important; }
 
 /* Hover Effects */

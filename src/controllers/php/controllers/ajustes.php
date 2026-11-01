@@ -30,7 +30,11 @@ $accion = trim($_POST['accion'] ?? '');
 $accionesPermitidas = [
     'obtener_variables'         => 'Obtener_Variables_Sistema',
     'guardar_variables'=>'Gestionar_Variables_Sistema',
-  
+    'obtener_informacion_empresa'=>'Obtener_Informacion_Empresa',
+    'guardar_informacion_empresa'=>'Guardar_Informacion_Empresa',
+    'gestionar_logo_empresa'=>'Gestionar_Logo_Empresa',
+    'obtener_logo_empresa'=>'Obtener_Logo_Empresa',
+    'eliminar_logo_empresa'=>'Eliminar_Logo_Empresa'
 ];
 
 // Ejecutar el despachador central

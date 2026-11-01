@@ -1,17 +1,37 @@
 window.FileViewer.registerModule({
     name: 'PDFModule',
     shouldHandle: function(file) {
-        return file.type.includes('pdf') || file.name.toLowerCase().endsWith('.pdf');
+        return (file.type && file.type.includes('pdf')) || /\.pdf$/i.test(file.name);
     },
-    init: function(file, $container,$toolbar, $headerActions, setRender) { // 1. Estilo del contenedor principal
-    $container.css({ 
+    init: function(file, $container, $toolbar, $headerActions, setRender) {
+        
+        // 1. Estilos unificados Google Material Design para PDF
+        if ($('#pdf-module-styles').length === 0) {
+            $('head').append(`
+                <style id="pdf-module-styles">
+                    .btn-google { 
+                        background: #3c4043; border: none; color: #e8eaed; cursor: pointer; display: flex; 
+                        align-items: center; justify-content: center; height: 36px; padding: 0 16px; border-radius: 18px; 
+                        font-size: 13px; font-weight: 500; gap: 8px; transition: background 0.2s ease, box-shadow 0.2s ease;
+                        box-shadow: 0 1px 2px 0 rgba(0,0,0,0.3), 0 1px 3px 1px rgba(0,0,0,0.15);
+                    }
+                    .btn-google:hover { background: #5f6368; box-shadow: 0 1px 3px 0 rgba(0,0,0,0.4), 0 4px 8px 3px rgba(0,0,0,0.15); }
+                    .btn-google-primary { background: #8ab4f8; color: #202124; }
+                    .btn-google-primary:hover { background: #aecbfa; }
+                    .btn-google-icon { width: 36px; padding: 0; border-radius: 50%; }
+                </style>
+            `);
+        }
+
+        // Estilo del contenedor principal
+        $container.css({ 
             'display': 'flex', 'flex-direction': 'column', 'align-items': 'center',
             'padding': '30px', 'overflow': 'auto', 'width': '100%', 'height': '100%', 'background': '#0f172a'
         });
         
         $container.html(`<canvas id="pdf-canvas" style="box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3); background: white; margin: 0 auto; border-radius: 8px; width: 90%; max-width: 900px; display: block;"></canvas>`);
     
-        // Carga asíncrona manejada de manera nativa sin bloquear la sintaxis del objeto
+        // Carga asíncrona manejada con PDF.js
         pdfjsLib.getDocument(file.url).promise.then(function(pdf) {
             let pageNum = 1;
             let zoomLevel = 1.0;
@@ -26,6 +46,7 @@ window.FileViewer.registerModule({
                 
                 pdf.getPage(pageNum).then(function(page) {
                     const containerWidth = $container.width() || 800;
+                    
                     const baseScale = (containerWidth * 0.85) / page.getViewport({ scale: 1, rotation: 0 }).width;
                     const viewport = page.getViewport({ scale: baseScale * zoomLevel, rotation: 0 });
                     
@@ -50,84 +71,106 @@ window.FileViewer.registerModule({
                 });
             };
 
-            // Botones de la cabecera (Descargar e Imprimir)
+            // Botones de la cabecera (Descargar e Imprimir) con estilo Google
             const createHeaderBtn = function(iconClass, title, action) {
-                return $('<button>', { title: title, html: `<i class="${iconClass}"></i>`, class: 'btn btn-option border border-slate-200/80 shadow-2xs rounded-8 px-2.5 py-1.5 text-slate-700 bg-white hover:bg-slate-50 flex items-center gap-1 fs-2' })
-                .on('click', action)
-                .appendTo($headerActions);
+                return $('<button>', { title: title, html: `<i class="icon fs-6 ${iconClass}"></i>`, class: 'btn-google btn-google-icon' })
+                    .on('click', action)
+                    .appendTo($headerActions);
             };
 
-            createHeaderBtn('vf-ic_fluent_arrow_download_24_regular', 'Descargar', function() { window.open(file.url, '_blank'); });
-            createHeaderBtn('vf-ic_fluent_print_24_regular', 'Imprimir', function() { window.print(); });
-
-            // 2. Estilo y limpieza de la Barra de herramientas inferior
-            $toolbar.empty().css({ 
-                'display': 'flex', 'justify-content': 'center', 'align-items': 'center', 
-                'gap': '15px', 'padding': '12px 24px', 
-                'border-top': '1px solid rgba(255, 255, 255, 0.1)', 'background': '#0f172a'
+            // Descarga segura mediante elemento temporal para evitar about:blank
+            createHeaderBtn('vf-ic_fluent_arrow_download_24_filled', 'Descargar', function() {
+                const link = document.createElement('a');
+                link.href = file.url;
+                link.download = file.name || 'documento.pdf';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
             });
-            
-            const createBtn = function(iconClass, title, action) {
-                return $('<button>', { title: title, html: `<i class="${iconClass}"></i>`, class: 'btn btn-option border border-slate-200/80 shadow-2xs rounded-8 px-3 py-2 text-slate-700 bg-white hover:bg-slate-50 flex items-center gap-1 fs-2 fw-600' })
-                .on('click', action);
+
+            createHeaderBtn('vf-ic_fluent_print_24_filled', 'Imprimir', function() { window.print(); });
+
+            // 2. Toolbar inferior expandida al 100% con estilo Google
+            $toolbar.empty().css({ 
+                'display': 'flex', 'justify-content': pdf.numPages > 1 ? 'space-between' : 'center', 'align-items': 'center', 
+                'padding': '14px 28px', 'width': '100%', 'box-sizing': 'border-box',
+                'background': '#202124', 'border-top': '1px solid #3c4043'
+            });
+
+            const createGoogleBtn = function(iconClass, text, action, isPrimary = false, isIconOnly = false) {
+                let className = isIconOnly ? 'btn-google btn-google-icon' : 'btn-google';
+                if (isPrimary) className += ' btn-google-primary';
+                const content = isIconOnly ? `<i class="icon fs-6 ${iconClass}"></i>` : `<i class="icon fs-6 ${iconClass}"></i><span>${text}</span>`;
+                
+                return $('<button>', { class: className, title: isIconOnly ? text : '' })
+                    .html(content)
+                    .on('click', action);
             };
-        
-            // 3. Grupo A: Navegación de páginas
-            const $navGroup =$('<div>', { class: 'nav-controls' })
-                .css({ 'display': 'flex', 'align-items': 'center', 'gap': '10px', 'padding-right': '15px', 'border-right': '1px solid rgba(255, 255, 255, 0.1)' })
-                .appendTo($toolbar);
-        
-            createBtn('vf-ic_fluent_chevron_left_24_regular', 'Página Anterior', function() { 
-                if(pageNum > 1) { pageNum--; render(); } 
-            }).appendTo($navGroup);
+
+            // 3. Grupo A: Navegación de páginas (Solo se muestra si el PDF tiene más de 1 página)
+            if (pdf.numPages > 1) {
+                const $navGroup = $('<div>', { class: 'nav-controls' })
+                    .css({ 'display': 'flex', 'align-items': 'center', 'gap': '12px' })
+                    .appendTo($toolbar);
+
+                createGoogleBtn('vf-ic_fluent_chevron_left_24_filled', 'Anterior', function() { 
+                    if(pageNum > 1) { pageNum--; render(); } 
+                }, false, true).appendTo($navGroup);
+                
+                // Input de número de página estilizado
+                $('<div>', { class: 'input-wrapper' })
+                    .css({ 'display': 'flex', 'align-items': 'center', 'gap': '8px', 'color': '#e8eaed', 'font-size': '13px' })
+                    .append(
+                        $('<input>', { id: 'page-input', type: 'number', value: pageNum })
+                        .css({ 'width': '55px', 'height': '32px', 'border': '1px solid #5f6368', 'border-radius': '6px', 'text-align': 'center', 'font-weight': '600', 'color': '#e8eaed', 'background': '#3c4043', 'outline': 'none' })
+                        .on('keydown', function(e) { 
+                            if (e.key === 'Enter') { 
+                                let v = parseInt(e.target.value); 
+                                if (v >= 1 && v <= pdf.numPages) { pageNum = v; render(); } 
+                            } 
+                        })
+                    )
+                    .append($('<span>', { class: 'text-slate-300' }).html('/ <span id="total-pages"></span>'))
+                    .appendTo($navGroup);
             
-            // Input de número de página
-            $('<div>', { class: 'input-wrapper' })
-                .css({ 'display': 'flex', 'align-items': 'center', 'gap': '6px', 'color': '#f8fafc' })
-                .append(
-                    $('<input>', { id: 'page-input', type: 'number', value: pageNum, class: 'border rounded-6 p-1 text-center font-semibold text-slate-900 bg-white' })
-                    .css({ 'width': '55px', 'border': '1px solid #cbd5e1', 'outline': 'none' })
-                    .on('keydown', function(e) { 
-                        if (e.key === 'Enter') { 
-                            let v = parseInt(e.target.value); 
-                            if (v >= 1 && v <= pdf.numPages) { pageNum = v; render(); } 
-                        } 
-                    })
-                )
-                .append($('<span>', { class: 'fw-600 text-slate-300 fs-2' }).html('/ <span id="total-pages"></span>'))
-                .appendTo($navGroup);
+                createGoogleBtn('vf-ic_fluent_chevron_right_24_filled', 'Siguiente', function() { 
+                    if(pageNum < pdf.numPages) { pageNum++; render(); } 
+                }, false, true).appendTo($navGroup);
+            }
         
-            createBtn('vf-ic_fluent_chevron_right_24_regular', 'Página Siguiente', function() { 
-                if(pageNum < pdf.numPages) { pageNum++; render(); } 
-            }).appendTo($navGroup);
-        
-            // Grupo B: Controles de Zoom
-            const $zoomGroup =$('<div>', { class: 'zoom-controls' })
-                .css({ 'display': 'flex', 'align-items': 'center', 'gap': '8px' })
+            // Grupo B: Controles de Zoom (siempre disponibles)
+            const $zoomGroup = $('<div>', { class: 'zoom-controls' })
+                .css({ 'display': 'flex', 'align-items': 'center', 'gap': '10px' })
                 .appendTo($toolbar);
         
-            createBtn('vf-ic_fluent_zoom_out_24_regular', 'Alejar Zoom', function() { 
+            createGoogleBtn('vf-ic_fluent_zoom_out_24_filled', 'Alejar', function() { 
                 zoomLevel = Math.max(0.5, zoomLevel - 0.2); 
                 render(); 
-            }).appendTo($zoomGroup);
+            }, false, true).appendTo($zoomGroup);
 
-            createBtn('vf-ic_fluent_arrow_clockwise_24_regular', 'Restaurar Zoom', function() { 
+            createGoogleBtn('vf-ic_fluent_arrow_clockwise_24_filled', 'Restaurar', function() { 
                 zoomLevel = 1.0; 
                 render(); 
-            }).appendTo($zoomGroup);
+            }, true).appendTo($zoomGroup);
 
-            createBtn('vf-ic_fluent_zoom_in_24_regular', 'Acercar Zoom', function() { 
+            createGoogleBtn('vf-ic_fluent_zoom_in_24_filled', 'Acercar', function() { 
                 zoomLevel = Math.min(3.0, zoomLevel + 0.2); 
                 render(); 
-            }).appendTo($zoomGroup);$container.data('render', render);
+            }, false, true).appendTo($zoomGroup);
+
             render();
 
-            // Limpieza automática al cerrar el visor
+            // Limpieza estricta al cerrar el visor
             setRender(function() {
-                if (canvas) {
-                    const ctx = canvas.getContext('2d');
-                    if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
-                }
+                try {
+                    if (canvas) {
+                        const ctx = canvas.getContext('2d');
+                        if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    }
+                } catch(e) {}
+                
+                if ($toolbar) $toolbar.empty().removeAttr("style");
+                if ($container) $container.empty();
             });
         });
     }

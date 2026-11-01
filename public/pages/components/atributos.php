@@ -88,5 +88,6 @@ $contenido_componente = ob_get_clean();
 
 include_once __DIR__ . '/../layouts/componente.php';
 ?>
+
 <script src="../../../public/js/components/pages/components/nuevo.producto/atributos.js" defer></script>
 <script src="../../../public/js/ajax/components/helpers/atributos.js"></script>

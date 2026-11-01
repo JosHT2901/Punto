@@ -1,11 +1,20 @@
 <?php 
 /**
- * Obtiene el listado completo de usuarios registrados en el sistema.
+ * Obtiene el listado completo de usuarios registrados en el sistema, 
+ * marcando con una bandera (es_usuario_actual) al usuario que tiene la sesión activa.
  * 
- * @return array Arreglo asociativo con los datos de los usuarios (sin contraseñas).
+ * @return array Arreglo asociativo con los datos de los usuarios.
  */
 function Obtener_Usuarios(): array {
     try {
+        // Asegurarse de que la sesión esté iniciada
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        // Extraemos el ID del usuario actual basándonos en tu estructura de sesión
+        $usuarioActualId = (int)($_SESSION['usuario']['id'] ?? $_SESSION['usuario_id'] ?? $_SESSION['ID'] ?? 0);
+
         $sql = "SELECT 
                     ID, 
                     nombre, 
@@ -20,23 +29,26 @@ function Obtener_Usuarios(): array {
                     nombre_usuario, 
                     Fecha_registro, 
                     Ultima_modificacion, 
-                    Habilitado 
+                    Habilitado,
+                    CASE 
+                        WHEN ID = $usuarioActualId THEN 1 
+                        ELSE 0 
+                    END AS es_usuario_actual
                 FROM usuarios 
                 ORDER BY ID DESC";
 
-        // Delegamos la ejecución a nuestro helper robusto Consultar_PDO
+        // Ejecutamos la consulta con tu helper
         $usuarios = Consultar_PDO($sql);
 
         // Verificamos que el resultado sea un arreglo válido
         return is_array($usuarios) ? $usuarios : [];
 
     } catch (Throwable $e) {
-        // Registramos el error internamente y retornamos un array vacío para no romper la interfaz
+        // Registramos el error internamente y retornamos un array vacío
         error_log("Error crítico al obtener usuarios: " . $e->getMessage());
         return [];
     }
 }
-
 /**
  * Genera un nombre de usuario aleatorio y limpio basado en un arreglo de parámetros ($params).
  * 
@@ -230,6 +242,166 @@ function Gestionar_Usuario($data) {
             $respuestaAmigable = 'El correo, nombre de usuario, teléfono, CURP o RFC ya se encuentran registrados.';
         }
         JsonResponse::error($respuestaAmigable, $mensajeError, 500);
+    }
+}
+
+function Obtener_Usuarios_Paginados(array $params = []): void {
+    try {
+        // Aseguramos que la sesión esté activa para leer variables globales ($_SESSION)
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        // Detectamos el ID del usuario actual desde la sesión (ajusta la llave según tu estructura de login, ej: 'user_id', 'id_usuario', 'id')
+        $usuarioActualId = $_SESSION['user_id'] ?? $_SESSION['id_usuario'] ?? $_SESSION['id'] ?? null;
+
+        // Unificamos si los filtros vienen anidados o planos desde el request JS
+        if (isset($params['filtros']) && is_array($params['filtros'])) {
+            $params = array_merge($params, $params['filtros']);
+        }
+
+        // Array para acumular todas las condiciones SQL personalizadas
+        $condicionesExtra = [];
+
+        // 1. Procesamiento de Estado / Habilitado
+        if (isset($params['Habilitado']) || isset($params['habilitado'])) {
+            $estadoVal = $params['Habilitado'] ?? $params['habilitado'];
+            if ($estadoVal !== '' && $estadoVal !== null) {
+                $condicionesExtra[] = "Habilitado = " . (int)$estadoVal;
+            }
+            unset($params['Habilitado'], $params['habilitado']);
+        }
+
+        // 2. Procesamiento de Verificación de Correo
+        if (isset($params['f-correo-verificado']) || isset($params['correo_verificado'])) {
+            $verifVal = $params['f-correo-verificado'] ?? $params['correo_verificado'];
+            if ($verifVal !== '' && $verifVal !== null) {
+                $condicionesExtra[] = "correo_verificado = " . (int)$verifVal;
+            }
+            unset($params['f-correo-verificado'], $params['correo_verificado']);
+        }
+
+        // Inyectamos todas las condiciones acumuladas en custom_where
+        $customWhereSQL = "";
+        if (!empty($condicionesExtra)) {
+            $customWhereSQL = implode(" AND ", $condicionesExtra);
+            $params['custom_where'] = $customWhereSQL;
+        }
+
+        // 3. Whitelists de seguridad adaptadas a la tabla usuarios
+        $configuracionSeguridad = [
+            'columnas_busqueda' => [
+                'nombre', 
+                'apellido_paterno', 
+                'apellido_materno', 
+                'nombre_usuario', 
+                'correo', 
+                'rfc', 
+                'curp',
+                'telefono'
+            ],
+            'filtros_permitidos' => [],
+            'columnas_orden' => [
+                'ID', 
+                'nombre', 
+                'apellido_paterno', 
+                'nombre_usuario', 
+                'correo', 
+                'Fecha_registro'
+            ]
+        ];
+
+        // 4. Ejecutamos la paginación normal para la tabla usuarios
+        $resultado = PaginacionService::obtenerPaginados('usuarios', $params, $configuracionSeguridad);
+
+        if ($resultado['exito']) {
+            // 🌟 4.1. Enriquecemos cada usuario con su 'nombre_completo' y formato de verificación
+            if (!empty($resultado['datos']) && is_array($resultado['datos'])) {
+                foreach ($resultado['datos'] as &$usuario) {
+                    $partes = [
+                        $usuario['nombre'] ?? '',
+                        $usuario['apellido_paterno'] ?? '',
+                        $usuario['apellido_materno'] ?? ''
+                    ];
+                    // Filtramos valores vacíos y unimos con espacio
+                    $usuario['nombre_completo'] = trim(implode(' ', array_filter($partes)));
+                    $verificado = (int)($usuario['correo_verificado'] ?? 0);
+                    $usuario['correo_verificado_fmt'] = $verificado === 1 ? 'VERIFICADO' : 'NO VERIFICADO';
+                    
+                    // Indicador bandera útil en frontend si este registro es el usuario logueado actual
+                    if ($usuarioActualId && (string)$usuario['ID'] === (string)$usuarioActualId) {
+                        $usuario['es_usuario_actual'] = true;
+                    } else {
+                        $usuario['es_usuario_actual'] = false;
+                    }
+                }
+                unset($usuario);
+            }
+
+            // 🌟 5. OBTENER EL UNIVERSO COMPLETO DE IDS FILTRADOS DE TODAS LAS PÁGINAS
+            $todosLosIds = [];
+            
+            try {
+                // Construimos la consulta independiente para extraer todos los IDs filtrados
+                $sqlTodosIds = "SELECT ID FROM usuarios";
+                $whereParts = [];
+
+                if (!empty($customWhereSQL)) {
+                    $whereParts[] = $customWhereSQL;
+                }
+
+                $terminoBusqueda = $params['buscar'] ?? $params['search'] ?? '';
+                if (!empty($terminoBusqueda)) {
+                    $terminoEscapado = '%' . addslashes($terminoBusqueda) . '%';
+                    $whereParts[] = "(nombre LIKE '$terminoEscapado' OR apellido_paterno LIKE '$terminoEscapado' OR apellido_materno LIKE '$terminoEscapado' OR nombre_usuario LIKE '$terminoEscapado' OR correo LIKE '$terminoEscapado' OR rfc LIKE '$terminoEscapado' OR curp LIKE '$terminoEscapado' OR telefono LIKE '$terminoEscapado')";
+                }
+
+                if (!empty($whereParts)) {
+                    $sqlTodosIds .= " WHERE " . implode(" AND ", $whereParts);
+                }
+
+                // Forma robusta de obtener la conexión PDO desde tus clases de servicio o base de datos
+                $conexionDb = null;
+                if (class_exists('Database') && method_exists('Database', 'getConnection')) {
+                    $conexionDb = Database::getConnection();
+                } elseif (class_exists('Conexion') && method_exists('Conexion', 'conectar')) {
+                    $conexionDb = Conexion::conectar();
+                } elseif (isset($GLOBALS['pdo']) && $GLOBALS['pdo'] instanceof PDO) {
+                    $conexionDb = $GLOBALS['pdo'];
+                }
+
+                if ($conexionDb) {
+                    $stmtIds = $conexionDb->query($sqlTodosIds);
+                    if ($stmtIds) {
+                        $todosLosIds = array_map('strval', $stmtIds->fetchAll(PDO::FETCH_COLUMN));
+                    }
+                }
+            } catch (Throwable $exQuery) {
+                error_log("Aviso al consultar todos los IDs globales de usuarios: " . $exQuery->getMessage());
+            }
+
+            // Fallback de seguridad: Si la consulta global falló, extraemos los IDs del resultado paginado actual
+            if (empty($todosLosIds) && !empty($resultado['datos'])) {
+                $todosLosIds = array_map(function($row) { 
+                    return strval($row['ID'] ?? $row['id'] ?? ''); 
+                }, $resultado['datos']);
+            }
+
+            // 6. Respuesta exitosa incluyendo el ID del usuario actual en la metadata de la respuesta
+            JsonResponse::success("Usuarios obtenidos correctamente", [
+                'datos' => $resultado['datos'],
+                'paginacion' => $resultado['paginacion'],
+                'todos_los_ids' => $todosLosIds,
+                'usuario_actual_id' => $usuarioActualId ? (string)$usuarioActualId : null, // <--- ID del usuario en sesión
+                'params' => $params
+            ]);
+        } else {
+            JsonResponse::error("Ocurrió un error al consultar los usuarios", null, 500);
+        }
+
+    } catch (Throwable $e) {
+        error_log("Error en Obtener_Usuarios_Paginados: " . $e->getMessage());
+        JsonResponse::error("Ocurrió un error al obtener los usuarios", $e->getMessage(), 500);
     }
 }
 ?>

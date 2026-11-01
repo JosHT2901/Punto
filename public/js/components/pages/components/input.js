@@ -1,4 +1,6 @@
 $.messenger.on('datos_iniciales', function (data, sourceWindow, origin) {
+    MostrarCargando('Obteniendo información...',false)
+    const mayus = data.mayus ?? true;
     if (!data) return;
 
     // Asignamos textos dinámicos con respaldo por defecto
@@ -9,7 +11,15 @@ $.messenger.on('datos_iniciales', function (data, sourceWindow, origin) {
     if (data.placeholder) {
         $("#input-nombre").attr('placeholder', data.placeholder);
     }
-    InputService.aMayusculas('.input-mayus');
+    if(data.valor)
+    {
+        $("#input-nombre").val(data.valor);
+    }
+    if(mayus)
+    {
+        InputService.aMayusculas('.input-mayus');
+    }
+
     InputService.maxLength('.input-100',100)
     // Inicialización según el tipo de input solicitado
     if (data.type_input) {
@@ -37,7 +47,7 @@ $.messenger.on('datos_iniciales', function (data, sourceWindow, origin) {
         $("#input-nombre").data('msg-vacio', data.mensajes.vacio);
         $("#input-nombre").data('msg-error', data.mensajes.error);
     }
-
+    OcultarCargando()
     // Manejo del evento click en el botón siguiente (usamos .off().on() para evitar duplicados)
     $('#boton-siguiente').off('click').on('click', function (e) {
         e.preventDefault();
@@ -57,7 +67,7 @@ $.messenger.on('datos_iniciales', function (data, sourceWindow, origin) {
         // Enviamos el resultado correcto hacia la ventana padre
         $.messenger.send(
             window.parent,
-            'resultado_opcion', // Nombre del evento ajustado al contexto actual
+            data.evento, // Nombre del evento ajustado al contexto actual
             { 
                 opcion: valorIngresado 
             },

@@ -19,7 +19,7 @@ $.messenger.on('resultado_codigo_postal', function (data, sourceWindow, origin) 
 });
 $(document).ready(function () {
     InputService.aMayusculas('.input-mayus');
-    InputService.maxLength('.input-100',200);
+    InputService.maxLength('.input-100',100);
     InputService.alfanumericoConEspacios(".input-alfanumerico")
     InputService.correo(".input-correo")
     // Función que inicializa tu select cuando ya existan los datos

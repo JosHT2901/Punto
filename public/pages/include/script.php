@@ -15,6 +15,7 @@
 <script src="../../../public/js/services/select.js"></script>
 <script src="../../../public/js/services/mensaje.js"></script>
 <script src="../../../public/js/services/seleccion.js"></script>
+<script src="../../../public/js/services/seleccion_sin_checks.js"></script>
 <script src="../../../public/js/services/tooltip.js"></script>
 <script src="../../../public/js/services/tabla/simple.js"></script>
 <script src="../../../public/js/services/ImageGalleryManager.js"></script>
@@ -40,6 +41,7 @@
 <script src="../../../public/js/config/ui.config.js"></script>
 <script src="../../../public/js/services/FileIconService.js"></script>
 <script src="../../../public/js/services/FileUploadService.js"></script>
+<script src="../../../public/js/services/Recortador.js"></script>
 <script src="../../../public/js/services/pages/EliminarService.js"></script>
 <script src="../../../public/js/services/pages/HabilitarService.js"></script>
 <script src="../../../public/js/services/pages/ExportacionService.js"></script>
@@ -55,5 +57,29 @@
 <script src="../../../public/js/ajax/pages/main/init.js"></script>
 <script src="../../../public/js/components/pages/main/init.js"></script>
 <script src="../../../public/js/components/pages/main/funciones.js"></script>
+<!-- 1. Dependencia de Estilos de Croppie -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.min.css" />
 
+<!-- 2. Dependencias de JS (jQuery primero, luego Croppie) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
+<!-- Librerías Externas de Previsualización -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+    if (typeof pdfjsLib !== 'undefined') {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+
+<script src="../../../public/js/services/multimedia/main.js"></script>
+<script src="../../../public/js/services/multimedia/audio.js"></script>
+<script src="../../../public/js/services/multimedia/docx.js"></script>
+<script src="../../../public/js/services/multimedia/images.js"></script>
+<script src="../../../public/js/services/multimedia/pdf.js"></script>
+<script src="../../../public/js/services/multimedia/video.js"></script>
+<script src="../../../public/js/services/multimedia/xlsx.js"></script>
+<script src="../../../public/js/services/multimedia/xml.js"></script>
+<script src="../../../public/js/services/multimedia/text.js"></script>

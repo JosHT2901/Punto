@@ -88,6 +88,6 @@ $("#variables-boton-guardar").on('click', async function (e) {
     Guardar_Gestion_Variables(data);
 });
 
-$("#variables-boton-atras").on('click',async function (e) {
+$("#variables-boton-atras").off('click').on('click',async function (e) {
     window.location.href="ajustes.php"  
 })

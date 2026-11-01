@@ -2,7 +2,6 @@
     SERVICIO: DRAG & DROP SERVICE (Motor Limpio con Advertencia y Control Multiple)
 ============================================= */
 window.DragDropService = (function ($) {
-    
     const inyectarEstilos = () => {
         if ($("#dds-styles").length) return;
         const css = `

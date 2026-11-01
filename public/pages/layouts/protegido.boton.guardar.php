@@ -6,7 +6,7 @@
     <title><?php echo $tituloPage ?? 'Sistema'; ?></title>
     <!-- Incluimos tus estilos y configuraciones globales -->
     <?php 
-    include_once __DIR__ . '/../include/include.php';  
+    include_once __DIR__ . '/../include/include.php';
     include_once __DIR__ . '/../include/script.php';
     include_once __DIR__ . '/../include/modal/script.php';
     ?>
@@ -21,6 +21,7 @@
             include_once __DIR__ . "/../include/menu/menu.php";
             include_once __DIR__ . "/../include/menu/lateral.php";
             include_once __DIR__ . "/../include/menu/sesion.php";
+            include_once __DIR__ . '/../include/menu/script.php';
             ?>
         </div>
 

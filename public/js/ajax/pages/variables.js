@@ -46,14 +46,9 @@ $(document).ready(async function () {
 
     } catch (error) {
         console.error("Error crítico al inicializar los datos:", error);
-
+        OcultarCargando();
         if (typeof MostrarMensaje === 'function') {
             MostrarMensaje('Ocurrió un error inesperado al cargar la información inicial.', false, false, false);
-        }
-    } finally {
-        // Aseguramos ocultar el componente de carga sin importar si hubo éxito o error
-        if (typeof OcultarCargando === 'function') {
-            OcultarCargando();
         }
     }
 });

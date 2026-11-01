@@ -1,5 +1,6 @@
 (function($) {
     $.fn.ondaLoader = function(opciones) {
+        const basePath= UI_CONFIG.ICON_PATH+'File/default.png'
         const settings = $.extend({
             progreso: 0,
             color: '#23c8fa',
@@ -7,7 +8,7 @@
             amplitud: 2,
             frecuencia: 30,
             velocidad: 0.15,
-            imagenUrl: '',
+            imagenUrl: '' || basePath,
             imagenSize: '110px',      
             imagenSizeFull: '130px',  
             velocidadTransicion: 1.8 

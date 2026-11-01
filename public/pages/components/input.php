@@ -5,11 +5,11 @@ $tituloPage = "Gestión de sucursales";
 // 2. Activamos el búfer para capturar todo el HTML que escribamos abajo
 ob_start();
 ?>
-<form class="w-p-100 h-p-100 py-2 flex flex-column">
+<form class="w-p-100 h-p-100 py-2 flex flex-column bg-white">
     <div class="w-p-100 flex flex-column js-wizard-container flex-1 min-w-0 ocultar-scroll">
 
         <!-- Paso 1: Información básica -->
-        <div class="w-p-100 my-2 bg-white rounded-8 box-sizing row-gap-1 p-3 card js-acordeon-container">
+        <div class="w-p-100 my-2  box-sizing row-gap-1 p-3 card js-acordeon-container">
             <div class="flex-1 min-h-0 my-3 flex flex-column row-gap-1 card-body js-panel-toggle">
                 <div class="my-3 flex flex-column gap-4">
                     <div class="row-gap-0 flex flex-column">

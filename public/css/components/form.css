@@ -1,7 +1,7 @@
 /* ==================================================
    INPUT BASE & INTERACTIVE ELEMENTS (Adaptable al contenedor)
    ================================================== */
-   input:not([type="checkbox"]):not([type="radio"]),
+   input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
    textarea,
    select {
        font-family: var(--font-primary);

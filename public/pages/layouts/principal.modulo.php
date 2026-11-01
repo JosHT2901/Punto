@@ -71,7 +71,7 @@
                                 <!-- Contador General Base -->
                                 <div class="bg-gray-200 col-gap-2 w-p-100 h-p-100 rounded-md items-center px-2 flex position-absolute top-0 left-0">
                                     <span class="rounded-8 bg-brand-soft px-2 h-30 flex items-center justify-center text-brand-blue fw-600 lh-1" id="contador-total">
-                                        0 clientes
+                                        0
                                     </span>
                                 </div>
 
@@ -110,11 +110,6 @@
 
         </div>
     </div>
-
-    <!-- Scripts de la vista -->
-    <script src="../../../public/js/variables/clientes.js"></script>
-    <script src="../../../public/js/ajax/pages/clientes.js"></script>
-    <script src="../../../public/js/components/pages/views/clientes.js"></script>
 </body>
 
 </html>

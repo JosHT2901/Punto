@@ -245,15 +245,18 @@ const InputService = {
      */
     formatoRazonSocial(selector) {
         const conectoresMinuscula = ['de', 'y', 'la', 'las', 'el', 'los', 'del'];
-
+    
         $(document).on('input.inputServiceRazon', selector, function () {
             const cursor = this.selectionStart;
             let valor = this.value;
-
-            valor = valor.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ. ]/g, '').replace(/\s{2,}/g, ' ');
+    
+            // Se agregó [0-9] para permitir números dentro de la razón social
+            valor = valor.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ0-9. ]/g, '').replace(/\s{2,}/g, ' ');
+            
             valor = valor.split(' ').map((palabra, index) => {
                 if (!palabra) return '';
-                if (/^([A-Z]\.)+$/.test(palabra.toUpperCase())) {
+                // Si la palabra es un número o siglas con puntos (ej. S.A. de C.V.), la respetamos
+                if (/^\d+$/.test(palabra) || /^([A-Z]\.)+$/.test(palabra.toUpperCase())) {
                     return palabra.toUpperCase();
                 }
                 const lower = palabra.toLowerCase();
@@ -262,11 +265,11 @@ const InputService = {
                 }
                 return lower.charAt(0).toUpperCase() + lower.slice(1);
             }).join(' ');
-
+    
             this.value = valor;
             this.setSelectionRange(cursor, cursor);
         });
-
+    
         $(document).on('blur.inputServiceRazon', selector, function () {
             this.value = this.value.trim();
         });

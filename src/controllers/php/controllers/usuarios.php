@@ -30,7 +30,8 @@ $accion = trim($_POST['accion'] ?? '');
 $accionesPermitidas = [
     'obtener_usuarios'         => 'Obtener_Usuarios',
     'generar_nombre_usuario'=>'Generar_Usuario_Aleatorio',
-    'gestionar_usuario'=>'Gestionar_Usuario'
+    'gestionar_usuario'=>'Gestionar_Usuario',
+    'obtener_usuarios_paginados'=>'Obtener_Usuarios_Paginados'
 ];
 
 // Ejecutar el despachador central

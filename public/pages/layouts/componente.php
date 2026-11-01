@@ -17,7 +17,12 @@
     <main class="w-p-100 h-p-100 position-relative">
         <?php
             echo $contenido_componente;
-            include_once __DIR__ . '/../include/carga.php';
+            $incluir_carga = $incluir_carga ?? true;
+
+            if ($incluir_carga) {
+                include_once __DIR__ . '/../include/carga.php';
+            }
+         
         ?>
 
     </main>

@@ -105,8 +105,7 @@ window.filtrosAdicionales = {
     habilitado: 1
 };
 
-window.opcionesClienteHabilitado = [
-    {
+window.opcionesClienteHabilitado = [{
         texto: 'Información básica',
         icono: 'vf-ic_fluent_person_edit_24_filled text-brand-blue', // Icono específico de persona/edición
         permiso: 'editar_clientes',
@@ -138,28 +137,27 @@ window.opcionesClienteHabilitado = [
     }
 ];
 
-window.opcionesClienteDeshabilitado = [
-    {
-        texto: 'Habilitar Cliente',
-        icono: 'vf-ic_fluent_checkmark_circle_24_filled text-success',
-        permiso: 'editar_clientes',
-        callback: (id) => HabilitarCliente(id)
-    }
-];
+window.opcionesClienteDeshabilitado = [{
+    texto: 'Habilitar Cliente',
+    icono: 'vf-ic_fluent_checkmark_circle_24_filled text-success',
+    permiso: 'editar_clientes',
+    callback: (id) => HabilitarCliente(id)
+}];
 
-// Definimos el estado inicial de ordenamiento si no existe
 window.ordenClientes = window.ordenClientes || {
     columna: 'ID',
     direccion: 'DESC'
 };
 
-window.opcionesMenuOrdenar = [
-    {
+window.opcionesMenuOrdenar = [{
         id: 'recientes',
         texto: 'Más recientes primero',
         icono: 'fa-solid fa-arrow-down-1-9',
         callback: (id, elemento) => {
-            window.ordenClientes = { columna: 'ID', direccion: 'DESC' };
+            window.ordenClientes = {
+                columna: 'ID',
+                direccion: 'DESC'
+            };
             window.pagina = 1; // Volvemos a la primera página
             CargarClientes();
         }
@@ -169,7 +167,10 @@ window.opcionesMenuOrdenar = [
         texto: 'Más antiguos primero',
         icono: 'fa-solid fa-arrow-up-9-1',
         callback: (id, elemento) => {
-            window.ordenClientes = { columna: 'ID', direccion: 'ASC' };
+            window.ordenClientes = {
+                columna: 'ID',
+                direccion: 'ASC'
+            };
             window.pagina = 1;
             CargarClientes();
         }
@@ -179,7 +180,10 @@ window.opcionesMenuOrdenar = [
         texto: 'Nombre (A - Z)',
         icono: 'fa-solid fa-arrow-down-a-z',
         callback: (id, elemento) => {
-            window.ordenClientes = { columna: 'Nombre', direccion: 'ASC' };
+            window.ordenClientes = {
+                columna: 'Nombre',
+                direccion: 'ASC'
+            };
             window.pagina = 1;
             CargarClientes();
         }
@@ -189,7 +193,10 @@ window.opcionesMenuOrdenar = [
         texto: 'Nombre (Z - A)',
         icono: 'fa-solid fa-arrow-up-z-a',
         callback: (id, elemento) => {
-            window.ordenClientes = { columna: 'Nombre', direccion: 'DESC' };
+            window.ordenClientes = {
+                columna: 'Nombre',
+                direccion: 'DESC'
+            };
             window.pagina = 1;
             CargarClientes();
         }

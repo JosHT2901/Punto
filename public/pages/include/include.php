@@ -10,5 +10,6 @@ include_once __DIR__ . "/../include/modal/iframe.php";
 include_once __DIR__ . "/../include/modal/mensaje.php";
 include_once __DIR__ . "/../include/modal/mensaje.accion.php";
 include_once __DIR__ . "/../include/modal/modal.php";
+include_once __DIR__ . "/../include/modal/documento.php";
 include_once __DIR__ . "/../include/modal/pregunta.php";
 ?>
