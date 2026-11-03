@@ -18,6 +18,7 @@ const CrearSeleccionController = (nombreControlador) => {
             checkItemClass: opciones.checkItemClass || '.check-item',
             checkAllId: checkAll,
             tarjetaClass: opciones.tarjetaClass || '.tarjeta-ajustable',
+            excludeClass: opciones.excludeClass || null, // 🌟 Soporte para excluir elementos (ej. .card-sucursal-actual)
             claseActiva: opciones.claseActiva || 'activo',
             onChange: typeof opciones.onChange === 'function' ? opciones.onChange : null,
             clickTarjetaSelecciona: opciones.clickTarjetaSelecciona !== false 
@@ -55,7 +56,14 @@ const CrearSeleccionController = (nombreControlador) => {
         if (!root) return;
         
         const checkAll = root.querySelector(config.checkAllId) || document.querySelector(config.checkAllId);
-        const habilitados = root.querySelectorAll(`${config.checkItemClass}:not(:disabled)`);
+        
+        // 🌟 Excluir tarjetas con la clase de exclusión (como la sucursal actual) del conteo y validación de "Check All"
+        let selectorHabilitados = `${config.checkItemClass}:not(:disabled)`;
+        if (config.excludeClass) {
+            // Aseguramos que no tome checkboxes dentro de tarjetas excluidas
+            selectorHabilitados = `${config.checkItemClass}:not(:disabled):not(${config.excludeClass} ${config.checkItemClass})`;
+        }
+        const habilitados = root.querySelectorAll(selectorHabilitados);
         
         if (!checkAll) return;
         if (habilitados.length === 0) {
@@ -75,7 +83,12 @@ const CrearSeleccionController = (nombreControlador) => {
         const root = config.scope instanceof jQuery ? config.scope[0] : config.scope;
         if (!root) return;
 
-        const habilitados = root.querySelectorAll(`${config.checkItemClass}:not(:disabled)`);
+        // 🌟 Solo seleccionar elementos habilitados que NO pertenezcan a tarjetas excluidas
+        let selectorHabilitados = `${config.checkItemClass}:not(:disabled)`;
+        if (config.excludeClass) {
+            selectorHabilitados = `${config.checkItemClass}:not(:disabled):not(${config.excludeClass} ${config.checkItemClass})`;
+        }
+        const habilitados = root.querySelectorAll(selectorHabilitados);
         
         habilitados.forEach(check => {
             const id = String(check.dataset.id || '');
@@ -98,6 +111,12 @@ const CrearSeleccionController = (nombreControlador) => {
                 return;
             }
 
+            // 🌟 Si el elemento está dentro de una tarjeta excluida, ignorar
+            if (config.excludeClass && $(this).closest(config.excludeClass).length > 0) {
+                this.checked = false;
+                return;
+            }
+
             e.stopPropagation();
             const id = String(this.dataset.id || '');
             if (!id) return;
@@ -115,6 +134,11 @@ const CrearSeleccionController = (nombreControlador) => {
         // 2. Click en tarjeta
         $(document).off(`click${namespaceEventos}`).on(`click${namespaceEventos}`, config.tarjetaClass, function(e) {
             if (config.scope !== document && !$.contains(config.scope instanceof jQuery ? config.scope[0] : config.scope, this)) {
+                return;
+            }
+
+            // 🌟 Si es una tarjeta excluida (ej. sucursal actual), no permitir selección al hacer clic
+            if (config.excludeClass && $(this).is(config.excludeClass)) {
                 return;
             }
 

@@ -15,7 +15,7 @@ style=" z-index: 10000;" id="menu-contenedor-usuario">
     </div>
     <div class="border-t-1  border-default flex flex-column py-2  row-gap-1">
         <a class="h-40 min-w-100  flex justify-start items-center rounded-md 
-        btn  btn-option flex-shrink-0">
+        btn  btn-option flex-shrink-0" href="../views/mi.perfil.php">
             <i class="icon vf-ic_fluent_person_24_filled fs-5 w-20"></i>
             <span class="fs-3">Perfil</span>
         </a>

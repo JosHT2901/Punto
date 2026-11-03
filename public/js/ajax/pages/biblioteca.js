@@ -58,24 +58,7 @@ $(document).ready(async function (e) {
     }
 });
 
-/**
- * Realiza la petición AJAX para obtener los tipos de archivos disponibles en la biblioteca.
- * @returns {Promise<Object>} Promesa con la respuesta del servidor.
- */
-function Obtener_Tipos_Archivos_API() {
-    if (typeof AjaxService === 'undefined' || typeof AjaxService.enviar !== 'function') {
-        console.error("AjaxService no está disponible.");
-        return Promise.reject(new Error("AjaxService no está disponible."));
-    }
 
-    return AjaxService.enviar(
-        '../../../src/controllers/php/controllers/biblioteca.php',
-        {
-            accion: 'obtener_tipos_archivos'
-        },
-        false // esFormData = false
-    );
-}
 
 /**
  * Realiza la petición AJAX para obtener los archivos de la biblioteca.

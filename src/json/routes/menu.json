@@ -10,5 +10,11 @@
       "icono": "vf-ic_fluent_person_24_filled",
       "href": "/punto_1/public/pages/views/usuarios.php",
       "modulo": "Clientes"
+    },
+    {
+      "titulo": "Sucursales",
+      "icono": "vf-ic_fluent_building_retail_24_filled",
+      "href": "/punto_1/public/pages/views/sucursales.php",
+      "modulo": "Sucursales"
     }
 ]

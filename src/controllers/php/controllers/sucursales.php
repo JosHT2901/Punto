@@ -29,7 +29,14 @@ $accion = trim($_POST['accion'] ?? '');
 // Mapeo de acciones permitidas
 $accionesPermitidas = [
     'obtener_sucursales'         => 'Obtener_Sucursales',
-    'gestionar_sucursales'=>'Gestionar_Sucursales'
+    'gestionar_sucursales'=>'Gestionar_Sucursales',
+    'obtener_sucursales_paginadas'=>'Obtener_Sucursales_Paginadas',
+    'obtener_informacion_sucursal'=>'Obtener_Sucursal_Por_Id',
+    'eliminar_sucursal'=>'Eliminar_Sucursal',
+    'habilitar_sucursal'=>'Habilitar_Sucursal',
+    'importar_sucursales'=>'Importar_Sucursales',
+    'eliminar_masivo_sucursales'=>'Eliminar_Masivo_Sucursales',
+    'exportar_sucursales'=>'Exportar_Sucursales'
 ];
 
 // Ejecutar el despachador central

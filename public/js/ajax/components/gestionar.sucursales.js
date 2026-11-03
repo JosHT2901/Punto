@@ -1,16 +1,43 @@
 $(document).ready(async function () {
     try {
-        MostrarCargando('Obteniendo información...', false);
+        if (typeof MostrarCargando === 'function') {
+            MostrarCargando('Obteniendo información...', false);
+        }
 
-        // Ejecutamos ambas peticiones en paralelo
-        let [localidades, sucursales] = await Promise.all([
+        window.ID_Sucursal = await Enviar_Id(500); // Espera máximo 500ms
+        console.log("ID de sucursal obtenido:", window.ID_Sucursal);
+
+        const esEdicion = window.ID_Sucursal !== null && window.ID_Sucursal !== undefined && window.ID_Sucursal !== '';
+
+        // Creamos el arreglo base de promesas en paralelo
+        let promesas = [
             CargarJSON('../../../src/json/data/localidades.json'),
             window.AjaxService.enviar('../../../src/controllers/php/controllers/sucursales.php', {
                 accion: 'obtener_sucursales'
             })
-        ]);
+        ];
 
-        OcultarCargando();
+        // 🌟 Si hay ID, agregamos la tercera petición en paralelo para obtener la sucursal específica
+        if (esEdicion) {
+            promesas.push(
+                window.AjaxService.enviar('../../../src/controllers/php/controllers/sucursales.php', {
+                    accion: 'obtener_informacion_sucursal',
+                    id: window.ID_Sucursal
+                }).catch(() => null)
+            );
+        }
+
+        // Ejecutamos todas las promesas en paralelo
+        let resultados = await Promise.all(promesas);
+
+        let localidades = resultados[0];
+        let sucursales = resultados[1];
+        let sucursalEspecificaRespuesta = esEdicion ? resultados[2] : null;
+
+        if (typeof OcultarCargando === 'function') {
+            OcultarCargando();
+        }
+
         window.localidades = localidades || [];
 
         if (sucursales && sucursales.ok) {
@@ -20,16 +47,29 @@ $(document).ready(async function () {
             window.sucursales = Array.isArray(sucursales) ? sucursales : (sucursales.data || []);
         }
 
-        console.log("localuda", window.localidades)
+        // Si se obtuvo la sucursal específica, extraemos correctamente el objeto interior de la respuesta de PHP
+        if (esEdicion && sucursalEspecificaRespuesta) {
+            const respuestaData = sucursalEspecificaRespuesta.data || sucursalEspecificaRespuesta;
+            window.sucursalEdicion = respuestaData.sucursal || respuestaData;
+            console.log("Sucursal cargada para edición:", window.sucursalEdicion);
+        } else {
+            window.sucursalEdicion = null;
+        }
+
+        console.log("Localidades cargadas:", window.localidades);
         console.log("Sucursales cargadas:", window.sucursales);
 
-        // Disparamos el evento personalizado con el namespace correcto
-        $(document).trigger('datosListos.gestionSucursales');
+        // Disparamos el evento personalizado pasando los datos relevantes
+        $(document).trigger('datosListos.gestionSucursales', [esEdicion, window.sucursalEdicion]);
 
     } catch (error) {
-        OcultarCargando();
+        if (typeof OcultarCargando === 'function') {
+            OcultarCargando();
+        }
         console.error("Error al obtener los datos:", error);
-        MostrarMensaje('Ocurrió un error inesperado al conectar con el servidor.', false, false, false);
+        if (typeof MostrarMensaje === 'function') {
+            MostrarMensaje('Ocurrió un error inesperado al conectar con el servidor.', false, false, false);
+        }
     }
 });
 // Función asíncrona para guardar o editar la sucursal conectando con el backend
@@ -45,6 +85,11 @@ async function Guardar_Gestion_Sucursal(datosGuardar) {
         console.log("Respuesta del servidor:", respuesta);
 
         if (respuesta && respuesta.ok) {
+            // Ocultamos el cargador al tener éxito
+            if (typeof OcultarCargando === 'function') {
+                OcultarCargando();
+            }
+
             MostrarMensaje(respuesta.mensaje || 'Sucursal guardada correctamente.', true, false, false);
             
             // --- ACTUALIZAR WINDOW.SUCURSALES EN TIEMPO REAL ---
@@ -63,7 +108,7 @@ async function Guardar_Gestion_Sucursal(datosGuardar) {
                     return s;
                 });
             } else {
-                let nuevoId = respuesta.data && respuesta.data.id ? respuesta.data.id : null;
+                let nuevoId = (respuesta.data && (respuesta.data.id || respuesta.data.ID)) ? (respuesta.data.id || respuesta.data.ID) : null;
                 window.sucursales.push({
                     id: nuevoId,
                     ID: nuevoId,
@@ -71,27 +116,40 @@ async function Guardar_Gestion_Sucursal(datosGuardar) {
                 });
             }
 
-            let notificacion = idEditado ? 'sucursal_editada' : 'sucursal_guardada';
-
+            // Determinamos con precisión si fue edición o nuevo registro
+            const sucursalIdFinal = idEditado || (respuesta.data && (respuesta.data.id || respuesta.data.ID)) || null;
+            const accionNotificacion = idEditado ? 'sucursal_editada' : 'sucursal_guardada';
+            
+            // Llamada correcta a $.messenger.send adaptada al framework
             $.messenger.send(
                 window.parent,
-                notificacion,
-                { status: 'success', mensaje: 'Proceso completado', id: idEditado || respuesta.data?.id },
+                accionNotificacion,
+                { status: 'success', mensaje: 'Proceso completado', id: sucursalIdFinal },
                 '*'
             );
-            LimpiarFormularioSucursal();
+
+            if (typeof LimpiarFormularioSucursal === 'function') {
+                LimpiarFormularioSucursal();
+            }
+
             setTimeout(() => {
-                ModalAPI.cerrar();
+                if (typeof ModalAPI !== 'undefined' && typeof ModalAPI.cerrar === 'function') {
+                    ModalAPI.cerrar();
+                }
             }, 1000);
 
         } else {
-            OcultarCargando();
+            if (typeof OcultarCargando === 'function') {
+                OcultarCargando();
+            }
             const mensajeError = (respuesta && respuesta.mensaje) ? respuesta.mensaje : 'No se pudo completar la operación.';
             MostrarMensaje(mensajeError, false, false, false);
         }
 
     } catch (error) {
-        OcultarCargando();
+        if (typeof OcultarCargando === 'function') {
+            OcultarCargando();
+        }
         console.error("Error al guardar la información de la sucursal:", error);
         
         let mensajeServidor = '';
@@ -107,7 +165,7 @@ async function Guardar_Gestion_Sucursal(datosGuardar) {
             || mensajeServidor.includes('obligatorio'))) {
             MostrarMensaje(mensajeServidor, false, true, false);
         } else {
-            MostrarMensaje('Ocurrió un error inesperado al conectar con el servidor.', false,true, false);
+            MostrarMensaje('Ocurrió un error inesperado al conectar con el servidor.', false, true, false);
         }
     }
 }

@@ -57,7 +57,7 @@ function Procesar_Resumen(data) {
             $.each(processed, function (index, item) {
                 const idItem = (typeof item === 'object' && item !== null) ? (item.id || item.codigo || '---') : item;
                 const nombreItem = (typeof item === 'object' && item !== null) ? (item.nombre || item.titulo || item.descripcion || `Elemento #${idItem}`) : `Elemento #${item}`;
-                const etiquetaSecundaria = (typeof item === 'object' && item !== null && (item.sku || item.codigo)) ? `SKU: ${item.sku || item.codigo}` : `CÓDIGO: ${idItem}`;
+                const etiquetaSecundaria = (typeof item === 'object' && item !== null && (item.sku || item.codigo)) ? `Código: ${item.sku || item.codigo}` : `CÓDIGO: ${idItem}`;
 
                 const htmlExito = `
                 <div class="w-p-100 bg-white p-4 my-3 rounded-16 border border-slate-100 shadow-xs hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-between gap-3 relative overflow-hidden">

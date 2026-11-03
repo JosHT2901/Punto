@@ -334,6 +334,55 @@ function Renderizar_Filas_Archivos(archivos) {
             AbrirMenuOpcionesDocumento(e, archivoSeleccionado, this);
         }
     });
+
+    // 🌟 💡 EVENTOS DE ORDENAMIENTO (NOMBRE, FECHA, TAMAÑO)
+    const manejarOrdenamiento = (columna) => {
+        window.ordenArchivos = window.ordenArchivos || { columna: 'creado_en', direccion: 'DESC' };
+        
+        // Si hace clic en la misma columna, alterna la dirección; si es otra, pone ASC por defecto
+        if (window.ordenArchivos.columna === columna) {
+            window.ordenArchivos.direccion = window.ordenArchivos.direccion === 'ASC' ? 'DESC' : 'ASC';
+        } else {
+            window.ordenArchivos.columna = columna;
+            window.ordenArchivos.direccion = 'ASC';
+        }
+
+        // Si tienes una función global para recargar con el nuevo orden, invócala aquí:
+        if (typeof CargarArchivos === 'function') {
+            CargarArchivos();
+        } else {
+            // Fallback: ordenar localmente el array global si no hay llamada al servidor inmediata
+            archivosGlobales.sort((a, b) => {
+                let valA = a[columna] || '';
+                let valB = b[columna] || '';
+                
+                if (columna === 'tamano_bytes') {
+                    valA = Number(valA) || 0;
+                    valB = Number(valB) || 0;
+                }
+
+                if (valA < valB) return window.ordenArchivos.direccion === 'ASC' ? -1 : 1;
+                if (valA > valB) return window.ordenArchivos.direccion === 'ASC' ? 1 : -1;
+                return 0;
+            });
+            Renderizar_Filas_Archivos(archivosGlobales);
+        }
+    };
+
+    $contenedor.off('click', '.btn-ordenar-nombre').on('click', '.btn-ordenar-nombre', function (e) {
+        e.stopPropagation();
+        manejarOrdenamiento('nombre_original');
+    });
+
+    $contenedor.off('click', '.btn-ordenar-fecha').on('click', '.btn-ordenar-fecha', function (e) {
+        e.stopPropagation();
+        manejarOrdenamiento('creado_en'); // O 'actualizado_en' según corresponda
+    });
+
+    $contenedor.off('click', '.btn-ordenar-tamano').on('click', '.btn-ordenar-tamano', function (e) {
+        e.stopPropagation();
+        manejarOrdenamiento('tamano_bytes');
+    });
 }
 
 /**

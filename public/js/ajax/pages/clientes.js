@@ -21,6 +21,52 @@ $.messenger.on('tipo_seleccionado', function (data, sourceWindow, origin) {
     ExportacionService.exportar(url, accion, formato, { seleccion: seleccion });
 });
 
+
+$(document).ready(async function (e) {
+    try {
+        // Función auxiliar limpia y segura para evaluar permisos
+        const verificarPermiso = (permiso) => {
+            return window.PermisosService && typeof window.PermisosService.tienePermiso === 'function' ?
+                PermisosService.tienePermiso(permiso) :
+                true;
+        };
+
+        // Asignación de variables globales de permisos
+        window.permiso_ver= verificarPermiso('ver_clientes');
+        window.permiso_editar = verificarPermiso('editar_clientes');
+        window.permiso_crear = verificarPermiso('crear_clientes');
+        window.permiso_eliminar = verificarPermiso('eliminar_clientes'); // 🌟 Typo corregido
+
+        if (!permiso_ver) {
+            return window.location.href = '../../../pages/errores/no-permiso.php';
+        }
+
+        if (typeof MostrarCargando === 'function') {
+            MostrarCargando('Obteniendo información...', false);
+        }
+
+        // 3. Disparar eventos pasando los datos obtenidos por si algún script los escucha
+        $(document).trigger('datosListos.clientes');
+
+        if (typeof OcultarCargando === 'function') {
+            OcultarCargando();
+        }
+
+    } catch (error) {
+        console.error("Error crítico al inicializar las localidades:", error);
+
+        if (typeof OcultarCargando === 'function') {
+            OcultarCargando();
+        }
+
+        if (typeof MostrarMensaje === 'function') {
+            MostrarMensaje('Ocurrió un error inesperado al cargar las localidades.', false, false, false);
+        }
+    }
+});
+
+
+
 /**
  * Obtiene los clientes paginados desde la API y actualiza el estado cifrado de la URL fusionando los parámetros previos.
  * 

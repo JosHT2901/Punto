@@ -41,7 +41,7 @@ id="menu-contenedor-lateral" style="z-index: 10000;">
                 <span class="texto-truncado">Módulos</span>
             </div>
             <div class="w-p-100 h-calc-100-30 flex items-start py-2 overflow-auto custom-scroll">
-                <div class="flex-wrap justify-between flex gap-2">
+                <div class="flex-wrap justify-between flex gap-2 w-p-100">
                     <?php
                     usort($modulos, function ($a, $b) {
                         $tituloA = trim($a['titulo']);

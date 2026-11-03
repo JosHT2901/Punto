@@ -6,27 +6,28 @@ function MostrarCargando(texto = 'Cargando...', transparencia = true) {
     $contenido.find('.js-loading-text').text(texto);
 
     ModalAPI.abrir({
-        titulo: '',         
+        titulo: '',        
         cerrarBtn: false,   
         overlayClick: false,
         altura: 200,
         transparencia: transparencia,
         contenido: $contenido,
         padding: false,
-        color: transparencia ? true : false
+        color: transparencia ? true : false,
+        esCargando: true // 🌟 Bandera clave para identificar que es un modal de carga
     });
 }
 
 /**
- * Quita el modal de carga de forma segura asegurando la transición
+ * Quita el modal de carga de forma segura asegurando la transición solo si es cargando
  */
 function OcultarCargando() {
     try {
-        if (typeof ModalAPI !== 'undefined' && typeof ModalAPI.cerrar === 'function') {
-            ModalAPI.cerrar();
+        if (typeof ModalAPI !== 'undefined' && typeof ModalAPI.cerrarCargando === 'function') {
+            ModalAPI.cerrarCargando();
         }
         
-        // Validar si existe el elemento antes de removerlo
+        // Validar si existe el elemento contenedor de carga tradicional antes de removerlo
         const $contenedorCarga = $("#contenedor-carga");
         if ($contenedorCarga.length) {
             $contenedorCarga.remove();

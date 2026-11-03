@@ -1,9 +1,10 @@
 /**
- * Modal Master API - Con Transición Secuencial y control de dimensiones en modal-content
+ * Modal Master API - Con Transición Secuencial, control de dimensiones y soporte exclusivo para Carga
  */
 const ModalAPI = {
     _onClose: null,
     _config: {},
+    _esModalCargando: false, // 🌟 Rastrea si el modal actualmente abierto es de tipo carga
 
     get $overlay() { return $('#modal-overlay'); },
     get $modalContent() { return $('#modal-content'); },
@@ -17,10 +18,14 @@ const ModalAPI = {
     },
 
     /**
-     * Abre un modal. Si ya hay uno abierto, lo cierra primero de forma secuencial y luego abre el nuevo.
+     * Abre un modal. Si ya hay uno abierto, maneja la apertura de forma inteligente.
      */
     abrir(p = {}) {
+        const esNuevoCargando = p.esCargando === true;
+
+        // Si ya hay un modal abierto y el nuevo NO es de carga, o viceversa, gestionamos la transición
         if (this.estaAbierto()) {
+            // Si el modal actual es de carga y abren otro normal, o si se superponen:
             this.cerrar(() => {
                 this._ejecutarApertura(p);
             });
@@ -31,6 +36,8 @@ const ModalAPI = {
 
     // Método interno para renderizar el modal
     _ejecutarApertura(p) {
+        this._esModalCargando = p.esCargando === true; // Guardamos el estado
+
         this._config = {
             titulo: p.titulo || '',
             contenido: p.contenido || '',
@@ -74,11 +81,24 @@ const ModalAPI = {
     },
 
     /**
+     * Cierra específicamente el modal si actualmente está activo como pantalla de carga.
+     */
+    cerrarCargando(callback = null) {
+        if (this._esModalCargando) {
+            this.cerrar(callback);
+        } else {
+            // Si no era un modal de carga el que estaba activo, evitamos cerrarlo por error
+            if (callback) callback();
+        }
+    },
+
+    /**
      * Cierra el modal actual. 
      * @param {Function} [callback] Función opcional que se ejecuta exactamente al terminar de cerrar.
      */
     cerrar(callback = null) {
         if (!this.estaAbierto()) {
+            this._esModalCargando = false;
             if (callback) callback();
             return;
         }
@@ -86,12 +106,17 @@ const ModalAPI = {
         this.$overlay.css('opacity', '0');
 
         setTimeout(() => {
-            this.$overlay.addClass('d-none');$('body').css('overflow', '');
-            this.$bodyContent.empty();$(document).off('keydown.modal');
+            this.$overlay.addClass('d-none');
+            $('body').css('overflow', '');
+            this.$bodyContent.empty();
+            $(document).off('keydown.modal');
 
             // Limpiar estilos de fondo y dimensiones aplicadas por JS en el contenido
             this.$overlay.css('background-color', '');
             this.$modalContent.css({ 'max-width': '', 'height': '', 'width': '' });
+
+            // Reiniciar estado de carga
+            this._esModalCargando = false;
 
             // Ejecutar callback de cierre centralizado
             if (this._onClose) {

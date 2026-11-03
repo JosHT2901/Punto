@@ -15,7 +15,8 @@ $.messenger.on('cliente_editado', function (data, sourceWindow, origin) {
 
 
 
-$(document).off('app:inicializada').on('app:inicializada', async() => {
+$(document).off('app:inicializada datosListos.clientes')
+  .on('app:inicializada datosListos.clientes', async (event) => {
     // 0. Sincronizamos los parámetros de la URL, rellenamos inputs, variables globales y el estado del MenuSelectorCheck
     if (window.UrlStateSyncService) {
         window.carga_inicial = false;
@@ -179,7 +180,7 @@ function CargarClientes() {
                                 idKey: 'ID',
                                 tituloKey: 'nombre_completo',
                                 badgeKey: 'RFC',
-                                permisoOpciones: true,
+                                permisoOpciones: window.permiso_editar &&  window.permiso_eliminar,
                                 callbackOpciones: 'AbrirMenuOpcionesCliente(event, ${ID}, this)',
                                 configuracionCampos: [
                                     { label: 'Código', columna: 'Codigo_Cliente' },
@@ -214,9 +215,17 @@ function CargarClientes() {
 }
 // Función centralizada para cargar y filtrar clientes (sin parámetros, basada 100% en window)
 async function FuncionesIniciales() {
-    if (window.CarouselButtonsNav && typeof botonesToolbarConfig !== 'undefined') {
-        CarouselButtonsNav.render('#viewer-toolbar', botonesToolbarConfig);
+    const $toolbar = $('#viewer-toolbar');
+    console.log(window.permiso_crear)
+    if (window.permiso_crear) {
+        $toolbar.removeClass('d-none');
+        if (window.CarouselButtonsNav && typeof botonesToolbarConfig !== 'undefined') {
+            CarouselButtonsNav.render('#viewer-toolbar', botonesToolbarConfig);
+        }
+    } else {
+        $toolbar.addClass('d-none');
     }
+
 
     // CARGAR CATÁLOGO DE REGÍMENES FISCALES
     if (typeof Obtener_Regimenes_API === 'function') {

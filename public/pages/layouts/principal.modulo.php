@@ -50,7 +50,7 @@
                 </div>
 
                 <!-- Resultados -->
-                <div class="flex-1 flex flex-column position-relative" id="contenedor-resultados">
+                <div class="flex-1 flex flex-column position-relative overflow-auto custom-scroll" id="contenedor-resultados">
                     <div class="flex-1 min-h-0 flex flex-column">
 
                         <!-- Cabecera de la tabla / lista con checkbox general y barra de selección -->
@@ -96,7 +96,7 @@
                         </div>
 
                         <!-- Contenedor de Tarjetas -->
-                        <div class="flex-1 min-h-0 overflow-auto custom-scroll" id="contenedor-tarjetas">
+                        <div class="flex-1 min-h-0 overflow-auto custom-scroll my-2" id="contenedor-tarjetas">
                         </div>
                     </div>
 

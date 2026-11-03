@@ -81,7 +81,7 @@ window.botonesToolbarConfig = [{
                     let datos = {
                         multiple: false,
                         mostrar_plantilla: true,
-                        direccion_plantilla: 'descargar_plantilla_cliente',
+                        url_plantilla:'/../../../../public/docs/Clientes.xlsx',
                         tipo_archivos: '.xlsx,.xls,.csv'
                     };
 
@@ -138,7 +138,7 @@ window.opcionesClienteHabilitado = [{
 ];
 
 window.opcionesClienteDeshabilitado = [{
-    texto: 'Habilitar Cliente',
+    texto: 'Habilitar cliente',
     icono: 'vf-ic_fluent_checkmark_circle_24_filled text-success',
     permiso: 'editar_clientes',
     callback: (id) => HabilitarCliente(id)

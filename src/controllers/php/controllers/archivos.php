@@ -28,7 +28,7 @@ $accion = trim($_POST['accion'] ?? '');
 
 // Mapeo de acciones permitidas
 $accionesPermitidas = [
-    'descargar_plantilla_cliente'         => 'Descargar_Plantilla_Cliente'
+    'descargar_plantilla'         => 'Descargar_Plantilla',
 ];
 
 // Ejecutar el despachador central

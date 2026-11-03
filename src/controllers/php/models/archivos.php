@@ -1,12 +1,9 @@
 <?php 
-function Descargar_Plantilla_Cliente() {
+function Descargar_Plantilla($Datos) {
     try {
         // Verificamos si llegó la acción correcta (opcional pero recomendado)
-        $accion = $_POST['accion'] ?? '';
-        
-        // Ruta absoluta o ajustada de manera segura al archivo
-        // Asegúrate de verificar que esta ruta apunte exactamente a donde vive 'Clientes.xlsx'
-        $rutaArchivo = __DIR__ . '/../../../../public/docs/Clientes.xlsx'; 
+        $url = $_POST['url'] ?? '';
+        $rutaArchivo = __DIR__ . $url; 
 
         // 1. Validar si el archivo existe físicamente
         if (!file_exists($rutaArchivo)) {

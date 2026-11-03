@@ -1,5 +1,99 @@
+window.ID_Sucursal = null; // Inicializamos la variable global
 
-$(document).ready(function () {
+$.messenger.on('datos_iniciales', async function (data) {
+    if (data) {
+        console.log("Datos iniciales recibidos:", data);
+        const datosUnificados = data.data || data;
+        window.ID_Sucursal = datosUnificados.id || datosUnificados.sucursal_id || null;
+    }
+});
+
+function Enviar_Id(tiempoMaximoMs = 500) {
+    return new Promise((resolve) => {
+        if (window.ID_Sucursal !== undefined && window.ID_Sucursal !== null) {
+            return resolve(window.ID_Sucursal);
+        }
+
+        let tiempoTranscurrido = 0;
+        const intervalo = 50;
+
+        const timer = setInterval(() => {
+            tiempoTranscurrido += intervalo;
+            if (window.ID_Sucursal !== undefined && window.ID_Sucursal !== null) {
+                clearInterval(timer);
+                resolve(window.ID_Sucursal);
+            } else if (tiempoTranscurrido >= tiempoMaximoMs) {
+                clearInterval(timer);
+                resolve(null);
+            }
+        }, intervalo);
+    });
+}
+
+// ==========================================
+// FUNCIONES AUXILIARES GLOBALES (En cascada)
+// ==========================================
+function CargarMunicipios(claveEstado, municipioSeleccion_Editar = null, localidadSeleccion_Editar = null) {
+    if (!window.localidades) return;
+    
+    const estados = ObtenerEstados(window.localidades);
+    const estObj = estados.find(e => e.clave == claveEstado);
+    window.estadoSeleccionadoNombre = estObj ? estObj.estado : '';
+    window.municipioSeleccionadoNombre = '';
+    window.localidadSeleccionadaObjeto = null;
+
+    $('#contenedor-select-municipio').empty();
+    $('#contenedor-select-localidad').empty();
+
+    const municipios = ObtenerMunicipiosPorEstado(window.localidades, claveEstado);
+
+    InsertarCustomSelect({
+        contenedor: '#contenedor-select-municipio',
+        id: 'select-municipio',
+        placeholder: 'Selecciona un municipio',
+        buscador: true,
+        opciones: municipios.map(m => ({
+            value: m.municipio.toUpperCase(),
+            text: m.municipio
+        })),
+        onChange: function (municipioNombre) {
+            CargarLocalidades(municipioNombre, localidadSeleccion_Editar);
+        }
+    });
+
+    if (municipioSeleccion_Editar && typeof CustomSelect !== 'undefined') {
+        CustomSelect.setValue('#select-municipio', municipioSeleccion_Editar);
+        CargarLocalidades(municipioSeleccion_Editar, localidadSeleccion_Editar);
+    }
+}
+
+function CargarLocalidades(municipioNombre, localidadSeleccion_Editar = null) {
+    if (!window.localidades) return;
+
+    window.municipioSeleccionadoNombre = municipioNombre;
+    window.localidadSeleccionadaObjeto = null;
+
+    $('#contenedor-select-localidad').empty();
+    const localidadesFiltradas = ObtenerLocalidadesPorMunicipio(window.localidades, municipioNombre);
+
+    InsertarCustomSelect({
+        contenedor: '#contenedor-select-localidad',
+        id: 'select-localidad',
+        placeholder: 'Selecciona una localidad',
+        buscador: true,
+        opciones: localidadesFiltradas.map((item) => ({
+            value: item.localidad.toUpperCase(),
+            text: item.localidad
+        })),
+        onChange: function () {}
+    });
+
+    if (localidadSeleccion_Editar !== null && typeof CustomSelect !== 'undefined') {
+        CustomSelect.setValue('#select-localidad', localidadSeleccion_Editar);
+    }
+}
+
+$(document).ready(async function () {
     let inicializado = false;
 
     function InicializarGestionarSucursales() {
@@ -47,33 +141,27 @@ $(document).ready(function () {
             debounceTimer = setTimeout(() => ValidarSucursal(), 300);
         });
 
-        $("#sucursal-input-cp").on('input', function(e) {
+        $("#sucursal-input-cp").on('input', function (e) {
             const codigo = $(this).val().trim();
-            
+
             if (codigo && codigo.length === 5) {
-                // 1. Filtramos todas las coincidencias que tengan ese código postal
                 const registrosEncontrados = window.localidades.filter(item => {
                     return String(item.Codigo || '').trim() === codigo;
                 });
-        
+
                 if (registrosEncontrados.length > 0) {
-                    // Tomamos el primer registro para extraer Estado y Municipio (ya que comparten la misma ubicación geográfica)
                     const datosUbicacion = registrosEncontrados[0];
-                    const estadoEncontrado = datosUbicacion.Estado;         // Ej. "Aguascalientes"
-                    const claveEstadoEncontrada = datosUbicacion.Clave_Estado; // Ej. "01"
-                    const municipioEncontrado = datosUbicacion.Municipio;   // Ej. "Aguascalientes"
-                    // 2. Opcional: Autoseleccionar Estado y Municipio en tus CustomSelect automáticamente
+                    const claveEstadoEncontrada = datosUbicacion.Clave_Estado; 
+                    const municipioEncontrado = datosUbicacion.Municipio; 
+
                     if (typeof CustomSelect !== 'undefined' && claveEstadoEncontrada) {
-                        // Seleccionamos el estado usando su Clave_Estado
                         CustomSelect.setValue('#select-estado', claveEstadoEncontrada, true);
-                        
-                        // Cargamos los municipios de ese estado y autoseleccionamos el municipio encontrado
                         CargarMunicipios(claveEstadoEncontrada, municipioEncontrado);
                     }
-        
                 }
             }
         });
+
         if (window.localidades && window.localidades.length > 0) {
             const estados = ObtenerEstados(window.localidades);
 
@@ -82,7 +170,10 @@ $(document).ready(function () {
                 id: 'select-estado',
                 placeholder: 'Selecciona un estado',
                 buscador: true,
-                opciones: estados.map(item => ({ value: item.clave, text: item.estado })),
+                opciones: estados.map(item => ({
+                    value: item.clave,
+                    text: item.estado
+                })),
                 onChange: function (claveEstado) {
                     CargarMunicipios(claveEstado);
                 }
@@ -95,13 +186,13 @@ $(document).ready(function () {
         }
 
         // 7. Validación y Control del Wizard por Acordeón
-        InicializarWizardAcordeon(function ($currentCard,$btn) {
+        InicializarWizardAcordeon(function ($currentCard, $btn) {
             const btnId = $btn.attr('id');
 
             if (btnId === 'sucursal-basica-boton-siguiente') {
                 const nombre = $("#sucursal-input-nombre").val().trim();
                 const tipo = CustomSelect.getValue("#select-custom-tipo-sucursal");
-                
+
                 if (!nombre) {
                     MostrarAlerta('Ingresa el nombre de la sucursal', 220);
                     return false;
@@ -123,7 +214,6 @@ $(document).ready(function () {
                 const municipioVal = CustomSelect.getValue("#select-municipio");
                 const localidadVal = CustomSelect.getValue("#select-localidad");
 
-                // Validar campos vacíos básicos
                 if (!calleVal) {
                     MostrarAlerta('Ingresa la calle', 220);
                     return false;
@@ -136,14 +226,11 @@ $(document).ready(function () {
                     MostrarAlerta('Ingresa el código postal', 220);
                     return false;
                 }
-
-                // Validación específica de longitud del Código Postal
                 if (cpVal.length < 5) {
                     MostrarAlerta('El código postal debe tener 5 dígitos', 220);
                     return false;
                 }
 
-                // Validación de existencia en window.localidades usando la propiedad 'Codigo' (con C mayúscula)
                 if (window.localidades && Array.isArray(window.localidades)) {
                     const cpEncontrado = window.localidades.some(item => {
                         return String(item.Codigo || '').trim() === cpVal;
@@ -155,7 +242,6 @@ $(document).ready(function () {
                     }
                 }
 
-                // Validar selects de domicilio
                 if (!estadoVal) {
                     MostrarAlerta('Selecciona el estado', 220);
                     return false;
@@ -171,9 +257,8 @@ $(document).ready(function () {
             }
 
             if (btnId === 'sucursal-contacto-boton-siguiente') {
-                // Payload final listo para enviar
                 const data_payload = {
-                    id: window.sucursalEdicion ? window.sucursalEdicion.id : null,
+                    id: window.sucursalEdicion ? (window.sucursalEdicion.ID || window.sucursalEdicion.id) : null,
                     nombre: $("#sucursal-input-nombre").val().trim(),
                     tipo: CustomSelect.getValue("#select-custom-tipo-sucursal"),
                     calle: $("#sucursal-input-calle").val().trim(),
@@ -195,98 +280,80 @@ $(document).ready(function () {
         });
     }
 
-    // Funciones auxiliares para cascada y edición
-    function CargarMunicipios(claveEstado, municipioSeleccion_Editar = null, localidadSeleccion_Editar = null) {
-        const estados = ObtenerEstados(window.localidades);
-        const estObj = estados.find(e => e.clave == claveEstado);
-        window.estadoSeleccionadoNombre = estObj ? estObj.estado : '';
-        window.municipioSeleccionadoNombre = '';
-        window.localidadSeleccionadaObjeto = null;
-
-        $('#contenedor-select-municipio').empty();
-        $('#contenedor-select-localidad').empty();
-
-        const municipios = ObtenerMunicipiosPorEstado(window.localidades, claveEstado);
-
-        InsertarCustomSelect({
-            contenedor: '#contenedor-select-municipio',
-            id: 'select-municipio',
-            placeholder: 'Selecciona un municipio',
-            buscador: true,
-            opciones: municipios.map(m => ({ value: m.municipio, text: m.municipio })),
-            onChange: function (municipioNombre) {
-                CargarLocalidades(municipioNombre, localidadSeleccion_Editar);
-            }
-        });
-
-        if (municipioSeleccion_Editar && typeof CustomSelect !== 'undefined') {
-            CustomSelect.setValue('#select-municipio', municipioSeleccion_Editar);
-            CargarLocalidades(municipioSeleccion_Editar, localidadSeleccion_Editar);
-        }
-    }
-
-    function CargarLocalidades(municipioNombre, localidadSeleccion_Editar = null) {
-        window.municipioSeleccionadoNombre = municipioNombre;
-        window.localidadSeleccionadaObjeto = null;
-
-        $('#contenedor-select-localidad').empty();
-        const localidadesFiltradas = ObtenerLocalidadesPorMunicipio(window.localidades, municipioNombre);
-
-        InsertarCustomSelect({
-            contenedor: '#contenedor-select-localidad',
-            id: 'select-localidad',
-            placeholder: 'Selecciona una localidad',
-            buscador: true,
-            opciones: localidadesFiltradas.map((item, index) => ({
-                value: item.localidad,
-                text: item.localidad
-            })),
-            onChange: function () {}
-        });
-
-        if (localidadSeleccion_Editar !== null && typeof CustomSelect !== 'undefined') {
-            CustomSelect.setValue('#select-localidad', localidadSeleccion_Editar);
-        }
-    }
-
-    function PrecargarDatosEdicion(sucursal) {
-        $("#sucursal-input-nombre").val(sucursal.nombre || '');
-        if (typeof CustomSelect !== 'undefined') {
-            CustomSelect.setValue('#select-custom-tipo-sucursal', sucursal.tipo);
-        }
-        $("#sucursal-input-calle").val(sucursal.calle || '');
-        $("#sucursal-input-num-ext").val(sucursal.numero_exterior || '');
-        $("#sucursal-input-num-int").val(sucursal.numero_interior || '');
-        $("#sucursal-input-cp").val(sucursal.codigo_postal || '');
-
-        if (sucursal.estado && typeof CustomSelect !== 'undefined') {
-            CustomSelect.setValue('#select-estado', sucursal.estado);
-            CargarMunicipios(sucursal.estado, sucursal.municipio, sucursal.localidad);
+    try {
+        if (typeof MostrarCargando === 'function') {
+            MostrarCargando('Obteniendo información...', false);
         }
 
-        if (sucursal.telefono) TelefonosUI.setValor("#sucursal-input-telefono", sucursal.telefono);
-        if (sucursal.telefono_adicional) TelefonosUI.setValor("#sucursal-input-telefono-adicional", sucursal.telefono_adicional);
-        if (sucursal.whatsapp) TelefonosUI.setValor("#sucursal-input-whatsapp", sucursal.whatsapp);
-    }
+        window.ID_Sucursal = await Enviar_Id(500); 
+        console.log("ID de sucursal obtenido:", window.ID_Sucursal);
 
-    // Inicialización
-    if (window.localidades) {
+        const esEdicion = window.ID_Sucursal !== null && window.ID_Sucursal !== undefined && window.ID_Sucursal !== '';
+
+        let promesas = [
+            CargarJSON('../../../src/json/data/localidades.json'),
+            window.AjaxService.enviar('../../../src/controllers/php/controllers/sucursales.php', {
+                accion: 'obtener_sucursales'
+            })
+        ];
+
+        if (esEdicion) {
+            promesas.push(
+                window.AjaxService.enviar('../../../src/controllers/php/controllers/sucursales.php', {
+                    accion: 'obtener_informacion_sucursal',
+                    id: window.ID_Sucursal
+                }).catch(() => null)
+            );
+        }
+
+        let resultados = await Promise.all(promesas);
+
+        let localidades = resultados[0];
+        let sucursales = resultados[1];
+        let sucursalEspecificaRespuesta = esEdicion ? resultados[2] : null;
+
+        if (typeof OcultarCargando === 'function') {
+            OcultarCargando();
+        }
+
+        window.localidades = localidades || [];
+
+        if (sucursales && sucursales.ok) {
+            window.sucursales = sucursales.data;
+        } else {
+            window.sucursales = Array.isArray(sucursales) ? sucursales : (sucursales.data || []);
+        }
+
+        if (esEdicion && sucursalEspecificaRespuesta) {
+            const respuestaData = sucursalEspecificaRespuesta.data || sucursalEspecificaRespuesta;
+            window.sucursalEdicion = respuestaData.sucursal || respuestaData;
+            console.log("Sucursal cargada para edición:", window.sucursalEdicion);
+        } else {
+            window.sucursalEdicion = null;
+        }
+
         InicializarGestionarSucursales();
-    }
 
-    $(document).off('datosListos.gestionSucursales').on('datosListos.gestionSucursales', function () {
-        InicializarGestionarSucursales();
-    });
+    } catch (error) {
+        if (typeof OcultarCargando === 'function') {
+            OcultarCargando();
+        }
+        console.error("Error al obtener los datos:", error);
+        if (typeof MostrarMensaje === 'function') {
+            MostrarMensaje('Ocurrió un error inesperado al conectar con el servidor.', false, false, false);
+        }
+    }
 });
 
 function ValidarSucursal() {
     let nombre = $('#sucursal-input-nombre').val().trim().toLowerCase();
     let tipo = CustomSelect.getValue('#select-custom-tipo-sucursal');
-    let idActual = window.sucursalEdicion ? window.sucursalEdicion.id : null;
+    let idActual = window.sucursalEdicion ? (window.sucursalEdicion.ID || window.sucursalEdicion.id) : null;
 
     if (window.sucursales && Array.isArray(window.sucursales)) {
         let existeDuplicado = window.sucursales.some(sucursal => {
-            if (idActual && sucursal.id == idActual) return false;
+            let sucursalId = sucursal.ID || sucursal.id;
+            if (idActual && sucursalId == idActual) return false;
 
             let nombreExistente = (sucursal.nombre || '').trim().toLowerCase();
             let tipoExistente = (sucursal.tipo || '').trim();
@@ -305,3 +372,32 @@ function ValidarSucursal() {
     return true;
 }
 
+function PrecargarDatosEdicion(sucursal) {
+    if (!sucursal) return;
+
+    $("#sucursal-input-nombre").val(sucursal.nombre || '');
+    
+    if (typeof CustomSelect !== 'undefined' && sucursal.tipo) {
+        CustomSelect.setValue('#select-custom-tipo-sucursal', sucursal.tipo);
+    }
+
+    $("#sucursal-input-calle").val(sucursal.calle || '');
+    $("#sucursal-input-num-ext").val(sucursal.numero_exterior || '');
+    $("#sucursal-input-num-int").val(sucursal.numero_interior || '');
+    $("#sucursal-input-cp").val(sucursal.codigo_postal || '');
+
+    if (sucursal.entidad_federativa && typeof CustomSelect !== 'undefined') {
+        CustomSelect.setValue('#select-estado', sucursal.entidad_federativa_clave);
+        CargarMunicipios(sucursal.entidad_federativa_clave, sucursal.municipio, sucursal.localidad);
+    }
+
+    if (typeof TelefonosUI !== 'undefined') {
+        if (sucursal.telefono) TelefonosUI.setValor("#sucursal-input-telefono", sucursal.telefono);
+        if (sucursal.telefono_adicional) TelefonosUI.setValor("#sucursal-input-telefono-adicional", sucursal.telefono_adicional);
+        if (sucursal.whatsapp) TelefonosUI.setValor("#sucursal-input-whatsapp", sucursal.whatsapp);
+    } else {
+        $("#sucursal-input-telefono").val(sucursal.telefono || '');
+        $("#sucursal-input-telefono-adicional").val(sucursal.telefono_adicional || '');
+        $("#sucursal-input-whatsapp").val(sucursal.whatsapp || '');
+    }
+}

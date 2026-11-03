@@ -6,11 +6,11 @@ window.EliminarService = (() => {
     /**
      * Elimina uno o múltiples registros enviando los IDs al controlador tras confirmar con MostrarPregunta.
      * 
-     * @param {string} url - URL del controlador endpoint.
-     * @param {string} accion - Nombre de la acción (ej. 'eliminar', 'eliminar_masivo').
-     * @param {number|string|Array} ids - Un ID único o un arreglo de IDs a eliminar.
-     * @param {Object} options - Opciones adicionales (título, mensaje, textoCargando, extraData, onSuccess, etc.).
-     * @returns {Promise} - Promesa que resuelve la respuesta del servidor o rechaza si se cancela/falla.
+     * @param {string} url URL del controlador endpoint.
+     * @param {string} accion Nombre de la acción (ej. 'eliminar', 'eliminar_masivo').
+     * @param {number|string|Array} ids Un ID único o un arreglo de IDs a eliminar.
+     * @param {Object} options Opciones adicionales (título, mensaje, textoCargando, extraData, onSuccess, etc.).
+     * @returns {Promise} Promesa que resuelve la respuesta del servidor o rechaza si se cancela/falla.
      */
     const ejecutar = async (url, accion, ids, options = {}) => {
         try {
@@ -83,12 +83,32 @@ window.EliminarService = (() => {
                 if (typeof MostrarMensaje === 'function') {
                     MostrarMensaje(response.mensaje || 'Elementos eliminados correctamente.', true, false, false);
                 }
+                
                 if (typeof options.onSuccess === 'function') {
                     options.onSuccess(response);
                 }
+
+                // Cerrar modal de confirmación actual antes de abrir el reporte de resumen
+                if (typeof ModalAPI !== 'undefined' && typeof ModalAPI.cerrar === 'function') {
+                    ModalAPI.cerrar();
+                }
+
+                // Abrir ventana Iframe con la información detallada del proceso
                 setTimeout(() => {
-                    ModalAPI.cerrar()
-                }, 1000);
+                    CrearVentanaIframe(
+                        'información del proceso',
+                        '../components/informacion.php',
+                        '620px',
+                        true,
+                        true,
+                        function (iframeElement) {
+                            console.log(iframeElement);
+                            // Enviamos la respuesta completa al iframe para renderizar stats y resultados
+                            $.messenger.send(iframeElement, 'informacion', response);
+                        }
+                    );
+                }, 300);
+
                 return response;
             } else {
                 const errorMsg = response?.mensaje || 'No se pudieron completar los cambios.';
@@ -108,9 +128,13 @@ window.EliminarService = (() => {
             if (typeof MostrarMensaje === 'function' && !error?.mensaje) {
                 MostrarMensaje(errorMsg, false, false, false);
             }
+            
             setTimeout(() => {
-                ModalAPI.cerrar()
+                if (typeof ModalAPI !== 'undefined' && typeof ModalAPI.cerrar === 'function') {
+                    ModalAPI.cerrar();
+                }
             }, 1000);
+            
             throw error;
         }
     };

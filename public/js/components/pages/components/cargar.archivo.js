@@ -16,7 +16,7 @@ $.messenger.on('datos_iniciales', function (data, sourceWindow, origin) {
     }
     if (window.mostrar_plantilla) {
         $("#contenedor-plantilla").removeClass('d-none');
-        window.direccion_plantilla = data.direccion_plantilla;
+        window.url_plantilla = data.url_plantilla;
         $("#btn-descargar-plantilla").off('click').on('click', function(e) {
             Evento_Click_Boton_Plantilla();
         });
@@ -208,7 +208,8 @@ async function Evento_Click_Boton_Plantilla() {
         // 2. Esperamos la promesa de la descarga usando 'await'
         const respuesta = await window.AjaxService.descargarArchivo(
             '../../../src/controllers/php/controllers/archivos.php', {
-                accion: window.direccion_plantilla,
+                accion: 'descargar_plantilla',
+                url:window.url_plantilla
             },
             false,
             'descarga.xlsx',
