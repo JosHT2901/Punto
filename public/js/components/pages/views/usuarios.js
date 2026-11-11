@@ -1,14 +1,21 @@
-window.carga_inicial = true;
+window.carga_inicial = window.carga_inicial !== undefined ? window.carga_inicial : true;
 window.UsuariosSelectionController = window.UsuariosSelectionController || CrearSeleccionController('Usuarios');
-window.filtrosAdicionales = window.filtrosAdicionales || {}; // Inicializamos como objeto global seguro
+window.filtrosAdicionales = window.filtrosAdicionales || {};
 
-$(document).off('app:inicializada').on('app:inicializada', async() => {
-    // Inicializamos window.filtrosAdicionales por seguridad
+$.messenger.off('usuario_editado').on('usuario_editado', function(data, sourceWindow, origin) {
+    if (data.status === "success") {
+        ModalAPI.cerrar();
+        CargarUsuarios();
+    }
+});
+
+// Usamos namespace único y evitamos múltiples bindings duplicados
+$(document).off('app:inicializada.usuariosInit datosListos.usuariosInit')
+  .on('app:inicializada.usuariosInit datosListos.usuariosInit', async (event) => {
+    
     window.filtrosAdicionales = window.filtrosAdicionales || {};
 
-    // 0. Sincronizamos los parámetros de la URL, rellenamos inputs, variables globales y el estado del MenuSelectorCheck
     if (window.UrlStateSyncService) {
-        window.carga_inicial = false;
         const parametrosUrl = UrlStateSyncService.sincronizarUrlAInputs((params) => {
             if (params.buscar !== undefined) {
                 window.busqueda = params.buscar;
@@ -29,9 +36,6 @@ $(document).off('app:inicializada').on('app:inicializada', async() => {
         });
 
         if (parametrosUrl) {
-            console.log("Parámetros decodificados de la URL:", parametrosUrl);
-
-            // 💡 SINCRONIZACIÓN INICIAL DE CHECKS EN MenuSelectorCheck DESDE LA URL
             if (window.MenuSelectorCheck && typeof window.MenuSelectorCheck.setSeleccionesPorKey === 'function') {
                 if (parametrosUrl.habilitado !== undefined && parametrosUrl.habilitado !== '') {
                     MenuSelectorCheck.setSeleccionesPorKey('f-estado', [String(parametrosUrl.habilitado)]);
@@ -41,23 +45,20 @@ $(document).off('app:inicializada').on('app:inicializada', async() => {
                 }
             }
         } else {
-            window.habilitado = 1; // Por defecto activos si no hay estado en URL
+            window.habilitado = 1;
         }
     }
 
-    // 1. Inicializamos el acordeón universal y funciones base (que cargan JSON y renderizan carrusel)
     if (typeof InicializarAcordeonUniversal === 'function') {
         InicializarAcordeonUniversal();
     }
     
     await FuncionesIniciales();
     
-    // Forzamos el refresco del carrusel para asegurar iluminación instantánea tras leer la URL
     if (window.FiltrosCarruselService) {
         FiltrosCarruselService.refrescar();
     }
 
-    // 2. Inicializamos el Buscador Universal independiente con los IDs estandarizados
     if (window.BuscadorUniversal) {
         BuscadorUniversal.crear({
             inputId: '#buscador-usuario',
@@ -76,14 +77,14 @@ $(document).off('app:inicializada').on('app:inicializada', async() => {
 
     CargarUsuarios();
 });
+
 function CargarUsuarios() {
     try {
         MostrarCargando('Obteniendo información...', false);
         window.pagina = window.pagina || 1;
         window.registrosPorPagina = window.registrosPorPagina || 25;
 
-        // O si tu buscador de usuarios tiene otro ID, ajústalo aquí (ej. #buscador-usuario)
-        const valorInputBuscador = $('#buscador-usuario').val()
+        const valorInputBuscador = $('#buscador-usuario').val();
         if (valorInputBuscador !== undefined) {
             window.busqueda = valorInputBuscador;
         }
@@ -94,9 +95,6 @@ function CargarUsuarios() {
             buscar: window.busqueda || ''
         };
 
-        console.log("Enviando filtros a API de Usuarios:", filtros);
-
-        // 🌟 Recuperamos el orden actual desde el estado global (o por defecto ID DESC)
         const orden = window.ordenUsuarios || {
             columna: 'ID',
             direccion: 'DESC'
@@ -106,10 +104,9 @@ function CargarUsuarios() {
             .then(response => {
                 OcultarCargando();
                 if (response && response.ok) {
-                    console.log("Respuesta API Usuarios:", response);
                     const listaDatos = response.data?.datos || [];
-
-                    // 🌟 GUARDAR EL UNIVERSO TOTAL DE IDS FILTRADOS CON NORMALIZACIÓN A STRING
+                    window.usuarioActualID = response.data.usuario_actual_id;
+                    
                     const idsCrudos = response.data?.todos_los_ids || listaDatos.map(u => u.ID || u.id);
                     window.todosLosIdsFiltrados = idsCrudos.map(id => String(id));
 
@@ -137,12 +134,10 @@ function CargarUsuarios() {
                                 contenedor: '#contenedor-paginador',
                                 paginacion: response.data.paginacion,
                                 callbackPagina: (nuevaPagina) => {
-                                    console.log("Cambiando a la página:", nuevaPagina);
                                     window.pagina = nuevaPagina;
                                     CargarUsuarios();
                                 },
                                 callbackRegistros: (nuevoLimite) => {
-                                    console.log("Cambiando registros por página a:", nuevoLimite);
                                     window.registrosPorPagina = parseInt(nuevoLimite, 10);
                                     window.pagina = 1;
                                     CargarUsuarios();
@@ -153,11 +148,13 @@ function CargarUsuarios() {
                         $("#contador-total").text(`${listaDatos.length} usuario${listaDatos.length > 1 ? 's' : ''}`);
 
                         if (window.CardTemplateService) {
+                            const tienePermisoGeneral = (window.permiso_editar || window.permiso_eliminar || window.permiso_editar_permisos);
                             CardTemplateService.render("#contenedor-tarjetas", listaDatos, {
                                 idKey: 'ID',
-                                tituloKey: 'nombre_completo', // O asegúrate de que el backend devuelva esta propiedad concatenada (nombre + apellidos)
+                                tituloKey: 'nombre_completo',
                                 badgeKey: 'nombre_usuario',
-                                permisoOpciones: true,
+                                esActualKey: 'es_usuario_actual',
+                                permisoOpciones: tienePermisoGeneral,
                                 callbackOpciones: 'AbrirMenuOpcionesUsuario(event, ${ID}, this)',
                                 configuracionCampos: [
                                     { label: 'Usuario', columna: 'nombre_usuario' },
@@ -166,20 +163,18 @@ function CargarUsuarios() {
                                     { label: 'Teléfono', columna: 'telefono' },
                                     { label: 'CURP', columna: 'curp' },
                                     { label: 'RFC', columna: 'rfc' },
-                                    { label:'Fecha de nacimiento',columna:'fecha_nacimiento'},
+                                    { label: 'Fecha de nacimiento', columna: 'fecha_nacimiento' },
                                     { label: 'Registrado', columna: 'Fecha_registro' }
                                 ]
                             });
                         }
                     }
 
-                    // 🌟 SINCRONIZAR DOM: Marca automáticamente los checkboxes si existe controlador de selección de usuarios
                     if (window.UsuariosSelectionController && typeof window.UsuariosSelectionController.sincronizarDOM === 'function') {
-                        window.UsuariosSelectionController.sincronizarDOM();
-                    } else if (window.UsuariosSelectionController && typeof window.UsuariosSelectionController.sincronizarDOM === 'function') {
                         window.UsuariosSelectionController.sincronizarDOM();
                     }
 
+                    // Establecemos carga_inicial a falso una única vez aquí de forma definitiva
                     window.carga_inicial = false;
                 }
             })
@@ -194,12 +189,12 @@ function CargarUsuarios() {
         MostrarMensaje('Ocurrió un error', false, false, false);
     }
 }
+
 async function FuncionesIniciales() {
     if (window.CarouselButtonsNav && typeof botonesToolbarConfig !== 'undefined') {
         CarouselButtonsNav.render('#viewer-toolbar', botonesToolbarConfig);
     }
 
-    // 2. RENDERIZA EL CARRUSEL CON LAS OPCIONES YA CARGADAS
     if (window.FiltrosCarruselService && typeof filtrosConfiguracionUsuarios !== 'undefined') {
         FiltrosCarruselService.render(
             '#contenedor-filtros', 
@@ -276,7 +271,6 @@ async function FuncionesIniciales() {
         );
     }
 
-    // 3. Inicialización del controlador de selección conectado a la barra flotante
     if (window.UsuariosSelectionController && window.SelectionBarService) {
         window.UsuariosSelectionController.init({
             scope: $("#contenedor-resultados"),
@@ -294,6 +288,7 @@ async function FuncionesIniciales() {
                         id: 'btn-eliminar-masivo',
                         icon: 'vf-ic_fluent_delete_24_filled',
                         title: 'Eliminar seleccionados',
+                        permiso: 'eliminar_usuarios',
                         onclick: 'EliminarUsuariosMasivos()'
                     },
                     {
@@ -307,7 +302,6 @@ async function FuncionesIniciales() {
         });
     }
 
-    // 4. Configuración del menú desplegable de selección masiva (Página actual vs Todos)
     $(document).off('click.abrirMenuSel').on('click.abrirMenuSel', '#btn-menu-seleccion', function(e) {
         e.preventDefault();
         e.stopPropagation();
@@ -350,7 +344,6 @@ async function FuncionesIniciales() {
         });
     });
 
-    // 5. Menú de ordenamiento corregido
     $(document).off('click.abrirMenuOrden').on('click.abrirMenuOrden', '#btn-ordenar-registros', function(e) {
         Abrir_Menu_Opciones_Global(e, window.opcionesMenuOrdenar);
     });
@@ -361,19 +354,15 @@ function AbrirMenuOpcionesUsuario(event, idUsuario, elementoButton) {
         event.stopPropagation();
     }
 
-    // 1. Obtener los parámetros actuales desde la URL cifrada
     const parametrosUrl = (window.UrlStateSyncService && typeof window.UrlStateSyncService.obtenerParametros === 'function')
         ? window.UrlStateSyncService.obtenerParametros() || {}
         : {};
 
     const habilitado = parametrosUrl.habilitado !== undefined ? parseInt(parametrosUrl.habilitado) : 1;
-
-    // 2. Seleccionar el arreglo de opciones según el estatus en la URL
     const opcionesBase = (habilitado === 0) 
         ? (window.opcionesUsuarioDeshabilitado || []) 
         : (window.opcionesUsuarioHabilitado || []);
 
-    // 3. Filtrar las opciones según los permisos del usuario
     const opcionesPermitidas = opcionesBase.filter(op => {
         if (!op.permiso) return true;
         return window.PermisosService && typeof window.PermisosService.tienePermiso === 'function' 
@@ -381,12 +370,8 @@ function AbrirMenuOpcionesUsuario(event, idUsuario, elementoButton) {
             : true;
     });
 
-    if (opcionesPermitidas.length === 0) {
-        console.warn("No hay opciones disponibles para este usuario con los permisos actuales.");
-        return;
-    }
+    if (opcionesPermitidas.length === 0) return;
 
-    // 4. Mapear los callbacks para inyectar el ID y asegurar la actualización del estado cifrado
     const opcionesConId = opcionesPermitidas.map(op => ({
         ...op,
         callback: () => {
@@ -407,10 +392,82 @@ function AbrirMenuOpcionesUsuario(event, idUsuario, elementoButton) {
         }
     }));
 
-    // 5. Abrir el menú global de opciones
     if (typeof Abrir_Menu_Opciones_Global === 'function') {
         Abrir_Menu_Opciones_Global(elementoButton, opcionesConId);
-    } else {
-        console.warn("Abrir_Menu_Opciones_Global no está disponible.");
     }
+}
+
+function Editar_Usuario(id, seccion) {
+    const tienePermiso = (window.PermisosService && typeof window.PermisosService.tienePermiso === 'function') 
+        ? PermisosService.tienePermiso('editar_usuarios') 
+        : true;
+
+    if (!tienePermiso) {
+        MostrarAlerta('No tienes permiso para editar', 230, false);
+        return; 
+    }
+
+    AbrirModalAutenticacion(false, function(datosAuth) {
+        window.permiso_edicion = true;
+
+        CrearVentanaIframe(
+            'Editar usuario',
+            '../components/editar.usuario.php',
+            '620px',
+            true,
+            true,
+            function (iframeElement) {
+                let datosIframe = {
+                    id: id,
+                    seccion: seccion
+                };
+                $.messenger.send(iframeElement, 'datos_iniciales', datosIframe);
+            }
+        );
+    });
+}
+
+async function Deshabilitar_Usuario(id_usuario) {
+    const confirmado = await MostrarPregunta({
+        titulo: 'Deshabilitar usuario',
+        texto: `¿Estás seguro de que deseas deshabilitar a este usuario? Esta acción no se puede deshacer.`,
+        icono: 'vf-ic_fluent_delete_24_filled',
+        confirmarText: 'Sí, eliminar',
+        cancelarText: 'Cancelar',
+        colorConfirmar: 'btn-danger',
+        altura: 350
+    });
+
+    if (!confirmado) return false;
+    Deshabilitar_Usuario_AJAX(id_usuario);
+}
+
+async function Eliminar_Usuario_Permanente(id_usuario) {
+    const confirmado = await MostrarPregunta({
+        titulo: 'Eliminación Permanente',
+        texto: '¿Estás completamente seguro? Esta acción borrará al usuario de forma definitiva y no se puede deshacer.',
+        icono: 'vf-ic_fluent_delete_24_filled',
+        confirmarText: 'Sí, elimina',
+        cancelarText: 'Cancelar',
+        colorConfirmar: 'btn-danger',
+        altura: 370
+    });
+
+    if (!confirmado) return false;
+    Eliminar_Usuario_Permanente_AJAX(id_usuario);
+}
+
+async function Habilitar_Usuario(id_usuario) {
+    const confirmado = await MostrarPregunta({
+        titulo: 'Habilitar usuario',
+        texto: '¿Estás seguro de que deseas habilitar el acceso a este usuario?',
+        icono: 'vf-ic_fluent_checkmark_24_filled',
+        confirmarText: 'Sí, habilitar',
+        cancelarText: 'Cancelar',
+        colorConfirmar: 'btn-primary',
+        altura: 350
+    });
+
+    if (!confirmado) return false;
+    Habilitar_Usuario_AJAX(id_usuario);
 }

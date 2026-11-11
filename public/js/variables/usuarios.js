@@ -44,7 +44,13 @@ window.botonesToolbarConfig = [{
     id: 'usuario-boton-nuevo',
     icon: 'vf-ic_fluent_add_24_filled',
     onClick: (e, $btn) => {
-        
+        CrearVentanaIframe(
+            'Nuevo usuario',
+            '../components/crear.usuario.php',
+            '600px',
+            true,
+            true
+        );
     }
 },
 {
@@ -61,30 +67,60 @@ window.botonesToolbarConfig = [{
 // Opciones para usuarios HABILITADOS (activos)
 window.opcionesUsuarioHabilitado = [
     {
-        texto: 'Editar usuario',
-        icono: 'vf-ic_fluent_edit_24_filled text-primary',
+        texto: 'Editar información básica',
+        icono: 'vf-ic_fluent_person_24_filled',
         permiso: 'editar_usuarios',
         callback: (id, elemento) => {
-            console.log("Editando usuario ID:", id);
-            // Ejemplo: AbrirModalEditarUsuario(id);
+            Editar_Usuario(id,'básica')
+        }
+    },
+    {
+        texto: 'Editar identificación',
+        icono: 'vf-ic_fluent_share_screen_person_24_filled',
+        permiso: 'editar_usuarios',
+        callback: (id, elemento) => {
+            Editar_Usuario(id,'identidad')
+        }
+    },
+    {
+        texto: 'Editar contacto',
+        icono: 'vf-ic_fluent_call_24_filled',
+        permiso: 'editar_usuarios',
+        callback: (id, elemento) => {
+            Editar_Usuario(id,'contacto')
+        }
+    },
+    {
+        texto: 'Reestablecer contraseña',
+        icono: 'vf-ic_fluent_key_24_filled',
+        permiso: 'editar_usuarios',
+        callback: (id, elemento) => {
+            Solicitar_Correo_Reestablecimiento(id,'password')
+        }
+    },
+    {
+        texto: 'Reestablecer PIN',
+        icono: 'vf-ic_fluent_password_24_filled',
+        permiso: 'editar_usuarios',
+        callback: (id, elemento) => {
+            Solicitar_Correo_Reestablecimiento(id,'pin')
         }
     },
     {
         texto: 'Gestionar permisos',
         icono: 'vf-ic_fluent_shield_keyhole_24_filled text-warning',
-        permiso: 'gestionar_permisos_usuarios',
+        permiso: 'editar_permisos_usuarios',
         callback: (id, elemento) => {
-            console.log("Gestionando permisos para usuario ID:", id);
-            // Ejemplo: AbrirModalPermisosUsuario(id);
+            const id_cifrado = Cifrar_Payload(id);
+            window.location.href = 'permisos.usuarios.php?id=' + encodeURIComponent(id_cifrado);
         }
     },
     {
         texto: 'Deshabilitar usuario',
         icono: 'vf-ic_fluent_prohibited_24_filled text-danger',
-        permiso: 'deshabilitar_usuarios',
+        permiso: 'eliminar_usuarios',
         callback: (id, elemento) => {
-            console.log("Deshabilitando usuario ID:", id);
-            // Ejemplo: DeshabilitarUsuario(id);
+            Deshabilitar_Usuario(id)
         }
     }
 ];
@@ -94,10 +130,9 @@ window.opcionesUsuarioDeshabilitado = [
     {
         texto: 'Habilitar usuario',
         icono: 'vf-ic_fluent_checkmark_circle_24_filled text-success',
-        permiso: 'habilitar_usuarios',
+        permiso: 'editar_usuarios',
         callback: (id, elemento) => {
-            console.log("Habilitando usuario ID:", id);
-            // Ejemplo: HabilitarUsuario(id);
+            Habilitar_Usuario(id)
         }
     },
     {
@@ -105,8 +140,8 @@ window.opcionesUsuarioDeshabilitado = [
         icono: 'vf-ic_fluent_delete_24_filled text-danger',
         permiso: 'eliminar_usuarios',
         callback: (id, elemento) => {
-            console.log("Eliminando usuario ID:", id);
-            // Ejemplo: EliminarUsuarioPermanente(id);
+            Eliminar_Usuario_Permanente(id)
         }
     }
 ];
+

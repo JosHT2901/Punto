@@ -13,8 +13,8 @@
     ?>
 </head>
 
-<body class="h-p-100">
-    <main class="w-400 h-vh-100 mx-auto overflow-auto flex justify-center items-center">
+<body class="h-p-100 min-h-600 custom-scroll">
+    <main class="w-400 h-p-100 mx-auto overflow-auto flex justify-center items-center">
         <?php 
             echo $contenido_columna;
         ?>

@@ -10,8 +10,6 @@ $configModulo = [
 $tituloPage = $configModulo['titulo'];
 ob_start();
 ?>
-<div class="w-p-100">
-</div>
 <?php
 // 3. Guardamos todo el HTML anterior en la variable $contenido
 $contenido_protegido = ob_get_clean();

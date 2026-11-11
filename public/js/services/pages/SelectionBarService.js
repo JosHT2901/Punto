@@ -1,5 +1,5 @@
 /* =============================================
-    SERVICIO: SELECTION BAR SERVICE (Ultra Simple y Robusta)
+    SERVICIO: SELECTION BAR SERVICE (Reutilizable y Agnóstico)
 ============================================= */
 window.SelectionBarService = (() => {
 
@@ -9,18 +9,26 @@ window.SelectionBarService = (() => {
             barra = '#barra-seleccion',
             contador = '#contador-container',
             contenedorBotones = '#acciones-masivas-container',
-            botones = []
+            // Ahora aceptamos un arreglo estático o una función callback que devuelva los botones en tiempo real
+            botones = [] 
         } = opciones;
 
         const $barra = $(barra);
         const $cont = $(contador);
         const $btnCont = $(contenedorBotones);
 
-        // 1. Inyectar botones con soporte para permisos opcionales, iconos y etiquetas
-        if ($btnCont.length && Array.isArray(botones)) {
-            const botonesHtml = botones
+        // Función interna para resolver y renderizar los botones actuales
+        const renderizarBotonesDinamicos = () => {
+            if (!$btnCont.length) return;
+
+            // Si "botones" es una función (ej. () => obtenerBotonesSegunEstado()), la ejecutamos para obtenerlos dinámicamente; si es un arreglo, lo usamos directamente.
+            const listaBotones = typeof botones === 'function' ? botones() : botones;
+
+            if (!Array.isArray(listaBotones)) return;
+
+            const botonesHtml = listaBotones
                 .filter(btn => {
-                    if (!btn.permiso) return true;
+                    if (!btn.permiso) return true; 
                     return window.PermisosService && typeof window.PermisosService.tienePermiso === 'function' 
                         ? PermisosService.tienePermiso(btn.permiso) 
                         : true;
@@ -33,12 +41,17 @@ window.SelectionBarService = (() => {
                 `).join('');
             
             $btnCont.html(botonesHtml);
-        }
+        };
 
-        // 2. Función para refrescar la barra de selección y el contador
+        // Renderizamos los botones al conectar inicialmente
+        renderizarBotonesDinamicos();
+
+        // Función para refrescar la barra de selección y el contador
         const refrescarUI = () => {
+            // Aseguramos que los botones se revalúen por si el estado del módulo cambió antes de refrescar
+            renderizarBotonesDinamicos();
+
             const idsSeleccionados = controller.getSeleccionados();
-            
             const totalSeleccionados = idsSeleccionados.length;
             
             if (totalSeleccionados > 0) {
@@ -51,21 +64,21 @@ window.SelectionBarService = (() => {
                     `);
                 }
 
-                // 🌟 Lógica clave: Detectar si entre los elementos seleccionados hay alguno que sea la sucursal actual (identificado por la clase o atributo visual de la tarjeta)
-                const contieneSucursalActual = idsSeleccionados.some(id => {
+                // Detección genérica de elemento actual (si el módulo usa la clase card-actual / card-sucursal-actual)
+                const contieneElementoActual = idsSeleccionados.some(id => {
                     const $card = $(`#contenedor-tarjetas .card[data-id="${id}"]`);
-                    // Verificamos si la tarjeta tiene la clase de sucursal actual
-                    return $card.hasClass('card-sucursal-actual');
+                    return $card.hasClass('card-actual') || $card.hasClass('card-sucursal-actual');
                 });
 
-                // Localizamos el botón de eliminación masiva en el contenedor de botones
-                const $btnEliminarMasivo = $btnCont.find('#btn-eliminar-masivo, [onclick*="Eliminar_Masivo"]');
+                const listaBotones = typeof botones === 'function' ? botones() : botones;
+                const tienePermisoEliminar = listaBotones.some(b => b.permiso?.includes('eliminar') && window.PermisosService?.tienePermiso(b.permiso)) 
+                    || !listaBotones.some(b => b.permiso?.includes('eliminar'));
+
+                const $btnEliminarMasivo = $btnCont.find('#btn-eliminar-masivo, [onclick*="Eliminar"]');
                 
-                if (contieneSucursalActual) {
-                    // Ocultar completamente el botón de eliminar masivo si se seleccionó la sucursal actual
+                if (contieneElementoActual || !tienePermisoEliminar) {
                     $btnEliminarMasivo.addClass('d-none');
                 } else {
-                    // Mostrarlo si ninguna de las seleccionadas es la sucursal actual
                     $btnEliminarMasivo.removeClass('d-none');
                 }
 
@@ -77,9 +90,7 @@ window.SelectionBarService = (() => {
             }
         };
 
-        // Sincronizar el estado inicial de la UI al conectar
         refrescarUI();
-
         return refrescarUI;
     };
 

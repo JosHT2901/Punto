@@ -14,31 +14,25 @@ $(document).ready(async function () {
 
         window.monedas = monedasResponse;
         
-        // Manejo seguro por si la API retorna los datos directamente o envueltos en .data
-        const listaVariables = variablesResponse?.data || variablesResponse || [];
-        window.variables = listaVariables;
-        
-        window.variablesMap = {};
-        if (Array.isArray(listaVariables)) {
-            listaVariables.forEach(item => {
-                if (item.v_clave) {
-                    window.variablesMap[item.v_clave] = item.v_valor;
-                }
-            });
-        }
+        // La estructura de la respuesta es { variables: Array(...), total: ... }
+        // Verificamos de forma segura si viene en .variables, .data o directamente en la respuesta
+        const contenedorDatos = variablesResponse?.variables ? variablesResponse : (variablesResponse?.data || variablesResponse);
+        const listaVariables = Array.isArray(contenedorDatos?.variables) 
+            ? contenedorDatos.variables 
+            : (Array.isArray(contenedorDatos) ? contenedorDatos : [contenedorDatos]);
 
-        // Auto-llenar los campos del formulario con los valores obtenidos de la BD
-        if (window.variablesMap['simbolo_moneda'] && typeof CustomSelect !== 'undefined') {
-            CustomSelect.setValue("#select-moneda", window.variablesMap['simbolo_moneda']);
-        }
-        if (window.variablesMap['codigo_iso'] && typeof CustomSelect !== 'undefined') {
-            CustomSelect.setValue("#select-codigo-iso", window.variablesMap['codigo_iso']);
-        }
-        if (window.variablesMap['redondear_precios'] !== undefined) {
-            $("#variables-check-round").prop('checked', window.variablesMap['redondear_precios'] == '1');
-        }
-        if (window.variablesMap['bloquear_stock_cero'] !== undefined) {
-            $("#variables-check-limit").prop('checked', window.variablesMap['bloquear_stock_cero'] == '1');
+        window.variables = listaVariables;
+        window.variablesMap = {};
+        console.log("Variables cargadas:", window.variables);
+
+        listaVariables.forEach(item => {
+            if (item && item.v_clave) {
+                window.variablesMap[item.v_clave] = item.v_valor;
+            }
+        });
+
+        if (typeof OcultarCargando === 'function') {
+            OcultarCargando();
         }
 
         // Disparamos un evento personalizado opcional por si otros scripts escuchan cuando los datos estén listos
@@ -46,7 +40,9 @@ $(document).ready(async function () {
 
     } catch (error) {
         console.error("Error crítico al inicializar los datos:", error);
-        OcultarCargando();
+        if (typeof OcultarCargando === 'function') {
+            OcultarCargando();
+        }
         if (typeof MostrarMensaje === 'function') {
             MostrarMensaje('Ocurrió un error inesperado al cargar la información inicial.', false, false, false);
         }

@@ -62,7 +62,8 @@ window.botonesToolbarConfig = [
                         multiple: false,
                         mostrar_plantilla: true,
                         url_plantilla:'/../../../../public/docs/Sucursales.xlsx',
-                        tipo_archivos: '.xlsx,.xls,.csv'
+                        tipo_archivos: '.xlsx,.xls,.csv',
+                        nombre_plantilla:'plantilla_sucursales.xlsx'
                     };
 
                     // Enviamos al iframe recién creado
@@ -154,3 +155,29 @@ window.opcionesMenuOrdenar = [
         }
     }
 ];
+
+window.botones_opciones_habilitado= [
+    {
+        id: 'btn-eliminar-masivo',
+        icon: 'vf-ic_fluent_delete_24_filled',
+        title: 'Eliminar seleccionadas',
+        permiso:'eliminar_sucursales',
+        onclick: 'Eliminar_Masivo_Sucursales()'
+    },
+    {
+        id: 'btn-exportar-masivo',
+        icon: 'vf-ic_fluent_arrow_export_24_filled',
+        title: 'Exportar seleccionadas',
+        onclick: 'ExportarSucursalesMasivas()'
+    }
+]
+
+window.botones_opciones_deshabilitado=[
+    {
+        id: 'btn-habilitar-masivo',
+        icon: 'vf-ic_fluent_arrow_clockwise_24_filled',
+        title: 'Habiltar seleccionados',
+        permiso:'editar_sucursales',
+        onclick: 'Habilitar_Masivo_Sucursales()'
+    }
+]

@@ -581,3 +581,272 @@ function Eliminar_Logo_Empresa(array $datos): void {
         JsonResponse::error($e->getMessage() ?: 'Ocurrió un error inesperado en el servidor.', null, 500);
     }
 }
+function Obtener_Ajustes_Smtp(array $params = []): void {
+    try {
+        // 1. Intentar obtener los ajustes directamente desde las variables de entorno (.env)
+        // Usamos getenv o $_ENV, con respaldos vacíos o valores por defecto seguros
+        $host     = $_ENV['SMTP_HOST'] ?? getenv('SMTP_HOST') ?: '';
+        $port     = $_ENV['SMTP_PORT'] ?? getenv('SMTP_PORT') ?: 587;
+        $secure   = $_ENV['SMTP_SECURE'] ?? getenv('SMTP_SECURE') ?: 'tls';
+        $username = $_ENV['SMTP_USERNAME'] ?? getenv('SMTP_USERNAME') ?: '';
+        $password = Descifrar_Payload($_ENV['SMTP_PASSWORD'] ?? getenv('SMTP_PASSWORD')) ?: '';
+        $fromName = $_ENV['SMTP_FROM_NAME'] ?? getenv('SMTP_FROM_NAME') ?: '';
+
+        // Opcional: limpiar comillas si el .env guardó el from_name entre comillas dobles
+        $fromName = trim($fromName, '"\'');
+
+        // 2. Validar si al menos hay datos mínimos configurados para saber si "existe" configuración
+        $existeConfiguracion = !empty($host) && !empty($username);
+
+        // 3. Retornamos siempre una respuesta exitosa (sin lanzar errores si falta algo)
+        JsonResponse::success("Ajustes SMTP obtenidos correctamente", [
+            'host'      => $host,
+            'port'      => (int)$port,
+            'secure'    => $secure,
+            'username'  => $username,
+            'password'  => $password,
+            'from_name' => $fromName,
+            'existe'    => $existeConfiguracion
+        ]);
+
+    } catch (Throwable $e) {
+        // Registramos el error internamente por si ocurre algo inesperado
+        error_log("Error crítico al obtener los ajustes SMTP del entorno: " . $e->getMessage());
+        
+        // Retornamos una respuesta segura de éxito con datos vacíos para no romper la interfaz visual
+        JsonResponse::success("No se pudieron cargar los ajustes SMTP, se usan valores por defecto", [
+            'host'      => '',
+            'port'      => 587,
+            'secure'    => 'tls',
+            'username'  => '',
+            'password'  => '',
+            'from_name' => '',
+            'existe'    => false
+        ]);
+    }
+}
+
+function Guardar_Ajustes_Smtp(array $data): void {
+    try {
+        // 1. Validar y sanitizar los datos recibidos desde el cliente
+        $host     = trim($data['host'] ?? '');
+        $port     = filter_var($data['port'] ?? 587, FILTER_VALIDATE_INT);
+        $secure   = trim($data['secure'] ?? 'tls');
+        $username = trim($data['username'] ?? '');
+        $password = $data['password'] ?? ''; 
+        $fromName = trim($data['from_name'] ?? 'Etcétera de México');
+
+        if (empty($host) || empty($username) || empty($password)) {
+            JsonResponse::error("El host, el usuario y la contraseña son obligatorios.", null, 400);
+            return;
+        }
+
+        if ($port === false || $port <= 0) {
+            JsonResponse::error("El puerto SMTP especificado no es válido.", null, 400);
+            return;
+        }
+
+        // 👉 2. CIFRAR LA CONTRASEÑA usando tu función AES-256-CBC
+        $passwordCifrada = Cifrar_Payload($password);
+
+        // 3. Ruta exacta y robusta al archivo .env (ubicado en src/env/.env)
+        $rutaEnv = realpath(__DIR__ . '/../../../env') . '/.env';
+        if (!file_exists($rutaEnv)) {
+            $rutaEnv = __DIR__ . '/../../env/.env';
+        }
+
+        if (!file_exists($rutaEnv)) {
+            $directorioEnv = dirname($rutaEnv);
+            if (!is_dir($directorioEnv)) {
+                mkdir($directorioEnv, 0755, true);
+            }
+            file_put_contents($rutaEnv, "# Archivo de entorno\n");
+        }
+
+        $contenidoEnv = file_get_contents($rutaEnv);
+        if ($contenidoEnv === false) {
+            JsonResponse::error("No se pudo leer el archivo de entorno (.env). Verifique permisos.", null, 500);
+            return;
+        }
+
+        // 4. Mapeo de las variables. ENVOLVEMOS ENTRE COMILLAS para evitar errores de espacios en blanco al parsear.
+        $variablesNuevas = [
+            'SMTP_HOST'       => $host,
+            'SMTP_USERNAME'   => $username,
+            'SMTP_PASSWORD'   => "\"{$passwordCifrada}\"",
+            'SMTP_PORT'       => (string)$port,
+            'SMTP_SECURE'     => $secure,
+            'SMTP_FROM_EMAIL' => $username,
+            'SMTP_FROM_NAME'  => "\"{$fromName}\"" // <-- Evita el error "unexpected whitespace" con nombres compuestos
+        ];
+
+        // 5. Actualizar línea por línea en el .env
+        $lineas = explode("\n", str_replace(["\r\n", "\r"], "\n", $contenidoEnv));
+        foreach ($variablesNuevas as $clave => $valor) {
+            $encontrado = false;
+            foreach ($lineas as &$linea) {
+                $lineaTrim = trim($linea);
+                if (str_starts_with($lineaTrim, '#')) continue;
+                if (str_starts_with($lineaTrim, $clave . '=')) {
+                    $linea = "{$clave}={$valor}";
+                    $encontrado = true;
+                    break;
+                }
+            }
+            unset($linea);
+
+            if (!$encontrado) {
+                $lineas[] = "{$clave}={$valor}";
+            }
+        }
+
+        $nuevoContenidoEnv = implode("\n", $lineas);
+        $resultadoEscritura = file_put_contents($rutaEnv, $nuevoContenidoEnv, LOCK_EX);
+
+        if ($resultadoEscritura === false) {
+            JsonResponse::error("No se pudo escribir en el archivo .env. Verifique permisos.", null, 500);
+            return;
+        }
+
+        JsonResponse::success("Configuración SMTP guardada y cifrada correctamente en el .env", [
+            'host'      => $host,
+            'port'      => $port,
+            'secure'    => $secure,
+            'username'  => $username,
+            'from_name' => $fromName
+        ]);
+
+    } catch (Throwable $e) {
+        error_log("Error crítico al guardar los ajustes SMTP: " . $e->getMessage());
+        JsonResponse::error("Ocurrió un error al guardar los ajustes SMTP", $e->getMessage(), 500);
+    }
+}
+
+function Obtener_Ajustes_Imap(array $params = []): void {
+    try {
+        // 1. Intentar obtener los ajustes IMAP directamente desde las variables de entorno (.env)
+        $host     = $_ENV['IMAP_HOST'] ?? getenv('IMAP_HOST') ?: '';
+        $port     = $_ENV['IMAP_PORT'] ?? getenv('IMAP_PORT') ?: 993;
+        $secure   = $_ENV['IMAP_SECURE'] ?? getenv('IMAP_SECURE') ?: 'tls';
+        $username = $_ENV['IMAP_USERNAME'] ?? getenv('IMAP_USERNAME') ?: '';
+        $password = Descifrar_Payload($_ENV['IMAP_PASSWORD'] ?? getenv('IMAP_PASSWORD')) ?: '';
+
+        // 2. Validar si al menos hay datos mínimos configurados
+        $existeConfiguracion = !empty($host) && !empty($username);
+
+        // 3. Retornamos respuesta exitosa
+        JsonResponse::success("Ajustes IMAP obtenidos correctamente", [
+            'host'     => $host,
+            'port'     => (int)$port,
+            'secure'   => $secure,
+            'username' => $username,
+            'password' => $password,
+            'existe'   => $existeConfiguracion
+        ]);
+
+    } catch (Throwable $e) {
+        error_log("Error crítico al obtener los ajustes IMAP del entorno: " . $e->getMessage());
+        
+        JsonResponse::success("No se pudieron cargar los ajustes IMAP, se usan valores por defecto", [
+            'host'     => '',
+            'port'     => 993,
+            'secure'   => 'tls',
+            'username' => '',
+            'password' => '',
+            'existe'   => false
+        ]);
+    }
+}
+
+function Guardar_Ajustes_Imap(array $data): void {
+    try {
+        // 1. Validar y sanitizar los datos recibidos desde el cliente
+        $host     = trim($data['host'] ?? '');
+        $port     = filter_var($data['port'] ?? 993, FILTER_VALIDATE_INT);
+        $secure   = trim($data['secure'] ?? 'tls');
+        $username = trim($data['username'] ?? '');
+        $password = $data['password'] ?? ''; 
+
+        if (empty($host) || empty($username) || empty($password)) {
+            JsonResponse::error("El host, el usuario y la contraseña son obligatorios.", null, 400);
+            return;
+        }
+
+        if ($port === false || $port <= 0) {
+            JsonResponse::error("El puerto IMAP especificado no es válido.", null, 400);
+            return;
+        }
+
+        // 2. CIFRAR LA CONTRASEÑA
+        $passwordCifrada = Cifrar_Payload($password);
+
+        // 3. Ruta exacta al archivo .env
+        $rutaEnv = realpath(__DIR__ . '/../../../env') . '/.env';
+        if (!file_exists($rutaEnv)) {
+            $rutaEnv = __DIR__ . '/../../env/.env';
+        }
+
+        if (!file_exists($rutaEnv)) {
+            $directorioEnv = dirname($rutaEnv);
+            if (!is_dir($directorioEnv)) {
+                mkdir($directorioEnv, 0755, true);
+            }
+            file_put_contents($rutaEnv, "# Archivo de entorno\n");
+        }
+
+        $contenidoEnv = file_get_contents($rutaEnv);
+        if ($contenidoEnv === false) {
+            JsonResponse::error("No se pudo leer el archivo de entorno (.env). Verifique permisos.", null, 500);
+            return;
+        }
+
+        // 4. Mapeo de las variables IMAP
+        $variablesNuevas = [
+            'IMAP_HOST'     => $host,
+            'IMAP_USERNAME' => $username,
+            'IMAP_PASSWORD' => "\"{$passwordCifrada}\"",
+            'IMAP_PORT'     => (string)$port,
+            'IMAP_SECURE'   => $secure
+        ];
+
+        // 5. Actualizar línea por línea en el .env
+        $lineas = explode("\n", str_replace(["\r\n", "\r"], "\n", $contenidoEnv));
+        foreach ($variablesNuevas as $clave => $valor) {
+            $encontrado = false;
+            foreach ($lineas as &$linea) {
+                $lineaTrim = trim($linea);
+                if (str_starts_with($lineaTrim, '#')) continue;
+                if (str_starts_with($lineaTrim, $clave . '=')) {
+                    $linea = "{$clave}={$valor}";
+                    $encontrado = true;
+                    break;
+                }
+            }
+            unset($linea);
+
+            if (!$encontrado) {
+                $lineas[] = "{$clave}={$valor}";
+            }
+        }
+
+        $nuevoContenidoEnv = implode("\n", $lineas);
+        $resultadoEscritura = file_put_contents($rutaEnv, $nuevoContenidoEnv, LOCK_EX);
+
+        if ($resultadoEscritura === false) {
+            JsonResponse::error("No se pudo escribir en el archivo .env. Verifique permisos.", null, 500);
+            return;
+        }
+
+        JsonResponse::success("Configuración IMAP guardada y cifrada correctamente en el .env", [
+            'host'     => $host,
+            'port'     => $port,
+            'secure'   => $secure,
+            'username' => $username
+        ]);
+
+    } catch (Throwable $e) {
+        error_log("Error crítico al guardar los ajustes IMAP: " . $e->getMessage());
+        JsonResponse::error("Ocurrió un error al guardar los ajustes IMAP", $e->getMessage(), 500);
+    }
+}
+

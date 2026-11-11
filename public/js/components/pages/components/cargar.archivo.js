@@ -9,7 +9,7 @@ $.messenger.on('datos_iniciales', function (data, sourceWindow, origin) {
     window.multiple = data.multiple;
     window.mostrar_plantilla = data.mostrar_plantilla;
     window.tipo_archivos = data.tipo_archivos;
-    
+    window.nombre_plantilla=data.nombre_plantilla
     // Si viene en true, mostramos el contenedor del botón de envío general
     if (window.multiple) {
         $("#contenedor-boton-enviar").removeClass('d-none');
@@ -209,7 +209,8 @@ async function Evento_Click_Boton_Plantilla() {
         const respuesta = await window.AjaxService.descargarArchivo(
             '../../../src/controllers/php/controllers/archivos.php', {
                 accion: 'descargar_plantilla',
-                url:window.url_plantilla
+                url:window.url_plantilla,
+                nombre:window.nombre_plantilla
             },
             false,
             'descarga.xlsx',
@@ -259,7 +260,7 @@ async function Evento_Click_Boton_Plantilla() {
         console.error("Error en la descarga:", error);
 
         if (typeof MostrarAlerta === 'function') {
-            MostrarAlerta(error.mensaje || 'Error al procesar la descarga', 230, true);
+            MostrarAlerta(error.mensaje || 'Error al procesar la descarga', 260, true);
         }
     }
 }

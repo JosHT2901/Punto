@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Controlador de Usuarios
  * Centraliza y enruta las peticiones AJAX de manera segura.
@@ -29,9 +30,17 @@ $accion = trim($_POST['accion'] ?? '');
 // Mapeo de acciones permitidas
 $accionesPermitidas = [
     'obtener_usuarios'         => 'Obtener_Usuarios',
-    'generar_nombre_usuario'=>'Generar_Usuario_Aleatorio',
-    'gestionar_usuario'=>'Gestionar_Usuario',
-    'obtener_usuarios_paginados'=>'Obtener_Usuarios_Paginados'
+    'generar_nombre_usuario' => 'Generar_Usuario_Aleatorio',
+    'gestionar_usuario' => 'Gestionar_Usuario',
+    'obtener_usuarios_paginados' => 'Obtener_Usuarios_Paginados',
+    'obtener_informacion_usuario' => 'Obtener_Informacion_Usuario',
+    'procesar_reset_administrador' => 'Procesar_Reset_Administrador',
+    'actualizar_password_reset' => 'Actualizar_Password_Reset',
+    'actualizar_pin_reset' => 'Actualizar_Pin_Reset',
+    'actualizar_permisos_usuario' => 'Actualizar_Permisos_Usuario',
+    'deshabilitar_usuario'=>'Deshabilitar_Usuario',
+    'eliminar_usuario_permanente'=>'Eliminar_Usuario_Permanente',
+    'habilitar_usuario'=>'Habilitar_Usuario'
 ];
 
 // Ejecutar el despachador central

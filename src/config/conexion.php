@@ -9,9 +9,6 @@ require_once dirname(__DIR__) . '/config/bootstrap.php';
 
 /**
  * Provee una instancia única de PDO (Singleton)
- * 
- * @return PDO
- * @throws Exception Si la configuración o la conexión fallan.
  */
 function Conexion(): PDO
 {
@@ -20,42 +17,47 @@ function Conexion(): PDO
         return $pdo;
     }
 
-    $config = require dirname(__DIR__) . '/config/config.php';
-    $db = $config['db'] ?? [];
-
-    // 2. Validación estricta de parámetros obligatorios
-    foreach (['host', 'db', 'user', 'password'] as $key) {
-        if (empty($db[$key])) {
-            throw new Exception("Configuración DB incompleta: falta la clave '{$key}'.");
-        }
+    // Intentamos cargar la configuración de forma segura
+    $db = [];
+    if (file_exists(__DIR__ . '/db.php')) {
+        $db = require __DIR__ . '/db.php';
     }
 
-    // 3. Parámetros opcionales con valores por defecto
-    $port = $db['port'] ?? '3306';
-    $charset = $db['charset'] ?? 'utf8mb4';
+    // Mapeo seguro con respaldo directo de $_ENV si el archivo devolviera vacíos
+   // Mapeo seguro con respaldo de getenv() y $_ENV
+   $host     = $db['host'] ?? $_ENV['DB_HOST'] ?? getenv('DB_HOST') ?? '127.0.0.1';
+   $port     = $db['port'] ?? $_ENV['DB_PORT'] ?? getenv('DB_PORT') ?? '3306';
+   $dbname   = $db['db'] ?? $db['dbname'] ?? $_ENV['DB_NAME'] ?? getenv('DB_NAME') ?? '';
+   $user     = $db['user'] ?? $db['username'] ?? $_ENV['DB_USER'] ?? getenv('DB_USER') ?? '';
+   $password = $db['password'] ?? $_ENV['DB_PASS'] ?? getenv('DB_PASS') ?? '';
+   $charset  = $db['charset'] ?? 'utf8mb4';
+
+    // Validación estricta con mensaje claro
+    if (empty($dbname) || empty($user)) {
+        throw new Exception("Configuración DB incompleta: Faltan credenciales en el archivo .env o en db.php (DB_NAME: '{$dbname}', DB_USER: '{$user}').");
+    }
 
     try {
         $dsn = sprintf(
             'mysql:host=%s;port=%s;dbname=%s;charset=%s',
-            $db['host'],
+            $host,
             $port,
-            $db['db'],
+            $dbname,
             $charset
         );
 
-        // Detección segura de driver: Evita el Fatal Error en consola CLI vs Servidor web
         $comandoInicialClave = defined('\Pdo\Mysql::ATTR_INIT_COMMAND') 
             ? \Pdo\Mysql::ATTR_INIT_COMMAND 
             : PDO::MYSQL_ATTR_INIT_COMMAND;
 
         $pdo = new PDO(
             $dsn,
-            $db['user'],
-            $db['password'],
+            $user,
+            $password,
             [
                 PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_EMULATE_PREPARES   => false, // Cambiado a false por seguridad nativa de tipos en PDO
+                PDO::ATTR_EMULATE_PREPARES   => false,
                 $comandoInicialClave         => "SET NAMES {$charset}; SET time_zone = '-06:00';"
             ]
         );
@@ -63,19 +65,12 @@ function Conexion(): PDO
         return $pdo;
 
     } catch (PDOException $e) {
-        // Encadenamiento de excepciones: Oculta credenciales pero preserva el log técnico original
-        throw new Exception("Error de conexión a la base de datos.", 0, $e);
+        throw new Exception("Error de conexión a la base de datos: " . $e->getMessage(), 0, $e);
     }
 }
 
 /**
  * Función auxiliar para ejecutar consultas de forma simplificada
- * 
- * @param string $sql Consulta SQL
- * @param array $params Parámetros de la consulta
- * @param bool $returnId Si es true y la consulta es un INSERT, devuelve el ID generado.
- * @return mixed Resultados del SELECT, ID del INSERT, o número de filas afectadas.
- * @throws Exception Si ocurre un fallo en la ejecución.
  */
 function Consultar_PDO(string $sql, array $params = [], bool $returnId = false)
 {
@@ -86,20 +81,17 @@ function Consultar_PDO(string $sql, array $params = [], bool $returnId = false)
 
         $sqlTrimmed = ltrim($sql);
 
-        // 1. Si es una consulta SELECT, devolvemos los resultados
         if (stripos($sqlTrimmed, 'SELECT') === 0) {
             return $stmt->fetchAll();
         }
 
-        // 2. Si es un INSERT y pedimos el ID, devolvemos el lastInsertId
         if ($returnId && stripos($sqlTrimmed, 'INSERT') === 0) {
             return (int) $pdo->lastInsertId();
         }
 
-        // 3. Para UPDATE, DELETE o INSERT estándar, devolvemos filas afectadas
         return $stmt->rowCount();
 
-} catch (Throwable $e) {
+    } catch (Throwable $e) {
         throw new Exception("Error en la ejecución de la consulta: " . $e->getMessage(), 0, $e);
     }
 }

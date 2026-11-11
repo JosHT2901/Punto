@@ -46,6 +46,7 @@ $(document).ready(async function () {
                 $('#variables-check-limit').prop('checked', window.variablesMap['bloquear_stock_cero'] == '1' || window.variablesMap['bloquear_stock_cero'] === true);
             }
         }
+        OcultarCargando()
     }
 
     // Si los datos ya estaban listos al cargar el DOM

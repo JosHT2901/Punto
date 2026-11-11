@@ -86,7 +86,7 @@ async function Guardar_Informacion_Usuario() {
     const pin = window.PinValidador ? window.PinValidador.obtener() : '';
     const confirmar_pin = window.PinValidador ? window.PinValidador.obtenerConfirmacion() : '';
 
-    const accion = window.accion === 'crear' ? 'crear_usuario' : 'editar_usuario';
+    const accion = 'crear_usuario' ;
 
     // 2. Consolidar datos de envío hacia PHP
     const datosEnvio = {

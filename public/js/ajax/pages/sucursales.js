@@ -265,9 +265,52 @@ function Eliminar_Masivo_Sucursales() {
         colorConfirmar: 'btn-danger',
         altura: 320,
         onSuccess: function (response) {
-            CargarSucursales()
+            setTimeout(() => {
+                ModalAPI.cerrar()
+                CargarSucursales()
+            }, 1000);
+          
 
         }
     });
 }
 
+function Habilitar_Masivo_Sucursales() {
+    const seleccionados = window.SucursalesSelectionController.getSeleccionados();
+
+    // Normalizar la variable 'seleccionados' para asegurar que siempre sea un arreglo válido
+    const idsArray = Array.isArray(seleccionados) ?
+        seleccionados :
+        (seleccionados !== null && seleccionados !== undefined && seleccionados !== '' ? [seleccionados] : []);
+
+    console.log("IDs a habilitar:", idsArray);
+
+    if (idsArray.length === 0) {
+        if (typeof MostrarMensaje === 'function') {
+            MostrarMensaje('No se han seleccionado elementos para habilitar.', false, false, false);
+        } else if (typeof MostrarAlerta === 'function') {
+            MostrarAlerta('Selecciona al menos una sucursal', 230, false);
+        }
+        return;
+    }
+
+    const esUnico = idsArray.length === 1;
+    const mensaje = `¿Estás seguro de habilitar ${esUnico ? 'la sucursal' : 'las sucursales'} seleccionada${esUnico ? '' : 's'}?`;
+
+    HabilitarService.ejecutar('../../../src/controllers/php/controllers/sucursales.php', 'habilitar_masivo_sucursales', idsArray, {
+        titulo: `¿Habilitar sucursal${esUnico ? '' : 'es'}?`,
+        mensaje: mensaje,
+        icono: 'vf-ic_fluent_checkmark_circle_24_filled',
+        confirmarText: 'Sí, habilitar',
+        cancelarText: 'Cancelar',
+        colorConfirmar: 'btn-primary',
+        altura: 320,
+        onSuccess: function (response) {
+            setTimeout(() => {
+                ModalAPI.cerrar()
+                CargarSucursales();
+            }, 1000);
+           
+        }
+    });
+}

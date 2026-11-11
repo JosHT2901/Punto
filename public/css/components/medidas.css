@@ -453,7 +453,6 @@
 .h-150 {
     height: 150px;
 }
-
 .h-200 {
     height: 200px;
 }
@@ -504,7 +503,12 @@
 .min-h-600 {
     min-height: 600px;
 }
-
+.min-h-650 {
+    min-height: 650px;
+}
+.min-h-700 {
+    min-height: 700px;
+}
 .min-h-full {
     min-height: 100%;
 }

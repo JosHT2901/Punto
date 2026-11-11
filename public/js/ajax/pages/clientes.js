@@ -35,6 +35,7 @@ $(document).ready(async function (e) {
         window.permiso_ver= verificarPermiso('ver_clientes');
         window.permiso_editar = verificarPermiso('editar_clientes');
         window.permiso_crear = verificarPermiso('crear_clientes');
+        console.log(window.permiso_crear)
         window.permiso_eliminar = verificarPermiso('eliminar_clientes'); // 🌟 Typo corregido
 
         if (!permiso_ver) {
@@ -224,12 +225,73 @@ function EliminarClientes(idsSeleccionados) {
         colorConfirmar: 'btn-danger',
         altura: 320,
         onSuccess: function(response) {
-            console.log("Respuesta de eliminación:", response);
+            MostrarMensaje('Clientes eliminados correctamente',true,false,false)
+            setTimeout(() => {
             idsArray.forEach(id => {
                 $(`.card[data-id="${id}"]`).fadeOut(300, function() {
                     $(this).remove();
                 });
-            });
+                CargarClientes()
+                });
+            })
+        }
+    });
+}
+
+function HabilitarClientesMasivos()
+{
+    const seleccionados = window.ClientesSelectionController.getSeleccionados();
+    
+    if (seleccionados.length === 0) {
+        return MostrarAlerta('Selecciona al menos un cliente', 230, false);
+    }
+    HabilitarClientes(seleccionados)
+}
+
+function HabilitarClientes(idsSeleccionados) {
+    // Normalizar la entrada para asegurar que siempre sea un arreglo (soporta ID único o array)
+    const idsArray = Array.isArray(idsSeleccionados) 
+        ? idsSeleccionados 
+        : (idsSeleccionados !== null && idsSeleccionados !== undefined && idsSeleccionados !== '' ? [idsSeleccionados] : []);
+
+    console.log("IDs a habilitar:", idsArray);
+
+    if (idsArray.length === 0) {
+        if (typeof MostrarMensaje === 'function') {
+            MostrarMensaje('No se han seleccionado elementos para habilitar.', false, false, false);
+        }
+        return;
+    }
+
+    const esUnico = idsArray.length === 1;
+    const mensaje = `¿Estás seguro de habilitar ${esUnico ? 'el cliente' : 'los clientes'} seleccionado${esUnico ? '' : 's'}?`;
+
+    // Invocamos directamente el servicio que se encarga del flujo completo (Confirmación -> Carga -> AJAX -> Mensaje)
+    HabilitarService.ejecutar('../../../src/controllers/php/controllers/clientes.php', 'habilitar_clientes', idsArray, {
+        titulo: `¿Habilitar cliente${esUnico ? '' : 's'}?`,
+        mensaje: mensaje,
+        icono: 'vf-ic_fluent_checkmark_circle_24_filled',
+        confirmarText: 'Sí, habilitar',
+        cancelarText: 'Cancelar',
+        colorConfirmar: 'btn-success', // Corregido a verde para indicar éxito/habilitación
+        altura: 320,
+        onSuccess: function(response) {
+            MostrarMensaje('Clientes habilitados correctamente',true,false,false)
+            setTimeout(() => {
+                // Animación de salida para las tarjetas en la interfaz
+                idsArray.forEach(id => {
+                    $(`.card[data-id="${id}"]`).fadeOut(300, function() {
+                        $(this).remove();
+                    });
+                });
+
+                // Refrescar el listado general y contadores
+                if (typeof CargarClientes === 'function') {
+                    CargarClientes();
+                } 
+            }, 1000);
+            
+           
         }
     });
 }

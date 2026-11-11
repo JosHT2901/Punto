@@ -43,7 +43,7 @@
 
    input[type="password"]:not(:placeholder-shown) {
     /* Verdana oculta mejor los puntos que Montserrat */
-    font-family: "Verdana", sans-serif;
+    font-family: "Verdana", sans-serif !important;
     letter-spacing: 4px;
     font-size: 13px;
 }

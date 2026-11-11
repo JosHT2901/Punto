@@ -5,11 +5,11 @@ $tituloPage = "Crear usuario";
 // 2. Activamos el búfer para capturar todo el HTML que escribamos abajo
 ob_start();
 ?>
-<form action="" class="w-p-100 h-p-100 py-2 flex flex-column" id="form-gestion-usuario">
+<div action="" class="w-p-100 h-p-100 p-2 flex flex-column" id="form-gestion-usuario">
     <div class="w-p-100 flex flex-column js-wizard-container flex-1 min-w-0 ocultar-scroll">
         
         <!-- Paso 1: Información básica -->
-        <div class="w-p-100 my-2 bg-white rounded-8 box-sizing row-gap-1 p-3 card js-acordeon-container">
+        <div class="w-p-100 my-2 bg-white rounded-8 box-sizing row-gap-1 p-3 card js-acordeon-container" id="form-crear-usuario-basico">
             <div class="w-p-100 text-blue-03618d fw-600 h-40 p-2 box-sizing bg-blue-03618d card-header js-header-toggle cursor-pointer">
                 <span>Información básica</span>
             </div>
@@ -47,7 +47,7 @@ ob_start();
         </div>
 
         <!-- Paso 2: Identificación -->
-        <div class="w-p-100 my-2 bg-white rounded-8 box-sizing row-gap-1 p-3 card js-acordeon-container">
+        <div class="w-p-100 my-2 bg-white rounded-8 box-sizing row-gap-1 p-3 card js-acordeon-container" id="form-crear-usuario-identidad">
             <div class="w-p-100 text-blue-03618d fw-600 h-40 p-2 box-sizing bg-blue-03618d card-header js-header-toggle cursor-pointer">
                 <span>Identificación</span>
             </div>
@@ -76,7 +76,7 @@ ob_start();
         </div>
 
         <!-- Paso 3: Contacto -->
-        <div class="w-p-100 my-2 bg-white rounded-8 box-sizing row-gap-1 p-3 card js-acordeon-container">
+        <div class="w-p-100 my-2 bg-white rounded-8 box-sizing row-gap-1 p-3 card js-acordeon-container" id="form-crear-usuario-contacto">
             <div class="w-p-100 text-blue-03618d fw-600 h-40 p-2 box-sizing bg-blue-03618d card-header js-header-toggle cursor-pointer">
                 <span>Contacto</span>
             </div>
@@ -105,7 +105,7 @@ ob_start();
         </div>
 
         <!-- Paso 4: Cuenta -->
-        <div class="w-p-100 my-2 bg-white rounded-8 box-sizing row-gap-1 p-3 card js-acordeon-container">
+        <div class="w-p-100 my-2 bg-white rounded-8 box-sizing row-gap-1 p-3 card js-acordeon-container" id="form-crear-usuario-usuario">
             <div class="w-p-100 text-blue-03618d fw-600 h-40 p-2 box-sizing bg-blue-03618d card-header js-header-toggle cursor-pointer">
                 <span>Cuenta</span>
             </div>
@@ -131,7 +131,7 @@ ob_start();
         </div>
 
         <!-- Paso 5: Contraseña -->
-        <div class="w-p-100 my-2 bg-white rounded-8 box-sizing row-gap-1 p-3 card js-acordeon-container">
+        <div class="w-p-100 my-2 bg-white rounded-8 box-sizing row-gap-1 p-3 card js-acordeon-container" id="form-crear-usuario-password">
             <div class="w-p-100 text-blue-03618d fw-600 h-40 p-2 box-sizing bg-blue-03618d card-header js-header-toggle cursor-pointer">
                 <span>Contraseña</span>
             </div>
@@ -165,7 +165,7 @@ ob_start();
         </div>
 
         <!-- Paso 6: PIN -->
-        <div class="w-p-100 my-2 bg-white rounded-8 box-sizing row-gap-1 p-3 card js-acordeon-container">
+        <div class="w-p-100 my-2 bg-white rounded-8 box-sizing row-gap-1 p-3 card js-acordeon-container" id="form-crear-usuario-pin">
             <div class="w-p-100 text-blue-03618d fw-600 h-40 p-2 box-sizing bg-blue-03618d card-header js-header-toggle cursor-pointer">
                 <span>PIN</span>
             </div>
@@ -199,7 +199,7 @@ ob_start();
         </div>
 
     </div>
-</form>
+</div>
 <?php
 $contenido_componente = ob_get_clean();
 

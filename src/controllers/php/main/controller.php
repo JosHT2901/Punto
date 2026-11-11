@@ -10,6 +10,9 @@ require_once __DIR__ . '/../helpers/paginacion.services.php';
 require_once __DIR__ . '/../auth/check_permiso.php';
 require_once __DIR__ . '/../helpers/exportar_universal.php';
 require_once __DIR__ . '/../../../config/sesion_example.php';
+
+require_once __DIR__ . '/../models/token.php';
+require_once __DIR__ . '/../controllers/mail.php';
 function DespacharAccion($accionesPermitidas) {
     try {
         $accion = $_POST['accion'] ?? '';

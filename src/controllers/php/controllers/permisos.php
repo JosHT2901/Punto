@@ -29,6 +29,7 @@ $accion = trim($_POST['accion'] ?? '');
 // Mapeo de acciones permitidas
 $accionesPermitidas = [
     'obtener_permisos'         => 'Obtener_Permisos',
+    'obtener_permisos_usuario'=>'Obtener_Permisos_Usuario'
 ];
 
 // Ejecutar el despachador central

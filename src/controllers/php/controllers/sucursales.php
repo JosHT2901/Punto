@@ -36,7 +36,8 @@ $accionesPermitidas = [
     'habilitar_sucursal'=>'Habilitar_Sucursal',
     'importar_sucursales'=>'Importar_Sucursales',
     'eliminar_masivo_sucursales'=>'Eliminar_Masivo_Sucursales',
-    'exportar_sucursales'=>'Exportar_Sucursales'
+    'exportar_sucursales'=>'Exportar_Sucursales',
+    'habilitar_masivo_sucursales'=>'Habilitar_Masivo_Sucursales'
 ];
 
 // Ejecutar el despachador central

@@ -34,7 +34,11 @@ $accionesPermitidas = [
     'guardar_informacion_empresa'=>'Guardar_Informacion_Empresa',
     'gestionar_logo_empresa'=>'Gestionar_Logo_Empresa',
     'obtener_logo_empresa'=>'Obtener_Logo_Empresa',
-    'eliminar_logo_empresa'=>'Eliminar_Logo_Empresa'
+    'eliminar_logo_empresa'=>'Eliminar_Logo_Empresa',
+    'obtener_ajustes_smtp'=>'Obtener_Ajustes_Smtp',
+    'guardar_ajustes_smtp'=>'Guardar_Ajustes_Smtp',
+     'obtener_ajustes_imap'=>'Obtener_Ajustes_Imap',
+    'guardar_ajustes_imap'=>'Guardar_Ajustes_Imap'
 ];
 
 // Ejecutar el despachador central

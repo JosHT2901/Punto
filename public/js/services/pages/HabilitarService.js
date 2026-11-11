@@ -3,15 +3,6 @@
 ============================================= */
 window.HabilitarService = (() => {
 
-    /**
-     * Habilita uno o múltiples registros enviando los IDs al controlador tras confirmar con MostrarPregunta.
-     * 
-     * @param {string} url - URL del controlador endpoint.
-     * @param {string} accion - Nombre de la acción (ej. 'habilitar', 'habilitar_masivo').
-     * @param {number|string|Array} ids - Un ID único o un arreglo de IDs a habilitar.
-     * @param {Object} options - Opciones adicionales (título, mensaje, textoCargando, extraData, onSuccess, etc.).
-     * @returns {Promise} - Promesa que resuelve la respuesta del servidor o rechaza si se cancela/falla.
-     */
     const ejecutar = async (url, accion, ids, options = {}) => {
         try {
             // 1. Normalizar los IDs a un arreglo plano y limpio
@@ -30,51 +21,50 @@ window.HabilitarService = (() => {
             }
 
             const total = idsArray.length;
-            const esMasivo = total > 1; // Determinamos si la operación es masiva
+            const esMasivo = total > 1;
 
             const tituloConfirmacion = options.titulo || 'Confirmar habilitación';
             const mensajeConfirmacion = options.mensaje || (!esMasivo 
                 ? '¿Deseas habilitar este elemento seleccionado?' 
                 : `¿Deseas habilitar los ${total} elementos seleccionados?`);
 
-            // 2. Mostrar la pregunta utilizando tu modal personalizada con Promesa
+            // 2. Mostrar la pregunta utilizando la modal personalizada con Promesa
             const confirmado = await MostrarPregunta({
                 titulo: tituloConfirmacion,
                 texto: mensajeConfirmacion,
                 icono: options.icono || 'vf-ic_fluent_checkmark_circle_24_filled',
                 confirmarText: options.confirmarText || 'Sí, habilitar',
                 cancelarText: options.cancelarText || 'Cancelar',
-                colorConfirmar: options.colorConfirmar || 'btn-success',
-                altura: options.altura || 280
+                colorConfirmar: options.colorConfirmar || 'btn-primary',
+                altura: options.altura || 350
             });
 
-            // Si el usuario cancela la operación
             if (!confirmado) {
                 return { ok: false, mensaje: 'Acción cancelada por el usuario' };
             }
 
-            // 3. Mostrar modal de carga mientras se ejecuta la petición
+            // 3. Mostrar modal de carga
             const textoCargando = options.textoCargando || (esMasivo ? 'Habilitando registros...' : 'Habilitando registro...');
             if (typeof MostrarCargando === 'function') {
                 MostrarCargando(textoCargando);
             }
 
-            // 4. Preparar los datos a enviar
+            // 4. Preparar los datos
             const payload = Object.assign({}, options.extraData || {}, {
                 accion: accion,
                 ids: idsArray,
-                id: !esMasivo ? idsArray[0] : null, // Soporte retroactivo
-                es_masivo: esMasivo ? 1 : 0        // Parámetro indicador de si es masivo o no
+                id: !esMasivo ? idsArray[0] : null,
+                es_masivo: esMasivo ? 1 : 0
             });
 
-            // 5. Ejecutar la petición AJAX usando AjaxService o jQuery $.ajax directo
+            // 5. Ejecutar petición AJAX
             const ajaxCall = window.AjaxService && typeof window.AjaxService.enviar === 'function'
                 ? window.AjaxService.enviar(url, payload)
                 : $.ajax({ url: url, method: 'POST', data: payload, dataType: 'json' });
 
             const response = await ajaxCall;
 
-            // 6. Ocultar el modal de carga
+            // 6. Ocultar carga
             if (typeof OcultarCargando === 'function') {
                 OcultarCargando();
             }
@@ -86,31 +76,31 @@ window.HabilitarService = (() => {
                 if (typeof options.onSuccess === 'function') {
                     options.onSuccess(response);
                 }
-                setTimeout(() => {
-                    ModalAPI.cerrar();
-                }, 1000);
                 return response;
             } else {
                 const errorMsg = response?.mensaje || 'No se pudieron completar los cambios.';
-                if (typeof MostrarMensaje === 'function') {
+                if (typeof MostrarAlerta === 'function') {
+                    MostrarAlerta(errorMsg, 250, false);
+                } else if (typeof MostrarMensaje === 'function') {
                     MostrarMensaje(errorMsg, false, false, false);
                 }
                 throw response;
             }
 
         } catch (error) {
-            // Asegurar que siempre se oculte el modal de carga si ocurre un error o excepción de red
             if (typeof OcultarCargando === 'function') {
                 OcultarCargando();
             }
 
-            const errorMsg = error?.mensaje || 'Ocurrió un error inesperado en el servidor.';
-            if (typeof MostrarMensaje === 'function' && !error?.mensaje) {
+            const errorMsg = error?.mensaje || error?.responseText || 'Ocurrió un error inesperado en el servidor.';
+            
+            // Usamos MostrarAlerta de forma limpia sin interferir con ModalAPI prematuramente
+            if (typeof MostrarAlerta === 'function') {
+                MostrarAlerta(errorMsg, 250, false);
+            } else if (typeof MostrarMensaje === 'function') {
                 MostrarMensaje(errorMsg, false, false, false);
             }
-            setTimeout(() => {
-                ModalAPI.cerrar();
-            }, 1000);
+            
             throw error;
         }
     };

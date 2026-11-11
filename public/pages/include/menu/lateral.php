@@ -1,25 +1,71 @@
 <?php
+// Ya no usamos session_start() aquí para evitar conflictos de headers enviados, 
+// solo validamos que la sesión exista y esté activa.
+$usuarioId = $_SESSION['usuario']['id'] ?? ($_SESSION['usuario_id'] ?? ($_SESSION['id_usuario'] ?? 0));
 
+/**
+ * Función para verificar si el usuario actual posee al menos un permiso 
+ * utilizando Consultar_PDO.
+ */
+function UsuarioTienePermisoModulo($usuarioId, $permisosRequeridos): bool {
+    if (empty($usuarioId) || empty($permisosRequeridos)) {
+        return false;
+    }
+
+    $permisosArray = is_array($permisosRequeridos) ? $permisosRequeridos : [$permisosRequeridos];
+    $permisosArray = array_filter($permisosArray);
+
+    if (empty($permisosArray)) {
+        return false;
+    }
+
+    $placeholders = implode(',', array_fill(0, count($permisosArray), '?'));
+    
+    $sql = "SELECT COUNT(up.id) as total 
+            FROM usuarios_permisos up
+            JOIN permisos p ON up.permiso_id = p.id
+            WHERE up.usuario_id = ? AND p.nombre_permiso IN ($placeholders)";
+
+    try {
+        $params = array_merge([$usuarioId], $permisosArray);
+        $resultado = Consultar_PDO($sql, $params);
+
+        if (!empty($resultado) && isset($resultado[0]['total'])) {
+            return ((int)$resultado[0]['total'] > 0);
+        }
+
+        return false;
+    } catch (Throwable $e) {
+        error_log("Error al validar permisos de menú con Consultar_PDO: " . $e->getMessage());
+        return false;
+    }
+}
+
+// Cargar Módulos
 $path_modulos = __DIR__ . '/../../../../src/json/routes/menu.json';
+$modulosCrudos = file_exists($path_modulos) ? json_decode(file_get_contents($path_modulos), true) : [];
+if (!is_array($modulosCrudos)) $modulosCrudos = [];
 
-$modulos = file_exists($path_modulos)
-    ? json_decode(file_get_contents($path_modulos), true)
-    : [];
-// Validar JSON
-if (!is_array($modulos)) {
-    $modulos = [];
-}
+$modulos = array_filter($modulosCrudos, function($item) use ($usuarioId) {
+    if (empty($item['permiso']) && empty($item['permisos'])) {
+        return true;
+    }
+    $permisosToCheck = $item['permisos'] ?? $item['permiso'];
+    return UsuarioTienePermisoModulo($usuarioId, $permisosToCheck);
+});
 
+// Cargar Utilidades
 $path_utilidades = __DIR__ . '/../../../../src/json/routes/utilidades.json';
+$utilidadesCrudas = file_exists($path_utilidades) ? json_decode(file_get_contents($path_utilidades), true) : [];
+if (!is_array($utilidadesCrudas)) $utilidadesCrudas = [];
 
-$utilidades = file_exists($path_utilidades)
-    ? json_decode(file_get_contents($path_utilidades), true)
-    : [];
-// Validar JSON
-if (!is_array($utilidades)) {
-    $utilidades = [];
-}
-
+$utilidades = array_filter($utilidadesCrudas, function($item) use ($usuarioId) {
+    if (empty($item['permiso']) && empty($item['permisos'])) {
+        return true;
+    }
+    $permisosToCheck = $item['permisos'] ?? $item['permiso'];
+    return UsuarioTienePermisoModulo($usuarioId, $permisosToCheck);
+});
 ?>
 <div class="w-300 h-vh-100 box-sizing p-2 flex flex-column bg-gray-100 position-absolute top-0 overflow-auto d-none"
 id="menu-contenedor-lateral" style="z-index: 10000;">
@@ -33,7 +79,7 @@ id="menu-contenedor-lateral" style="z-index: 10000;">
         <!-- 2. Texto de Bienvenida -->
         <span class="fw-600 text-main fs-4">Bienvenido</span>
     </div>
-    <!-- Contenedor principal (debe tener una altura definida, por ejemplo h-p-100 o un alto fijo en px) -->
+    <!-- Contenedor principal -->
     <div class="w-p-100 flex-1 min-h-0 flex flex-column box-sizing">
 
         <div class="w-p-100 flex-1 min-h-100 flex flex-column items-start justify-between py-2 box-sizing">
@@ -44,33 +90,29 @@ id="menu-contenedor-lateral" style="z-index: 10000;">
                 <div class="flex-wrap justify-between flex gap-2 w-p-100">
                     <?php
                     usort($modulos, function ($a, $b) {
-                        $tituloA = trim($a['titulo']);
-                        $tituloB = trim($b['titulo']);
+                        $tituloA = trim($a['titulo'] ?? '');
+                        $tituloB = trim($b['titulo'] ?? '');
 
-                        // Si son iguales, mantener posición
                         if (strcasecmp($tituloA, $tituloB) === 0) return 0;
-
-                        // Prioridad máxima a "Inicio"
                         if (strcasecmp($tituloA, 'Inicio') === 0) return -1;
                         if (strcasecmp($tituloB, 'Inicio') === 0) return 1;
 
-                        // Orden alfabético para los demás
                         return strcasecmp($tituloA, $tituloB);
                     });
                     foreach ($modulos as $item) {
                     ?>
                         <div class="btn w-120 h-120 rounded-4 p-2 box-sizing cursor-pointer btn-option flex flex-column justify-between mx-auto" 
-                        <?= isset($item['id']) ? 'id="' . $item['id'] . '"' : '' ?>
-                        <?= isset($item['href']) ? 'onclick="location.href=\'' . $item['href'] . '\'"' : '' ?>>
+                        <?= isset($item['id']) ? 'id="' . htmlspecialchars($item['id']) . '"' : '' ?>
+                        <?= isset($item['href']) ? 'onclick="location.href=\'' . htmlspecialchars($item['href']) . '\'"' : '' ?>>
 
                             <!-- Icono del módulo -->
                             <div class="w-p-100 flex-1 min-h-0 flex-center">
-                                <i class="<?= htmlspecialchars($item['icono']) ?> fs-13"></i>
+                                <i class="<?= htmlspecialchars($item['icono'] ?? '') ?> fs-13"></i>
                             </div>
 
                             <!-- Texto de la tarjeta -->
                             <div class="w-p-100 h-30 flex-center fw-600 fs-3 text-center">
-                                <span><?= htmlspecialchars($item['titulo']) ?></span>
+                                <span><?= htmlspecialchars($item['titulo'] ?? '') ?></span>
                             </div>
 
                         </div>
@@ -90,17 +132,17 @@ id="menu-contenedor-lateral" style="z-index: 10000;">
                     foreach ($utilidades as $item) {
                     ?>
                     <div class="btn w-120 h-120 rounded-4 p-2 box-sizing cursor-pointer btn-option flex flex-column justify-between"
-                    <?= isset($item['id']) ? 'id="' . $item['id'] . '"' : '' ?>
-                    <?= isset($item['href']) ? 'onclick="location.href=\'' . $item['href'] . '\'"' : '' ?>>
+                    <?= isset($item['id']) ? 'id="' . htmlspecialchars($item['id']) . '"' : '' ?>
+                    <?= isset($item['href']) ? 'onclick="location.href=\'' . htmlspecialchars($item['href']) . '\'"' : '' ?>>
 
                         <!-- Icono del módulo -->
                         <div class="w-p-100 flex-1 min-h-0 flex-center">
-                            <i class="icon <?= $item['icono'] ?> fs-13"></i>
+                            <i class="icon <?= htmlspecialchars($item['icono'] ?? '') ?> fs-13"></i>
                         </div>
 
                         <!-- Texto de la tarjeta -->
                         <div class="w-p-100 h-30 flex-center fw-600 fs-3 text-center">
-                            <span><?= htmlspecialchars($item['titulo']) ?></span>
+                            <span><?= htmlspecialchars($item['titulo'] ?? '') ?></span>
                         </div>
 
                     </div>
@@ -111,7 +153,6 @@ id="menu-contenedor-lateral" style="z-index: 10000;">
             </div>
 
         </div>
-
 
     </div>
 </div>

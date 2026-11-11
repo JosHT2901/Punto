@@ -82,7 +82,8 @@ window.botonesToolbarConfig = [{
                         multiple: false,
                         mostrar_plantilla: true,
                         url_plantilla:'/../../../../public/docs/Clientes.xlsx',
-                        tipo_archivos: '.xlsx,.xls,.csv'
+                        tipo_archivos: '.xlsx,.xls,.csv',
+                        nombre_plantilla:'plantilla_clientes.xlsx'
                     };
 
                     // Enviamos al iframe recién creado usando la acción 'codigo_postal'
@@ -141,7 +142,7 @@ window.opcionesClienteDeshabilitado = [{
     texto: 'Habilitar cliente',
     icono: 'vf-ic_fluent_checkmark_circle_24_filled text-success',
     permiso: 'editar_clientes',
-    callback: (id) => HabilitarCliente(id)
+    callback: (id) => HabilitarClientes(id)
 }];
 
 window.ordenClientes = window.ordenClientes || {
@@ -202,3 +203,29 @@ window.opcionesMenuOrdenar = [{
         }
     }
 ];
+
+window.botones_opciones_habilitado=[
+    {
+        id: 'btn-eliminar-masivo',
+        icon: 'vf-ic_fluent_delete_24_filled',
+        title: 'Eliminar seleccionados',
+        permiso:'eliminar_clientes',
+        onclick: 'EliminarClientesMasivos()'
+    },
+    {
+        id: 'btn-exportar-masivo',
+        icon: 'vf-ic_fluent_arrow_export_24_filled',
+        title: 'Exportar seleccionados',
+        onclick: 'ExportarClientesMasivos()'
+    }
+]
+
+window.botones_opciones_deshabilitado=[
+    {
+        id: 'btn-habilitar-masivo',
+        icon: 'vf-ic_fluent_arrow_clockwise_24_filled',
+        title: 'Habiltar seleccionados',
+        permiso:'editar_clientes',
+        onclick: 'HabilitarClientesMasivos()'
+    }
+]

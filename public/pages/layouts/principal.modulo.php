@@ -27,7 +27,21 @@
 
         <!-- Contenedor Principal de la Página -->
         <div class="w-p-100 h-calc-100-60 flex flex-column flex-1 min-h-0 p-2">
-
+        <?php if (!empty($configModulo['boton_atras'])): ?>
+                    <div class="flex">
+                        <a type="button" class="btn btn-secondary fw-600 flex shrink-0 gap-2 items-center" 
+                        href="<?php echo $configModulo['href_atras']?>"
+                        style="flex-shrink: 0; white-space: nowrap;" id="smtp-boton-guardar">
+                            <i class="icon vf-ic_fluent_arrow_left_24_filled fs-5"></i>
+                            <span>Atrás</span>
+                        </a>
+                    </div>
+                <?php endif; ?>
+            <div class="w-p-100 fw-600 fs-4 p-2 pl-3 my-2 text-gray-700 rounded-8 flex align-items-center justify-content-between" style="border-left: 6px solid var(--warning);">
+                <div class="flex-1">
+                    <span><?php echo $configModulo['titulo'] ?></span>
+                </div>
+            </div>
             <!-- Barra de Acciones Superior (Botones Atrás / Guardar Dinámicos) -->
             <div class="w-p-100 h-50 mb-2 bg-gray-200 flex p-2 items-center box-sizing rounded-8 gap-2" id="viewer-toolbar">
             </div>

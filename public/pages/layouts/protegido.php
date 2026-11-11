@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <title><?php echo $tituloPage ?? 'Mi Sistema'; ?></title>
     <!-- Incluimos tus estilos y configuraciones globales -->
-    <?php 
-    include_once __DIR__ . '/../include/include.php';  
+    <?php
+    include_once __DIR__ . '/../include/include.php';
     include_once __DIR__ . '/../include/script.php';
     include_once __DIR__ . '/../include/modal/script.php';
 
@@ -24,11 +24,15 @@
             include_once __DIR__ . '/../include/menu/script.php';
             ?>
         </div>
-        <div class="w-p-100 h-calc-100-60">
-            <?php
-            echo $contenido_protegido;
-            ?>
-
+        <div class="w-p-100 h-calc-100-60 p-2 flex flex-column">
+            <div class="w-p-100 fw-600 fs-4 p-2 pl-3 my-2 text-gray-700 rounded-8" style="border-left: 6px solid var(--warning);">
+                <span><?php echo $tituloPage ?></span>
+            </div>
+            <div class="flex-1">
+                <?php
+                echo $contenido_protegido;
+                ?>
+            </div>
         </div>
     </div>
 

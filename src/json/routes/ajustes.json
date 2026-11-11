@@ -1,0 +1,48 @@
+[
+    {
+        "id": "card-variables",
+        "titulo": "Variables del sistema",
+        "descripcion": "Configurar límites de stock, formatos y moneda activa",
+        "icono": "vf-ic_fluent_options_24_filled",
+        "href": "variables.php",
+        "permiso": "editar_variables"
+    },
+    {
+        "id": "card-imap",
+        "titulo": "Ajustes IMAP",
+        "descripcion": "Configurar la sincronización y recepción de correos electrónicos desde el servidor",
+        "icono": "vf-ic_fluent_mail_24_filled",
+        "permiso": "editar_imap"
+    },
+    {
+        "id": "card-smtp",
+        "titulo": "Ajustes SMTP",
+        "descripcion": "Configurar el servidor de correo saliente para el envío de notificaciones y documentos",
+        "icono": "vf-ic_fluent_mail_24_filled",
+        "permiso": "editar_smtp"
+    },
+    {
+        "id": "card-empresa",
+        "titulo": "Información de la Empresa",
+        "descripcion": "Configurar los datos generales, razón social, dirección y detalles fiscales de la empresa",
+        "icono": "vf-ic_fluent_building_24_filled",
+        "href": "empresa.php",
+        "permiso": "editar_empresa"
+    },
+    {
+        "id": "card-logo-empresa",
+        "titulo": "Logo de la Empresa",
+        "descripcion": "Actualizar la imagen institucional o logotipo que aparece en los documentos, tickets y sistemas",
+        "icono": "vf-ic_fluent_image_24_filled",
+        "href": "logo.empresa.php",
+        "permiso": "editar_empresa"
+    },
+    {
+        "id": "card-esquemas-impuestos",
+        "titulo": "Esquemas de Impuestos",
+        "descripcion": "Configurar las tasas de IVA, retenciones y reglas fiscales aplicadas en las operaciones comerciales",
+        "icono": "vf-ic_fluent_calculator_24_filled",
+        "href": "impuestos.php",
+        "permiso": "ver_esquemas_fiscales"
+    }
+]

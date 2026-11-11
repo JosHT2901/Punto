@@ -13,10 +13,13 @@ $.messenger.on('cliente_editado', function (data, sourceWindow, origin) {
    }
 });
 
+// Usar .off().on() previene que el evento se duplique si el script se carga o evalúa más de una vez
+$(document).off('datosListos.clientes')
+  .on('datosListos.clientes', async (event) => {
+    // Evitar ejecuciones simultáneas dobles
+    if (window._moduloClientesInicializado) return;
+    window._moduloClientesInicializado = true;
 
-
-$(document).off('app:inicializada datosListos.clientes')
-  .on('app:inicializada datosListos.clientes', async (event) => {
     // 0. Sincronizamos los parámetros de la URL, rellenamos inputs, variables globales y el estado del MenuSelectorCheck
     if (window.UrlStateSyncService) {
         window.carga_inicial = false;
@@ -32,7 +35,7 @@ $(document).off('app:inicializada datosListos.clientes')
                 window.registrosPorPagina = parseInt(params.registros || params.registros_por_p);
             }
             if (params.habilitado !== undefined) {
-                window.habilitado = params.habilitado || 'inactivo';
+                window.habilitado = params.habilitado;
             }
             if (params.tipo_rfc !== undefined) {
                 window.filtrosAdicionales.tipo_rfc = Array.isArray(params.tipo_rfc) ? params.tipo_rfc : [params.tipo_rfc];
@@ -61,9 +64,8 @@ $(document).off('app:inicializada datosListos.clientes')
                 }
             }
         }
-        else
-        {
-            window.habilitado=1
+        else {
+            window.habilitado = 1;
         }
     }
 
@@ -129,7 +131,6 @@ function CargarClientes() {
             .then(response => {
                 OcultarCargando();
                 if (response && response.ok) {
-                    console.log("Respuesta API Clientes:", response);
                     const listaDatos = response.data?.datos || [];
 
                     // 🌟 GUARDAR EL UNIVERSO TOTAL DE IDS FILTRADOS CON NORMALIZACIÓN A STRING
@@ -180,7 +181,7 @@ function CargarClientes() {
                                 idKey: 'ID',
                                 tituloKey: 'nombre_completo',
                                 badgeKey: 'RFC',
-                                permisoOpciones: window.permiso_editar &&  window.permiso_eliminar,
+                                permisoOpciones: window.permiso_editar && window.permiso_eliminar,
                                 callbackOpciones: 'AbrirMenuOpcionesCliente(event, ${ID}, this)',
                                 configuracionCampos: [
                                     { label: 'Código', columna: 'Codigo_Cliente' },
@@ -213,10 +214,11 @@ function CargarClientes() {
         MostrarMensaje('Ocurrió un error', false, false, false);
     }
 }
-// Función centralizada para cargar y filtrar clientes (sin parámetros, basada 100% en window)
+
+// Función centralizada para cargar componentes y filtros iniciales
 async function FuncionesIniciales() {
     const $toolbar = $('#viewer-toolbar');
-    console.log(window.permiso_crear)
+    console.log(window.permiso_crear);
     if (window.permiso_crear) {
         $toolbar.removeClass('d-none');
         if (window.CarouselButtonsNav && typeof botonesToolbarConfig !== 'undefined') {
@@ -225,7 +227,6 @@ async function FuncionesIniciales() {
     } else {
         $toolbar.addClass('d-none');
     }
-
 
     // CARGAR CATÁLOGO DE REGÍMENES FISCALES
     if (typeof Obtener_Regimenes_API === 'function') {
@@ -239,7 +240,7 @@ async function FuncionesIniciales() {
             if (filtroRegimen && Array.isArray(regimenesData)) {
                 filtroRegimen.opciones = regimenesData.map(reg => ({
                     id: reg.id,
-                    texto: `${reg.id} - ${reg.descripcion}`
+                    texto: `${reg.id}\n${reg.descripcion}`
                 }));
             }
 
@@ -326,37 +327,33 @@ async function FuncionesIniciales() {
             }
         );
     }
-
-    // 3. Inicialización del controlador de selección conectado a la barra flotante
-    if (window.ClientesSelectionController && window.SelectionBarService) {
-        window.ClientesSelectionController.init({
-            scope: $("#contenedor-resultados"),
-            checkItemClass: '.check-item',
-            tarjetaClass: '.card-universal',
-            claseActiva: 'seleccionada',
-            checkAllId: 'check-item-all',
-            onChange: SelectionBarService.conectar(window.ClientesSelectionController, {
+ 
+ // Inicialización del controlador de selección en clientes.js
+        if (window.ClientesSelectionController && window.SelectionBarService) {
+                
+            const refrescarBarra = SelectionBarService.conectar(window.ClientesSelectionController, {
                 entidad: 'clientes',
                 barra: '#barra-seleccion',
                 contador: '#contador-container',
                 contenedorBotones: '#acciones-masivas-container',
-                botones: [
-                    {
-                        id: 'btn-eliminar-masivo',
-                        icon: 'vf-ic_fluent_delete_24_filled',
-                        title: 'Eliminar seleccionados',
-                        onclick: 'EliminarClientesMasivos()'
-                    },
-                    {
-                        id: 'btn-exportar-masivo',
-                        icon: 'vf-ic_fluent_arrow_export_24_filled',
-                        title: 'Exportar seleccionados',
-                        onclick: 'ExportarClientesMasivos()'
-                    }
-                ]
-            })
-        });
-    }
+                // Pasamos una función para que determine los botones de forma dinámica por cada módulo
+                botones: () => {
+                    const estadoActual = window.habilitado !== undefined ? parseInt(window.habilitado) : 1;
+                    return (estadoActual === 0) 
+                        ? (window.botones_opciones_deshabilitado || []) 
+                        : (window.botones_opciones_habilitado || []);
+                }
+            });
+
+            window.ClientesSelectionController.init({
+                scope: $("#contenedor-resultados"),
+                checkItemClass: '.check-item',
+                tarjetaClass: '.card-universal',
+                claseActiva: 'seleccionada',
+                checkAllId: 'check-item-all',
+                onChange: refrescarBarra
+            });
+        }
 
     // 4. Configuración del menú desplegable de selección masiva (Página actual vs Todos)
     $(document).off('click.abrirMenuSel').on('click.abrirMenuSel', '#btn-menu-seleccion', function(e) {
@@ -401,7 +398,7 @@ async function FuncionesIniciales() {
         });
     });
 
-    $(document).off('click.abrirMenuOrden').on('click.abrirMenuOrdens', '#btn-ordenar-registros', function(e) {
+    $(document).off('click.abrirMenuOrden').on('click.abrirMenuOrden', '#btn-ordenar-registros', function(e) {
         Abrir_Menu_Opciones_Global(e, window.opcionesMenuOrdenar);
     });
 }
@@ -411,19 +408,16 @@ function AbrirMenuOpcionesCliente(event, idCliente, elementoButton) {
         event.stopPropagation();
     }
 
-    // 1. Obtener los parámetros actuales desde la URL cifrada
     const parametrosUrl = (window.UrlStateSyncService && typeof window.UrlStateSyncService.obtenerParametros === 'function')
         ? window.UrlStateSyncService.obtenerParametros() || {}
         : {};
 
-    const habilitado = parametrosUrl.habilitado !== undefined ? parseInt(parametrosUrl.habilitado) : 1;
+    const habilitado = window.habilitado !== undefined ? parseInt(window.habilitado) : (parametrosUrl.habilitado !== undefined ? parseInt(parametrosUrl.habilitado) : 1);
 
-    // 2. Seleccionar el arreglo de opciones según el estatus en la URL
     const opcionesBase = (habilitado === 0) 
         ? (window.opcionesClienteDeshabilitado || []) 
         : (window.opcionesClienteHabilitado || []);
 
-    // 3. Filtrar las opciones según los permisos del usuario
     const opcionesPermitidas = opcionesBase.filter(op => {
         if (!op.permiso) return true;
         return window.PermisosService && typeof window.PermisosService.tienePermiso === 'function' 
@@ -436,7 +430,6 @@ function AbrirMenuOpcionesCliente(event, idCliente, elementoButton) {
         return;
     }
 
-    // 4. Mapear los callbacks para inyectar el ID y asegurar la actualización del estado cifrado
     const opcionesConId = opcionesPermitidas.map(op => ({
         ...op,
         callback: () => {
@@ -457,7 +450,6 @@ function AbrirMenuOpcionesCliente(event, idCliente, elementoButton) {
         }
     }));
 
-    // 5. Abrir el menú global de opciones
     if (typeof Abrir_Menu_Opciones_Global === 'function') {
         Abrir_Menu_Opciones_Global(elementoButton, opcionesConId);
     } else {
@@ -465,9 +457,8 @@ function AbrirMenuOpcionesCliente(event, idCliente, elementoButton) {
     }
 }
 
-function EditarCliente(id,seccion)
-{
-    console.log(seccion)
+function EditarCliente(id, seccion) {
+    console.log(seccion);
     CrearVentanaIframe(
         'Editar cliente',
         '../components/editar.cliente.php',
@@ -475,15 +466,11 @@ function EditarCliente(id,seccion)
         true,
         true,
         function (iframeElement) {
-            // Empaquetamos los datos con la propiedad 'localidades'
             let datos = {
                 id: id,
-                seccion:seccion
+                seccion: seccion
             };
-
-            // Enviamos al iframe recién creado usando la acción 'codigo_postal'
             $.messenger.send(iframeElement, 'datos_iniciales', datos);
         }
     );
 }
-

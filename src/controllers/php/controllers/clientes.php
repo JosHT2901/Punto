@@ -35,7 +35,8 @@ $accionesPermitidas = [
     'importar_clientes'=>'Importar_Clientes',
     'eliminar_clientes'=>'Eliminar_Clientes',
     'obtener_informacion_cliente'=>'Obtener_Informacion_Cliente',
-    'exportar_clientes'=>'Exportar_Clientes'
+    'exportar_clientes'=>'Exportar_Clientes',
+    'habilitar_clientes'=>'Habilitar_Clientes'
 ];
 
 // Ejecutar el despachador central

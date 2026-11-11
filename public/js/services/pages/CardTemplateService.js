@@ -103,8 +103,9 @@ window.CardTemplateService = (() => {
         } = options;
 
         const htmlTarjetas = listaElementos.map(element => {
+            console.log(element)
             const recordId = element[idKey] || '';
-            const esActual = element.es_sucursal_actual == 1 || element.es_actual == 1;
+            const esActual = element.es_actual == 1;
             
             // Título principal con respaldo automático
             let titulo = element[tituloKey];
@@ -182,7 +183,7 @@ window.CardTemplateService = (() => {
                 const tienePermisoOpciones = permisoOpciones === true || 
                     (typeof permisoOpciones === 'string' && window.PermisosService?.tienePermiso(permisoOpciones));
 
-                if (tienePermisoOpciones) {
+                if (tienePermisoOpciones && !esActual) {
                     const onclickFn = typeof callbackOpciones === 'function' 
                         ? callbackOpciones(element) 
                         : callbackOpciones.replace(/\${ID}/g, recordId);

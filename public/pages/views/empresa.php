@@ -3,7 +3,7 @@ $tituloPage = 'Empresa';
 ob_start();
 ?>
 <div class="w-p-100 overflow-auto">
-    <form class="w-p-100 h-p-100 py-2 flex flex-column overflow-auto" id="form-gestion-empresa">
+    <form class="w-p-100 h-p-100 p-3 flex flex-column overflow-auto" id="form-gestion-empresa">
 
         <div class="w-p-100 flex flex-column js-wizard-container flex-1 min-w-0 ocultar-scroll">
 

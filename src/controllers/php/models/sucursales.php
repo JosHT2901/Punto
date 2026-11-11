@@ -371,7 +371,7 @@ function Obtener_Sucursales_Paginadas(array $params = []): void {
                     $idSucursal = (int)($sucursal['ID'] ?? $sucursal['id'] ?? 0);
                     
                     // Bandera de sucursal actual
-                    $sucursal['es_sucursal_actual'] = ($idSucursal === $sucursalActualId) ? 1 : 0;
+                    $sucursal['es_actual'] = ($idSucursal === $sucursalActualId) ? 1 : 0;
 
                     // Traducir clave de entidad federativa numérica (ej. '29') a su nombre real ('Tlaxcala') usando el JSON
                     $claveEntidad = trim((string)($sucursal['entidad_federativa'] ?? ''));
@@ -1094,4 +1094,131 @@ function Exportar_Sucursales($datos)
         'Listado de Sucursales Seleccionadas', 
         'sucursales_reporte'    
     );
+}
+
+function Habilitar_Masivo_Sucursales(array $datosCrudos): void {
+    try {
+        // 1. Asegurar sesión activa
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        // 2. Obtener PDO
+        $pdo = Conexion();
+
+        // 3. Validar sesión e ID de usuario
+        $usuarioId = $_SESSION['usuario']['id'] ?? ($_SESSION['usuario_id'] ?? ($_SESSION['id_usuario'] ?? 0));
+        if (empty($usuarioId)) {
+            JsonResponse::error('No hay una sesión activa para realizar esta acción.', null, 401);
+        }
+
+        // 4. Validar permiso estrictamente para habilitación ('habilitar_sucursales')
+        if (!TienePermiso($pdo, 'editar_sucursales')) {
+            JsonResponse::error('No cuentas con los permisos necesarios para realizar esta acción.', null, 403);
+        }
+
+        // 5. Obtener los IDs enviados (soporta JSON body o POST clásico)
+        $ids = $datosCrudos['ids'] ?? ($_POST['ids'] ?? []);
+        
+        if (is_string($ids)) {
+            $ids = json_decode($ids, true) ?? [];
+        }
+
+        if (empty($ids) || !is_array($ids)) {
+            JsonResponse::error('No se han proporcionado sucursales válidas para habilitar.', null, 400);
+        }
+
+        $processed = [];
+        $failed = [];
+        $sesionId = $_SESSION['sesion_id'] ?? ($_SESSION['id_sesion'] ?? null);
+
+        $pdo->beginTransaction();
+
+        $stmtVerificar = $pdo->prepare("SELECT ID, nombre, activo FROM sucursales WHERE ID = :id LIMIT 1");
+        $stmtHabilitar = $pdo->prepare("UPDATE sucursales SET activo = 1, ultima_modificacion = NOW() WHERE ID = :id");
+
+        foreach ($ids as $id) {
+            $idInt = (int)$id;
+
+            if ($idInt <= 0) {
+                continue;
+            }
+
+            // Verificar si existe la sucursal
+            $stmtVerificar->execute([':id' => $idInt]);
+            $sucursal = $stmtVerificar->fetch(PDO::FETCH_ASSOC);
+
+            if (!$sucursal) {
+                $failed[] = [
+                    "id"     => $idInt,
+                    "nombre" => "Sucursal ID: $idInt",
+                    "reason" => "La sucursal solicitada no existe."
+                ];
+                continue;
+            }
+
+            // Validar si ya se encuentra activa
+            if ((int)$sucursal['activo'] === 1) {
+                $failed[] = [
+                    "id"     => $idInt,
+                    "nombre" => $sucursal['nombre'] ?? 'Desconocida',
+                    "reason" => "La sucursal ya se encuentra habilitada."
+                ];
+                continue;
+            }
+
+            $nombreSucursal = $sucursal['nombre'] ?? 'Desconocida';
+
+            // Ejecutar la activación lógica (activo = 1)
+            $stmtHabilitar->execute([':id' => $idInt]);
+
+            // Registrar en la bitácora de auditoría
+            if (function_exists('RegistrarBitacoraAccion')) {
+                RegistrarBitacoraAccion(
+                    $usuarioId,
+                    $sesionId,
+                    'SUCURSALES',
+                    'HABILITAR_MASIVO',
+                    $idInt,
+                    "Activación lógica masiva de la sucursal '{$nombreSucursal}'.",
+                    null,
+                    ['id' => $idInt, 'nombre' => $nombreSucursal]
+                );
+            }
+
+            $processed[] = [
+                "id"     => $idInt,
+                "codigo" => "SUC-" . $idInt,
+                "nombre" => $nombreSucursal
+            ];
+        }
+
+        $pdo->commit();
+
+        // Estructura de respuesta estandarizada para Procesar_Resumen
+        $totalProcesados = count($processed);
+        $totalFallidos = count($failed);
+        $totalGeneral = $totalProcesados + $totalFallidos;
+
+        $dataRespuesta = [
+            "stats" => [
+                "total"   => $totalGeneral,
+                "success" => $totalProcesados,
+                "error"   => $totalFallidos
+            ],
+            "results" => [
+                "processed" => $processed,
+                "failed"    => $failed
+            ]
+        ];
+
+        JsonResponse::success("Proceso de habilitación masiva completado.", $dataRespuesta, 200);
+
+    } catch (Throwable $e) {
+        if (isset($pdo) && $pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        error_log("Error crítico al habilitar sucursales masivas: " . $e->getMessage());
+        JsonResponse::error('Ocurrió un error inesperado al procesar la habilitación masiva: ' . strtolower($e->getMessage()), null, 500);
+    }
 }

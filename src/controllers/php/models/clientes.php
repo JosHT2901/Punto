@@ -1070,3 +1070,140 @@ function Exportar_Clientes($datos)
         'clientes_reporte'    
     );
 }
+
+function Habilitar_Clientes(array $datos): void {
+    try {
+        // 1. Asegurar que la sesión esté iniciada
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        // 2. Obtener la instancia única de PDO
+        $pdo = Conexion();
+
+        // 3. Validar que exista una sesión de usuario activa
+        $usuarioId = $_SESSION['usuario']['id'] ?? ($_SESSION['usuario_id'] ?? ($_SESSION['id_usuario'] ?? 0));
+        $sesionId  = $_SESSION['sesion_id'] ?? ($_SESSION['id_sesion'] ?? null);
+
+        if (empty($usuarioId)) {
+            JsonResponse::error('No hay una sesión activa. Por favor, inicia sesión nuevamente.', null, 401);
+        }
+
+        // 4. Obtener y normalizar los IDs a procesar
+        $idsRaw = $datos['ids'] ?? ($datos['id'] ?? []);
+        if (!is_array($idsRaw)) {
+            $idsRaw = [$idsRaw];
+        }
+
+        $idsClientes = array_values(array_unique(array_filter(array_map('intval', $idsRaw))));
+
+        if (empty($idsClientes)) {
+            JsonResponse::error('No se han seleccionado clientes válidos para habilitar.');
+        }
+
+        // 5. Determinar si es una operación masiva o individual y asignar el permiso correspondiente
+        $esMasivo = count($idsClientes) > 1;
+        $permisoRequerido = 'editar_clientes';
+
+        // 6. Validar permisos usando tu función TienePermiso()
+        if (!TienePermiso($pdo, $permisoRequerido)) {
+            JsonResponse::error('No cuentas con los permisos necesarios para realizar esta acción.', null, 403);
+        }
+
+        // 7. Iniciar transacción para asegurar la integridad
+        $pdo->beginTransaction();
+
+        $processed = [];
+        $failed = [];
+        $habilitadoValor = 1;
+
+        // Cambiamos la condición para buscar los que estén inactivos (Habilitado = 0) y actualizarlos a 1
+        $stmtUpdate = $pdo->prepare("UPDATE clientes SET Habilitado = :habilitado, Modificado_por = :modificado_por, Ultima_Actualizacion = NOW() WHERE ID = :id AND Habilitado = 0");
+
+        foreach ($idsClientes as $idCliente) {
+            // Verificar si el cliente existe y está inactivo
+            $stmtAnt = $pdo->prepare("SELECT ID, Codigo_Cliente, Nombre, Apellido_Paterno, Habilitado FROM clientes WHERE ID = :id");
+            $stmtAnt->execute([':id' => $idCliente]);
+            $cliente = $stmtAnt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$cliente) {
+                $failed[] = [
+                    'id' => $idCliente,
+                    'nombre' => "Cliente ID #{$idCliente}",
+                    'reason' => 'El cliente no existe.'
+                ];
+                continue;
+            }
+
+            if ((int)$cliente['Habilitado'] === 1) {
+                $failed[] = [
+                    'id' => $idCliente,
+                    'nombre' => trim("{$cliente['Nombre']} {$cliente['Apellido_Paterno']}"),
+                    'reason' => 'El cliente ya se encuentra habilitado.'
+                ];
+                continue;
+            }
+
+            $nombreCompleto = trim("{$cliente['Nombre']} {$cliente['Apellido_Paterno']}");
+
+            // Ejecutar la habilitación
+            $stmtUpdate->execute([
+                ':habilitado'     => $habilitadoValor,
+                ':modificado_por' => $usuarioId,
+                ':id'             => $idCliente
+            ]);
+
+            if ($stmtUpdate->rowCount() > 0) {
+                // Registrar bitácora individual
+                if (function_exists('RegistrarBitacoraAccion')) {
+                    RegistrarBitacoraAccion(
+                        $usuarioId,
+                        $sesionId,
+                        'CLIENTES',
+                        'HABILITAR', // Acción actualizada
+                        $idCliente,
+                        "Se habilitó el cliente ID: {$idCliente} ({$nombreCompleto})",
+                        $cliente,
+                        ['Habilitado' => $habilitadoValor, 'Modificado_por' => $usuarioId]
+                    );
+                }
+
+                $processed[] = [
+                    'id' => $idCliente,
+                    'nombre' => $nombreCompleto,
+                    'codigo' => $cliente['Codigo_Cliente']
+                ];
+            } else {
+                $failed[] = [
+                    'id' => $idCliente,
+                    'nombre' => $nombreCompleto,
+                    'reason' => 'No se pudo actualizar el estado del cliente en la base de datos.'
+                ];
+            }
+        }
+
+        // Confirmar transacción
+        $pdo->commit();
+
+        $mensajeResumen = count($failed) === 0 
+            ? "Proceso de habilitación completado exitosamente." 
+            : "Proceso completado con algunas observaciones.";
+
+        // Devolver la respuesta estructurada masiva compatible con Procesar_Resumen
+        JsonResponse::massive($mensajeResumen, $processed, $failed, 200);
+
+    } catch (PDOException $e) {
+        if (isset($pdo) && $pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        error_log("Error de BD al habilitar clientes: " . $e->getMessage());
+        JsonResponse::error('Error de BD: ' . $e->getMessage(), null, 500);
+
+    } catch (Throwable $e) {
+        if (isset($pdo) && $pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        error_log("Error crítico al habilitar clientes: " . $e->getMessage());
+        JsonResponse::error($e->getMessage() ?: 'Ocurrió un error inesperado en el servidor.', null, 500);
+    }
+}

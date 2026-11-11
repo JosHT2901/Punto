@@ -16,5 +16,11 @@
       "icono": "vf-ic_fluent_building_retail_24_filled",
       "href": "/punto_1/public/pages/views/sucursales.php",
       "modulo": "Sucursales"
+    },
+    {
+      "titulo": "Ajustes",
+      "icono": "vf-ic_fluent_settings_24_filled",
+      "href": "/punto_1/public/pages/views/ajustes.php",
+      "modulo": "Ajustes"
     }
 ]

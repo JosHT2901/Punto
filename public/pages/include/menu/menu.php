@@ -43,6 +43,14 @@
                 0
             </span>
         </a>
+        <a class="btn w-40 h-40 btn-ghost rounded-md flex-center position-relative" id="nuevo-usuario-boton-generar-usuario" title="Alertas">
+            <i class="fs-8 vf-ic_fluent_chat_24_filled"></i>
+            <span id="badge-mensajes-main"
+                class="position-absolute top-0 right-0 bg-danger text-white fw-bold rounded-full flex-center w-18 h-18 fs-0 border-white"
+                style="display:none; transform: translate(0%, -5%);">
+                0
+            </span>
+        </a>
     </div>
 
     <div class="flex-center shrink-0 px-2">

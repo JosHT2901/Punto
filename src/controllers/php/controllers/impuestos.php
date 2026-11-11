@@ -11,6 +11,7 @@ declare(strict_types=1);
 // header('Content-Type: application/json; charset=UTF-8');
 
 require_once __DIR__ . '/../models/impuestos.php';
+require_once __DIR__ . '/../models/ajustes.php';
 require_once __DIR__ . '/../main/controller.php';
 
 // Validar estrictamente que la petición sea por POST (seguridad básica para AJAX)
@@ -29,7 +30,15 @@ $accion = trim($_POST['accion'] ?? '');
 // Mapeo de acciones permitidas
 $accionesPermitidas = [
     'obtener_esquemas_fiscales'         => 'Obtener_Esquemas_Fiscales',
-    'guardar_esquema_fiscal'=>'Guardar_Esquema_Fiscal'
+    'guardar_esquema_fiscal'=>'Guardar_Esquema_Fiscal',
+    'obtener_esquemas_impuestos_paginados'=>'Obtener_Esquemas_Impuestos_Paginados',
+    'obtener_impuesto_por_id'=>'Obtener_Esquema_Impuesto_Por_Id',
+    'actualizar_esquema_fiscal'=>'Actualizar_Esquema_Fiscal',
+    'eliminar_esquema_fiscal'=>'Eliminar_Esquema_Fiscal',
+    'habilitar_esquema_fiscal'=>'Habilitar_Esquema_Fiscal',
+    'habilitar_esquemas_fiscales'=>'Habilitar_Esquemas_Fiscales',
+    'eliminar_esquemas_fiscales'=>'Eliminar_Esquemas_Fiscales',
+    'exportar_esquemas'=>'Exportar_Esquemas_Fiscales'
 ];
 
 // Ejecutar el despachador central

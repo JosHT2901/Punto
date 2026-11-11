@@ -10,5 +10,6 @@ return [
     'db'       => require __DIR__ . '/db.php',
     'smtp'     => require __DIR__ . '/smtp.php',
     'imap'     => require __DIR__ . '/imap.php',
-    'key'      => require __DIR__ . '/key.php',
+    // Leemos la clave de cifrado directamente de $_ENV (o de getenv como respaldo)
+    'key'      => $_ENV['APP_CRYPTO_KEY'] ?? getenv('APP_CRYPTO_KEY') ?? '',
 ];

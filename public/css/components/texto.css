@@ -63,11 +63,6 @@ UTILIDADES DE TEXTO
     color: #28a745 !important;
 }
 
-/* Verde - Aprobado/Disponible */
-.text-danger {
-    color: #dc3545 !important;
-}
-
 /* Rojo - Error/Agotado */
 .text-warning {
     color: #ffc107 !important;

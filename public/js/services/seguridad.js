@@ -19,20 +19,24 @@ async function sha256(texto) {
 }
 
 /**
- * Cifra un texto plano utilizando AES-256-CBC (compatible con PHP openssl_encrypt)
+ * Cifra un texto plano o número utilizando AES-256-CBC (compatible con PHP openssl_encrypt)
  * 
- * @param {string} plaintext Texto que deseas proteger
+ * @param {string|number} plaintext Texto o número que deseas proteger
  * @returns {string|null} Paquete cifrado en Base64 o null en caso de error
  */
 function Cifrar_Payload(plaintext) {
     try {
-        if (!plaintext || typeof plaintext !== 'string') {
-            console.error("Cifrar_Payload: El texto de entrada no es válido.");
+        if (plaintext === null || plaintext === undefined || (typeof plaintext !== 'string' && typeof plaintext !== 'number')) {
+            console.error("Cifrar_Payload: El valor de entrada no es válido.");
             return null;
         }
+
+        // Convertir explícitamente a string por si se pasa un número (ej: 48 -> "48")
+        const textToEncrypt = String(plaintext);
+
         const secretKey = UI_CONFIG?.CRYPTO_KEY;
         if (!secretKey) {
-            console.error("Cifrar_Payload: La llave de cifrado (SYSTEM_CONFIG.CRYPTO_KEY) no está definida.");
+            console.error("Cifrar_Payload: La llave de cifrado (UI_CONFIG.CRYPTO_KEY) no está definida.");
             return null;
         }
         
@@ -43,7 +47,7 @@ function Cifrar_Payload(plaintext) {
         const key = CryptoJS.enc.Utf8.parse(secretKey);
 
         // 3. Cifrar el texto utilizando AES en modo CBC con padding PKCS7
-        const encrypted = CryptoJS.AES.encrypt(plaintext, key, {
+        const encrypted = CryptoJS.AES.encrypt(textToEncrypt, key, {
             iv: iv,
             mode: CryptoJS.mode.CBC,
             padding: CryptoJS.pad.Pkcs7
@@ -81,7 +85,7 @@ function Descifrar_Payload(encryptedData) {
 
         const secretKey = UI_CONFIG?.CRYPTO_KEY;
         if (!secretKey) {
-            console.error("Descifrar_Payload: La llave de cifrado (SYSTEM_CONFIG.CRYPTO_KEY) no está definida.");
+            console.error("Descifrar_Payload: La llave de cifrado (UI_CONFIG.CRYPTO_KEY) no está definida.");
             return null;
         }
 

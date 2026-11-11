@@ -329,8 +329,9 @@ window.Calendario = (function ($) {
             if (!date) return '';
             const d = date.getDate();
             const m = meses[date.getMonth()].substring(0, 3);
+            const a = date.getFullYear();
             const diasS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-            return `${diasS[date.getDay()]}, ${d} ${m}`;
+            return `${diasS[date.getDay()]}, ${d} ${m} ${a}`;
         }
 
         // Formato estándar SQL / Base de Datos (YYYY-MM-DD)

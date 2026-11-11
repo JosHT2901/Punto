@@ -9,7 +9,8 @@ declare(strict_types=1);
 /* ===============================
    AUTOLOAD (Composer)
 ================================ */
-require_once __DIR__ . '../../lib/php/vendor/autoload.php';
+// Desde src/config/ subimos un nivel a src/ y entramos a lib/php/vendor/
+require_once dirname(__DIR__) . '/lib/php/vendor/autoload.php';
 
 use Dotenv\Dotenv;
 
@@ -17,19 +18,20 @@ use Dotenv\Dotenv;
    CARGAR VARIABLES DE ENTORNO (.env)
 ================================ */
 try {
+    // Apuntamos de forma absoluta a la carpeta src/env/
     $rutaEnv = dirname(__DIR__) . '/env'; 
+    
     if (file_exists($rutaEnv . '/.env')) {
         $dotenv = Dotenv::createImmutable($rutaEnv);
         $dotenv->load();
     }
 } catch (Throwable $e) {
-    // Capturamos Throwable por seguridad ante errores de sintaxis o lectura en el .env
+    // Capturamos Throwable por seguridad ante errores de lectura del .env
 }
 
 /* ===============================
    CONFIGURACIÓN GLOBAL (Primero)
 ================================ */
-// Definimos constantes y configuraciones antes de cargar dependencias internas
 $isDebug = filter_var($_ENV['APP_DEBUG'] ?? false, FILTER_VALIDATE_BOOLEAN);
 
 define('CONFIG', require __DIR__ . '/config.php');
@@ -51,7 +53,6 @@ if (!IS_DEBUG) {
 /* ===============================
    ZONA HORARIA (Dinámica desde DB o Fallback)
 ================================ */
-// Valor por defecto inmediato por seguridad
 date_default_timezone_set('America/Mexico_City');
 
 try {
@@ -68,6 +69,5 @@ try {
         }
     }
 } catch (Throwable $e) {
-    // Si la base de datos no está lista, la tabla no existe o falla la conexión, 
-    // el sistema continúa operando con el fallback de 'America/Mexico_City'.
+    // Fallback a México por defecto si la base de datos no está lista
 }

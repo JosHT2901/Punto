@@ -41,11 +41,11 @@ window.EliminarService = (() => {
             const confirmado = await MostrarPregunta({
                 titulo: tituloConfirmacion,
                 texto: mensajeConfirmacion,
-                icono: options.icono || 'vf-ic_fluent_delete_24_regular',
+                icono: options.icono || 'vf-ic_fluent_delete_24_filled',
                 confirmarText: options.confirmarText || 'Sí, eliminar',
                 cancelarText: options.cancelarText || 'Cancelar',
                 colorConfirmar: options.colorConfirmar || 'btn-danger',
-                altura: options.altura || 280
+                altura: options.altura || 320
             });
 
             // Si el usuario cancela la operación
@@ -111,8 +111,13 @@ window.EliminarService = (() => {
 
                 return response;
             } else {
+                if (typeof OcultarCargando === 'function') {
+                    OcultarCargando();
+                }
                 const errorMsg = response?.mensaje || 'No se pudieron completar los cambios.';
-                if (typeof MostrarMensaje === 'function') {
+                if (typeof MostrarAlerta === 'function') {
+                    MostrarAlerta(errorMsg, 250, false);
+                } else if (typeof MostrarMensaje === 'function') {
                     MostrarMensaje(errorMsg, false, false, false);
                 }
                 throw response;
@@ -124,16 +129,13 @@ window.EliminarService = (() => {
                 OcultarCargando();
             }
 
-            const errorMsg = error?.mensaje || 'Ocurrió un error inesperado en el servidor.';
-            if (typeof MostrarMensaje === 'function' && !error?.mensaje) {
+            const errorMsg = error?.mensaje || error?.responseText || 'Ocurrió un error inesperado en el servidor.';
+            
+            if (typeof MostrarAlerta === 'function') {
+                MostrarAlerta(errorMsg, 250, false);
+            } else if (typeof MostrarMensaje === 'function') {
                 MostrarMensaje(errorMsg, false, false, false);
             }
-            
-            setTimeout(() => {
-                if (typeof ModalAPI !== 'undefined' && typeof ModalAPI.cerrar === 'function') {
-                    ModalAPI.cerrar();
-                }
-            }, 1000);
             
             throw error;
         }

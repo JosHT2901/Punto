@@ -4,6 +4,7 @@ function Descargar_Plantilla($Datos) {
         // Verificamos si llegó la acción correcta (opcional pero recomendado)
         $url = $_POST['url'] ?? '';
         $rutaArchivo = __DIR__ . $url; 
+        $nombreDescarga=$_POST['nombre']??'plantilla.xlsx';
 
         // 1. Validar si el archivo existe físicamente
         if (!file_exists($rutaArchivo)) {
@@ -16,8 +17,6 @@ function Descargar_Plantilla($Datos) {
             ob_end_clean();
         }
 
-        // 3. Definir el nombre con el que se descargará en el equipo del cliente
-        $nombreDescarga = 'plantilla_clientes.xlsx';
 
         // 4. Configurar los headers HTTP para descarga de archivos binarios
         header('Content-Description: File Transfer');

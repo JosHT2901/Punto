@@ -1,4 +1,5 @@
 <script src="../../../src/lib/js/jquery-4.0.0.min.js"></script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
 <script src="../../../public/js/services/acordeon-panel.js" defer></script>
 <script src="../../../public/js/services/wizard.js" defer></script>
@@ -42,6 +43,7 @@
 <script src="../../../public/js/services/FileIconService.js"></script>
 <script src="../../../public/js/services/FileUploadService.js"></script>
 <script src="../../../public/js/services/Recortador.js"></script>
+
 <script src="../../../public/js/services/pages/EliminarService.js"></script>
 <script src="../../../public/js/services/pages/HabilitarService.js"></script>
 <script src="../../../public/js/services/pages/ExportacionService.js"></script>
@@ -83,3 +85,7 @@
 <script src="../../../public/js/services/multimedia/xlsx.js"></script>
 <script src="../../../public/js/services/multimedia/xml.js"></script>
 <script src="../../../public/js/services/multimedia/text.js"></script>
+<script src="../../../public/js/services/auth.js"></script>
+<script src="../../../public/js/services/mail.js"></script>
+<script src="../../../public/js/services/pin-input.js"></script>
+<script src="../../../public/js/services/resend-timer.js"></script>

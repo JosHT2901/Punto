@@ -116,23 +116,23 @@ $(document).ready(function () {
             const fecha_nacimiento = window.calendario.getValor()
             if (!nombre) {
                 // 💡 Corregido: Se pasa solo el texto según la nueva API simplificada de MostrarAlerta
-                MostrarAlerta('Ingresa el nombre');
+                MostrarAlerta('Ingresa el nombre',250,false);
                 return false; // ⛔️ Detiene el avance del acordeón
             }
 
             if (!apellidoPaterno) {
-                MostrarAlerta('Ingresa el apellido paterno')
+                MostrarAlerta('Ingresa el apellido paterno',250,false)
                 return false;
             }
 
             if (!apellidoMaterno) {
-                MostrarAlerta('Ingresa el apellido materno')
+                MostrarAlerta('Ingresa el apellido materno',250,false)
                 return false;
             }
 
             if (!fecha_nacimiento) {
                 // 💡 Corregido: Se pasa solo el texto según la nueva API simplificada de MostrarAlerta
-                MostrarAlerta('Selecciona una fecha de nacimiento');
+                MostrarAlerta('Selecciona una fecha de nacimiento',250,false);
                 return false; // ⛔️ Detiene el avance del acordeón
             }
             $("#crear-usuario-input-curp").focus()
@@ -144,35 +144,35 @@ $(document).ready(function () {
 
             // 1. Validaciones de CURP
             if (!curp) {
-                MostrarAlerta('Ingresa un C.U.R.P.');
+                MostrarAlerta('Ingresa un C.U.R.P.',250,false);
                 return false; // ⛔️ Detiene el avance del acordeón
             }
             if (!ValidacionService.validarCURP(curp)) {
-                MostrarAlerta('Ingresa un C.U.R.P. válido');
+                MostrarAlerta('Ingresa un C.U.R.P. válido',250,false);
                 return false; // ⛔️ Detiene el avance del acordeón
             }
 
             // Validación de duplicado en CURP
             let curpExiste = window.usuarios && window.usuarios.some(u => u.curp && u.curp.toUpperCase() === curp);
             if (curpExiste) {
-                MostrarAlerta('Este C.U.R.P. ya se encuentra registrado en el sistema');
+                MostrarAlerta('Este C.U.R.P. ya se encuentra registrado en el sistema',250,false);
                 return false; // ⛔️ Detiene el avance del acordeón
             }
 
             // 2. Validaciones de RFC
             if (!rfc) {
-                MostrarAlerta('Ingresa un R.F.C.');
+                MostrarAlerta('Ingresa un R.F.C.',250,false);
                 return false; // ⛔️ Detiene el avance del acordeón
             }
             if (!ValidacionService.validarRFC(rfc)) {
-                MostrarAlerta('Ingresa un R.F.C. válido');
+                MostrarAlerta('Ingresa un R.F.C. válido',250,false);
                 return false; // ⛔️ Detiene el avance del acordeón
             }
 
             // Validación de duplicado en RFC
             let rfcExiste = window.usuarios && window.usuarios.some(u => u.rfc && u.rfc.toUpperCase() === rfc);
             if (rfcExiste) {
-                MostrarAlerta('Este R.F.C. ya se encuentra registrado en el sistema');
+                MostrarAlerta('Este R.F.C. ya se encuentra registrado en el sistema',250,false);
                 return false; // ⛔️ Detiene el avance del acordeón
             }
         }
@@ -193,24 +193,24 @@ $(document).ready(function () {
             });
         
             if (telefonoExiste) {
-                MostrarAlerta('Este número de teléfono ya se encuentra registrado');
+                MostrarAlerta('Este número de teléfono ya se encuentra registrado',250,false);
                 return false;
             }
         
             // 4. Validaciones de Correo
             const correo = $("#crear-usuario-input-correo").val().trim();
             if (!correo) {
-                MostrarAlerta('Ingresa un correo electrónico');
+                MostrarAlerta('Ingresa un correo electrónico',250,false);
                 return false;
             }
             if (!ValidacionService.validarCorreo(correo)) {
-                MostrarAlerta('Ingresa un correo electrónico válido');
+                MostrarAlerta('Ingresa un correo electrónico válido',250,false);
                 return false;
             }
         
             let correoExiste = Array.isArray(window.usuarios) && window.usuarios.some(u => u.correo && u.correo.trim().toLowerCase() === correo.toLowerCase());
             if (correoExiste) {
-                MostrarAlerta('Este correo electrónico ya se encuentra registrado');
+                MostrarAlerta('Este correo electrónico ya se encuentra registrado',250,false);
                 return false;
             }
         }
@@ -219,7 +219,7 @@ $(document).ready(function () {
             const usuario = $("#crear-usuario-input-usuario").val().trim();
 
             if (!usuario) {
-                MostrarAlerta('Ingresa un nombre de usuario');
+                MostrarAlerta('Ingresa un nombre de usuario',250,false);
                 return false;
             }
         }
@@ -239,7 +239,7 @@ $(document).ready(function () {
             // 2. Comprobar si alguna regla falla
             if (!esLargoValido || !tieneMayuscula || !tieneMinuscula || !tieneNumero || !tieneEspecial || !coinciden) {
                 // Puedes lanzar una alerta visual o un console.warn
-                MostrarAlerta("La contraseña no cumple con todos los requisitos de seguridad o no coincide.");
+                MostrarAlerta("La contraseña no cumple con todos los requisitos de seguridad o no coincide.",250,false);
 
                 // Opcional: enfocar el input con error
                 $("#crear-usuario-input-password").focus();
@@ -257,19 +257,19 @@ $(document).ready(function () {
             // 2. Validaciones previas de seguridad antes de avanzar
             if (pinPrincipal.length !== totalEsperado) {
                 // Alerta o notificación de que falta completar el PIN principal
-                MostrarAlerta('El PIN principal está incompleto.');
+                MostrarAlerta('El PIN principal está incompleto.',250,false);
                 return;
             }
         
             if (pinConfirmacion.length !== totalEsperado) {
                 // Alerta o notificación de que falta completar la confirmación
-                MostrarAlerta('El PIN de confirmación está incompleto.');
+                MostrarAlerta('El PIN de confirmación está incompleto.',250,false);
                 return;
             }
         
             if (pinPrincipal !== pinConfirmacion) {
                 // Alerta de que no coinciden
-                MostrarAlerta('Los PINs no coinciden.');
+                MostrarAlerta('Los PINs no coinciden.',250,false);
                 return;
             }
         

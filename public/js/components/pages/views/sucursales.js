@@ -327,32 +327,27 @@ async function FuncionesIniciales() {
 
     // 3. Inicialización del controlador de selección conectado a la barra flotante
     if (window.SucursalesSelectionController && window.SelectionBarService) {
+        
+        const refrescarBarra = SelectionBarService.conectar(window.SucursalesSelectionController, {
+            entidad: 'sucursales',
+            barra: '#barra-seleccion',
+            contador: '#contador-container',
+            contenedorBotones: '#acciones-masivas-container',
+            botones: () => {
+                const estadoActual = window.activo !== undefined ? parseInt(window.activo) : 1;
+                return (estadoActual === 0) 
+                    ? (window.botones_opciones_deshabilitado || []) 
+                    : (window.botones_opciones_habilitado || []);
+            }
+        });
+
         window.SucursalesSelectionController.init({
             scope: $("#contenedor-resultados"),
             checkItemClass: '.check-item',
             tarjetaClass: '.card-universal',
             claseActiva: 'seleccionada',
             checkAllId: 'check-item-all',
-            onChange: SelectionBarService.conectar(window.SucursalesSelectionController, {
-                entidad: 'sucursales',
-                barra: '#barra-seleccion',
-                contador: '#contador-container',
-                contenedorBotones: '#acciones-masivas-container',
-                botones: [
-                    {
-                        id: 'btn-eliminar-masivo',
-                        icon: 'vf-ic_fluent_delete_24_filled',
-                        title: 'Eliminar seleccionadas',
-                        onclick: 'Eliminar_Masivo_Sucursales()'
-                    },
-                    {
-                        id: 'btn-exportar-masivo',
-                        icon: 'vf-ic_fluent_arrow_export_24_filled',
-                        title: 'Exportar seleccionadas',
-                        onclick: 'ExportarSucursalesMasivas()'
-                    }
-                ]
-            })
+            onChange: refrescarBarra
         });
     }
 

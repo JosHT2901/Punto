@@ -5,7 +5,7 @@ $tituloPage = "Gestión de esquemas fiscales";
 // 2. Activamos el búfer para capturar todo el HTML que escribamos abajo
 ob_start();
 ?>
-<form class="w-p-100 h-p-100 py-2 flex flex-column" id="form-gestion-esquema-fiscal">
+<form class="w-p-100 h-p-100 p-2 flex flex-column" id="form-gestion-esquema-fiscal">
     <div class="w-p-100 flex flex-column js-wizard-container flex-1 min-w-0 ocultar-scroll">
 
         <!-- Sección 1: Identificación -->
@@ -46,7 +46,7 @@ ob_start();
                             </div>
                             <div class="row-gap-0 flex flex-column flex-1 min-w-0">
                                 <div class="flex items-center justify-between mb-1 pl-2">
-                                    <label for="esquema-input-ieps" class="block fs-3 fw-600">Tasa I.E.P.S. (Ad-valorem)</label>
+                                    <label for="esquema-input-ieps" class="block fs-3 fw-600">Tasa I.E.P.S.</label>
                                     <button type="button" class="btn btn-secondary rounded-md flex-center shrink-0" style="padding: 0px; width:15px; height:15px;" id="boton-ayuda-ieps" title="Ayuda">
                                         <i class="vf-ic_fluent_question_24_filled fs-3"></i>
                                     </button>
@@ -71,7 +71,7 @@ ob_start();
                         <div class="flex justify-between gap-3">
                             <div class="row-gap-0 flex flex-column flex-1 min-w-0">
                                 <div class="flex items-center justify-between mb-1 pl-2">
-                                    <label for="esquema-input-cuota-litro" class="block fs-3 fw-600">Cuota por litro</label>
+                                    <label for="esquema-input-cuota-litro" class="block fs-3 fw-600">Por litro</label>
                                     <button type="button" class="btn btn-secondary rounded-md flex-center shrink-0" style="padding: 0px; width:15px; height:15px;" id="boton-ayuda-cuota-litro" title="Ayuda">
                                         <i class="vf-ic_fluent_question_24_filled fs-3"></i>
                                     </button>
@@ -83,7 +83,7 @@ ob_start();
                             </div>
                             <div class="row-gap-0 flex flex-column flex-1 min-w-0">
                                 <div class="flex items-center justify-between mb-1 pl-2">
-                                    <label for="esquema-input-cuota-unidad" class="block fs-3 fw-600">Cuota por unidad</label>
+                                    <label for="esquema-input-cuota-unidad" class="block fs-3 fw-600">Por unidad</label>
                                     <button type="button" class="btn btn-secondary rounded-md flex-center shrink-0" style="padding: 0px; width:15px; height:15px;" id="boton-ayuda-cuota-unidad" title="Ayuda">
                                         <i class="vf-ic_fluent_question_24_filled fs-3"></i>
                                     </button>

@@ -1,24 +1,13 @@
 <?php
-/**
- * Configuración de SMTP
- */
 
 declare(strict_types=1);
 
-// Limpiamos espacios y comillas externas que puedan importarse erróneamente del .env
-$limpiarEnv = function($clave, $defecto = '') {
-    $valor = $_ENV[$clave] ?? $defecto;
-    return trim($valor, " \t\n\r\0\x0B\""); // Remueve espacios y comillas dobles de los extremos
-};
-
 return [
-    'host'   => $limpiarEnv('SMTP_HOST', 'smtp.ionos.mx'), 
-    'port'   => (int)($_ENV['SMTP_PORT'] ?? 587),         // Puerto estándar para TLS explícito
-    'user'   => $limpiarEnv('SMTP_USER', ''),
-    'pass'   => $limpiarEnv('SMTP_PASS', ''),             // Extrae la contraseña libre de comillas basura
-    'secure' => strtolower($limpiarEnv('SMTP_SECURE', 'tls')), // Asegura el string en minúsculas ('tls' o 'ssl')
-    'from'   => [
-        'email' => $limpiarEnv('SMTP_USER', ''),
-        'name'  => 'Etcétera de México'
-    ]
+    'host'       => $_ENV['SMTP_HOST'] ?? getenv('SMTP_HOST') ?: 'smtp.ionos.mx',
+    'username'   => $_ENV['SMTP_USERNAME'] ?? getenv('SMTP_USERNAME') ?: 'contacto@tiendas-etcetera.com',
+    'password'   => $_ENV['SMTP_PASSWORD'] ?? getenv('SMTP_PASSWORD') ?: 'Hola$290105',
+    'port'       => (int) ($_ENV['SMTP_PORT'] ?? getenv('SMTP_PORT') ?: 587),
+    'secure'     => $_ENV['SMTP_SECURE'] ?? getenv('SMTP_SECURE') ?: 'tls',
+    'from_email' => $_ENV['SMTP_FROM_EMAIL'] ?? getenv('SMTP_FROM_EMAIL') ?: 'contacto@tiendas-etcetera.com',
+    'from_name'  => $_ENV['SMTP_FROM_NAME'] ?? getenv('SMTP_FROM_NAME') ?: 'Etcétera de México'
 ];

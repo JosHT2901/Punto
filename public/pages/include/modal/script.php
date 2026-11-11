@@ -9,3 +9,4 @@
 <script src="../../../public/js/components/include/modal/pregunta.js"></script>
 <script src="../../../public/js/components/include/modal/mensaje.accion.js"></script>
 <script src="../../../public/js/components/include/modal/documento.js"></script>
+<script src="../../../public/js/components/include/modal/auth.js"></script>

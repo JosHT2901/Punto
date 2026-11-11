@@ -5,20 +5,22 @@
 
 declare(strict_types=1);
 
-/**
- * Obtiene la llave de cifrado de forma segura y centralizada.
- */
 function ObtenerLlaveCifrado(): string
 {
     static $passphrase = null;
     if ($passphrase === null) {
-        $config = require dirname(__DIR__) . '/config/config.php';
-        $passphrase = (string) ($config['key'] ?? '');
-        if ($passphrase === '') {
-            throw new RuntimeException("La llave de cifrado no está configurada.");
+        // Intentamos leer primero de la constante global CONFIG, luego de $_ENV y finalmente de getenv
+        $passphrase = (string) (
+            (defined('CONFIG') && isset(CONFIG['key']) && !empty(CONFIG['key'])) 
+                ? CONFIG['key'] 
+                : ($_ENV['APP_CRYPTO_KEY'] ?? getenv('APP_CRYPTO_KEY') ?? '')
+        );
+
+        if (empty($passphrase)) {
+            throw new RuntimeException("La llave de cifrado (APP_CRYPTO_KEY) no está definida en el archivo .env.");
         }
     }
-    return $passphrase;
+    return trim($passphrase, " \t\n\r\0\x0B\"");
 }
 
 /**
