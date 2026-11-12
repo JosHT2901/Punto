@@ -44,5 +44,19 @@
         "icono": "vf-ic_fluent_calculator_24_filled",
         "href": "impuestos.php",
         "permiso": "ver_esquemas_fiscales"
+    },
+    {
+        "id": "card-exportar-sql",
+        "titulo": "Descargar archivo SQL",
+        "descripcion": "Generar y descargar un respaldo completo de la base de datos en formato SQL",
+        "icono": "fa-solid fa-database",
+        "permiso": "database"
+    },
+    {
+        "id": "card-importar-sql",
+        "titulo": "Restaurar archivo SQL",
+        "descripcion": "Cargar y restaurar un respaldo previo de la base de datos a partir de un archivo en formato SQL",
+        "icono": "fa-solid fa-database",
+        "permiso": "database"
     }
 ]

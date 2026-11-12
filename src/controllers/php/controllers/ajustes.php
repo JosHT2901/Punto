@@ -38,7 +38,11 @@ $accionesPermitidas = [
     'obtener_ajustes_smtp'=>'Obtener_Ajustes_Smtp',
     'guardar_ajustes_smtp'=>'Guardar_Ajustes_Smtp',
      'obtener_ajustes_imap'=>'Obtener_Ajustes_Imap',
-    'guardar_ajustes_imap'=>'Guardar_Ajustes_Imap'
+    'guardar_ajustes_imap'=>'Guardar_Ajustes_Imap',
+    'descargar_sql'=>'Descargar_Backup_Dinamico_SQL',
+    'importar_sql'=>'Importar_Backup_Dinamico_SQL',
+    'gestionar_ticket'=>'Gestionar_Ticket',
+    'obtener_configuracion_ticket'=>'Obtener_Configuracion_Ticket'
 ];
 
 // Ejecutar el despachador central

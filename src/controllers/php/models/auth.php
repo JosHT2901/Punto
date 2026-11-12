@@ -15,7 +15,7 @@ function Verificar_Credenciales_Usuario($data) {
         if (isset($_SESSION['usuario']) && !empty($_SESSION['usuario']['id'])) {
             $idUsuario = $_SESSION['usuario']['id'];
         } else {
-            JsonResponse::error('No se encontró una sesión activa para validar las credenciales.', 230, 200);
+            JsonResponse::error('No se encontró una sesión activa para validar las credenciales.', null, 200);
         }
     }
 
@@ -45,14 +45,14 @@ function Verificar_Credenciales_Usuario($data) {
     }
 
     if (!$registro || empty($registro['ID'])) {
-        JsonResponse::error('Usuario no encontrado en el sistema.', 230, 200);
+        JsonResponse::error('Usuario no encontrado en el sistema.', null, 200);
     }
 
     // 4. Validaciones según el contexto (Con usuario o Sin usuario)
     if ($tieneUsuarioExplicito) {
         // CASO A: CON USUARIO -> Debe validar obligatoriamente usuario y contraseña
         if (empty($password) || empty($registro['password']) || !password_verify($password, $registro['password'])) {
-            JsonResponse::error('La contraseña ingresada es incorrecta.', 230, 200);
+            JsonResponse::error('La contraseña ingresada es incorrecta.',null, 200);
         }
     } else {
         // CASO B: SIN USUARIO (Sesión activa) -> Permite pasar si el valor ingresado coincide con la contraseña O con el PIN
@@ -60,7 +60,7 @@ function Verificar_Credenciales_Usuario($data) {
         $pinOk  = (!empty($pin) && !empty($registro['pin']) && password_verify($pin, $registro['pin']));
 
         if (!$passOk && !$pinOk) {
-            JsonResponse::error('La contraseña o el PIN ingresados son incorrectos.', 230, 200);
+            JsonResponse::error('La contraseña o el PIN ingresados son incorrectos.', null, 200);
         }
     }
 

@@ -59,18 +59,24 @@ function Gestionar_Variables_Sistema(array $datos): void {
             $ipOrigen = '127.0.0.1';
         }
 
-        // 6. Extraer y validar los campos enviados desde el formulario de variables
-        $simboloMoneda       = trim($datos['simbolo_moneda'] ?? '');
-        $codigoIso           = strtoupper(trim($datos['codigo_iso'] ?? ''));
-        $redondearPrecios    = isset($datos['redondear_precios']) ? (int)$datos['redondear_precios'] : 0;
-        $bloquearStockCero   = isset($datos['bloquear_stock_cero']) ? (int)$datos['bloquear_stock_cero'] : 0;
+        // 6. Extraer y validar los campos enviados desde el formulario de variables (incluyendo comisión e IVA)
+        $simboloMoneda         = trim($datos['simbolo_moneda'] ?? '');
+        $codigoIso             = strtoupper(trim($datos['codigo_iso'] ?? ''));
+        $redondearPrecios      = isset($datos['redondear_precios']) ? (int)$datos['redondear_precios'] : 0;
+        $bloquearStockCero     = isset($datos['bloquear_stock_cero']) ? (int)$datos['bloquear_stock_cero'] : 0;
+        $incluirComisionTarjeta = isset($datos['incluir_comision_tarjeta']) ? (int)$datos['incluir_comision_tarjeta'] : 0;
+        $comisionTarjeta       = $incluirComisionTarjeta ? number_format((float)($datos['comision_tarjeta'] ?? 0), 2, '.', '') : '0.00';
+        $ivaComision           = $incluirComisionTarjeta ? trim($datos['iva_comision'] ?? '0') : '0';
 
         // Arreglo con las variables clave-valor que vamos a guardar/actualizar
         $variablesAGuardar = [
-            'simbolo_moneda'      => $simboloMoneda,
-            'codigo_iso'          => $codigoIso,
-            'redondear_precios'     => $redondearPrecios,
-            'bloquear_stock_cero'   => $bloquearStockCero
+            'simbolo_moneda'          => $simboloMoneda,
+            'codigo_iso'              => $codigoIso,
+            'redondear_precios'       => $redondearPrecios,
+            'bloquear_stock_cero'     => $bloquearStockCero,
+            'incluir_comision_tarjeta' => $incluirComisionTarjeta,
+            'comision_tarjeta'        => $comisionTarjeta,
+            'iva_comision'            => $ivaComision
         ];
 
         // Iniciamos transacción para asegurar consistencia
@@ -86,10 +92,13 @@ function Gestionar_Variables_Sistema(array $datos): void {
 
         // Descripciones predeterminadas para cada clave
         $descripciones = [
-            'simbolo_moneda'      => 'Símbolo monetario utilizado en la interfaz',
-            'codigo_iso'          => 'Código ISO 4217 de la moneda principal',
-            'redondear_precios'   => 'Indica si los precios se redondean automáticamente (1 = Sí, 0 = No)',
-            'bloquear_stock_cero' => 'Bloquea la venta si el producto cuenta con stock en cero (1 = Sí, 0 = No)'
+            'simbolo_moneda'           => 'Símbolo monetario utilizado en la interfaz',
+            'codigo_iso'               => 'Código ISO 4217 de la moneda principal',
+            'redondear_precios'        => 'Indica si los precios se redondean automáticamente (1 = Sí, 0 = No)',
+            'bloquear_stock_cero'      => 'Bloquea la venta si el producto cuenta con stock en cero (1 = Sí, 0 = No)',
+            'incluir_comision_tarjeta' => 'Indica si se incluye la comisión de terminal bancaria (1 = Sí, 0 = No)',
+            'comision_tarjeta'         => 'Porcentaje de comisión aplicado por la terminal bancaria',
+            'iva_comision'             => 'Tasa o porcentaje de IVA aplicable sobre la comisión de la tarjeta'
         ];
 
         foreach ($variablesAGuardar as $clave => $valor) {
@@ -850,3 +859,589 @@ function Guardar_Ajustes_Imap(array $data): void {
     }
 }
 
+function Descargar_Backup_Dinamico_SQL(): void {
+    // 1. Asegurar sesión activa
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+
+    $usuarioId = $_SESSION['usuario']['id'] ?? null;
+    $sesionId  = $_SESSION['sesion_id'] ?? ($_SESSION['id_sesion'] ?? null);
+
+    // Validación de autenticación base compatible con AjaxService / descargarArchivo
+    if (!$usuarioId || !isset($_SESSION['seguridad']['autenticado'])) {
+        JsonResponse::error("Error 401: Sesión expirada o usuario no autenticado.", null, 401);
+        return;
+    }
+
+    // 2. Obtener instancia de PDO mediante la función del sistema
+    $pdo = Conexion();
+    if (!$pdo) {
+        JsonResponse::error("No se pudo establecer conexión con el motor de base de datos.", null, 500);
+        return;
+    }
+
+    // 3. Validación de permisos robusta utilizando la función global estandarizada
+    $permisoRequerido = 'database';
+    if (!TienePermiso($pdo, $permisoRequerido)) {
+        JsonResponse::error("No tienes los privilegios necesarios para descargar respaldos de la base de datos.", null, 403);
+        return;
+    }
+
+    // 4. Proceso de generación y streaming del archivo .SQL
+    try {
+        // Obtener el listado de todas las tablas activas de forma segura
+        $tablas = [];
+        $result = $pdo->query("SHOW TABLES");
+        while ($row = $result->fetch(PDO::FETCH_NUM)) {
+            $tablas[] = $row[0];
+        }
+
+        if (empty($tablas)) {
+            JsonResponse::error("La base de datos no contiene tablas para respaldar.", null, 404);
+            return;
+        }
+
+        // Preparar nombre del archivo descargable compatible con AjaxService.descargarArchivo
+        $nombreArchivo = "backup_" . date("Y-m-d_H-i-s") . ".sql";
+
+        // Limpieza absoluta de todos los buffers abiertos
+        while (ob_get_level() > 0) {
+            @ob_end_clean();
+        }
+
+        set_time_limit(0);
+        ini_set('memory_limit', '512M'); 
+
+        // Cabeceras HTTP nativas de descarga para el blob
+        header('Content-Description: File Transfer');
+        header('Content-Type: application/sql; charset=UTF-8'); 
+        header('Content-Disposition: attachment; filename="' . $nombreArchivo . '"');
+        header('Content-Transfer-Encoding: binary');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header('Pragma: public');
+
+        // Flujo de streaming continuo (php://output)
+        $output = fopen('php://output', 'w');
+        if ($output === false) {
+            throw new Exception("No se pudo abrir el flujo de salida para la descarga.");
+        }
+
+        fwrite($output, "-- ==========================================================\n");
+        fwrite($output, "-- RESPALDO DE BASE DE DATOS GENERADO AUTOMÁTICAMENTE\n");
+        fwrite($output, "-- Solicitado por Usuario ID: $usuarioId\n");
+        fwrite($output, "-- Sucursal ID: " . ($_SESSION['entorno']['sucursal_id'] ?? 'N/A') . "\n");
+        fwrite($output, "-- Fecha: " . date("Y-m-d H:i:s") . "\n");
+        fwrite($output, "-- ==========================================================\n\n");
+        fwrite($output, "SET FOREIGN_KEY_CHECKS=0;\n\n");
+
+        // Iterar tablas y escribir estructuras y registros al vuelo optimizando memoria
+        foreach ($tablas as $tabla) {
+            // Validar nombre de tabla seguro contra inyección estructural
+            $tablaEscapada = '`' . str_replace('`', '``', $tabla) . '`';
+
+            fwrite($output, "-- --------------------------------------------------------\n");
+            fwrite($output, "-- Estructura para la tabla {$tablaEscapada}\n");
+            fwrite($output, "-- --------------------------------------------------------\n");
+            fwrite($output, "DROP TABLE IF EXISTS {$tablaEscapada};\n");
+            
+            $createTableStmt = $pdo->query("SHOW CREATE TABLE {$tablaEscapada}")->fetch(PDO::FETCH_NUM);
+            if ($createTableStmt && isset($createTableStmt[1])) {
+                fwrite($output, $createTableStmt[1] . ";\n\n");
+            }
+
+            // Volcado de datos estructurado por bloques (Inserts)
+            fwrite($output, "-- Volcado de datos para la tabla {$tablaEscapada}\n");
+            $rows = $pdo->query("SELECT * FROM {$tablaEscapada}", PDO::FETCH_ASSOC);
+            
+            foreach ($rows as $row) {
+                $valores = array_map(function($val) use ($pdo) {
+                    if ($val === null) return 'NULL';
+                    return $pdo->quote($val);
+                }, $row);
+
+                $columnas = array_keys($row);
+                $colsEscapadas = array_map(function($col) {
+                    return '`' . str_replace('`', '``', $col) . '`';
+                }, $columnas);
+
+                $sqlInsert = "INSERT INTO {$tablaEscapada} (" . implode(", ", $colsEscapadas) . ") VALUES (" . implode(", ", $valores) . ");\n";
+                fwrite($output, $sqlInsert);
+            }
+            fwrite($output, "\n\n");
+        }
+
+        fwrite($output, "SET FOREIGN_KEY_CHECKS=1;\n");
+        fclose($output);
+
+        // Registro de bitácora de la acción exitosa
+        if (function_exists('RegistrarBitacoraAccion')) {
+            RegistrarBitacoraAccion(
+                $usuarioId,
+                $sesionId,
+                'AJUSTES_DATABASE',
+                'BACKUP',
+                null,
+                "Se generó y descargó un respaldo exitoso de la base de datos ({$nombreArchivo}).",
+                null,
+                ['archivo' => $nombreArchivo, 'total_tablas' => count($tablas)]
+            );
+        }
+
+        exit;
+
+    } catch (Throwable $e) {
+        error_log("Error crítico al generar backup dinámico SQL: " . $e->getMessage());
+        // Uso de la clase JsonResponse estandarizada para capturar el error limpiamente en el frontend
+        JsonResponse::error('Falló la generación del script SQL: ' . $e->getMessage(), null, 500);
+    }
+}
+
+function Importar_Backup_Dinamico_SQL(array $datosCrudos): void {
+    // 1. Asegurar sesión activa
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+
+    $usuarioId = $_SESSION['usuario']['id'] ?? null;
+    $sesionId  = $_SESSION['sesion_id'] ?? ($_SESSION['id_sesion'] ?? null);
+
+    // Validación de autenticación base compatible con AjaxService
+    if (!$usuarioId || !isset($_SESSION['seguridad']['autenticado'])) {
+        JsonResponse::error("Error 401: Sesión expirada o usuario no autenticado.", null, 401);
+        return;
+    }
+
+    // 2. Obtener instancia de PDO mediante la función del sistema
+    $pdo = Conexion();
+    if (!$pdo) {
+        JsonResponse::error("No se pudo establecer conexión con el motor de base de datos.", null, 500);
+        return;
+    }
+
+    // 3. Validación de permisos estricta
+    $permisoRequerido = 'database';
+    if (!TienePermiso($pdo, $permisoRequerido)) {
+        JsonResponse::error("No tienes los privilegios necesarios para restaurar respaldos de la base de datos.", null, 403);
+        return;
+    }
+
+    // --- NORMALIZACIÓN DE ENTRADA DE ARCHIVOS ---
+    $archivosFiles = $datosCrudos['archivos'] ?? ($_FILES ?? []);
+    $archivoSql = null;
+
+    foreach ($archivosFiles as $fileData) {
+        if (is_array($fileData) && isset($fileData['name']) && !is_array($fileData['name'])) {
+            if ($fileData['error'] === UPLOAD_ERR_OK) {
+                $archivoSql = $fileData;
+                break;
+            }
+        }
+    }
+
+    if (!$archivoSql) {
+        JsonResponse::error('No se ha recibido ningún archivo SQL válido para restaurar.', null, 400);
+        return;
+    }
+
+    $nombreOriginal = $archivoSql['name'];
+    $tmpPath        = $archivoSql['tmp_name'];
+    $extension      = strtolower(pathinfo($nombreOriginal, PATHINFO_EXTENSION));
+
+    if ($extension !== 'sql') {
+        JsonResponse::error("El formato del archivo (.$extension) no es válido. Se requiere un archivo con extensión .sql.", null, 400);
+        return;
+    }
+
+    // 4. Proceso de lectura y ejecución del script SQL
+    try {
+        set_time_limit(0);
+        // Aumentar temporalmente el límite de memoria para archivos SQL grandes
+        ini_set('memory_limit', '1024M');
+
+        $contenidoSql = file_get_contents($tmpPath);
+        if ($contenidoSql === false) {
+            throw new Exception("No se pudo leer el contenido del archivo SQL subido.");
+        }
+
+        // Limpiar comentarios y normalizar saltos de línea
+        $lineas = explode("\n", str_replace(["\r\n", "\r"], "\n", $contenidoSql));
+        $sqlDepurado = "";
+        
+        foreach ($lineas as $linea) {
+            $lineaTrim = trim($linea);
+            // Omitir comentarios completos
+            if ($lineaTrim === '' || str_starts_with($lineaTrim, '--') || str_starts_with($lineaTrim, '/*')) {
+                continue;
+            }
+            $sqlDepurado .= $linea . "\n";
+        }
+
+        // Dividir sentencias de forma segura por punto y coma al final de línea
+        $sentencias = array_filter(array_map('trim', explode(";\n", $sqlDepurado)));
+
+        if (empty($sentencias)) {
+            throw new Exception("El archivo SQL está vacío o no contiene sentencias válidas.");
+        }
+
+        $pdo->beginTransaction();
+
+        // Desactivar temporalmente verificaciones de llaves foráneas y modo estricto si fuera necesario
+        $pdo->exec("SET FOREIGN_KEY_CHECKS=0;");
+        $pdo->exec("SET SQL_MODE = 'NO_AUTO_VALUE_ON_ZERO';");
+
+        $ejecutadas = 0;
+        foreach ($sentencias as $sqlStmt) {
+            if (empty($sqlStmt)) {
+                continue;
+            }
+            
+            // Ejecutar cada sentencia individualmente
+            $pdo->exec($sqlStmt);
+            $ejecutadas++;
+        }
+
+        $pdo->exec("SET FOREIGN_KEY_CHECKS=1;");
+        $pdo->commit();
+
+        // Registro de bitácora de la acción exitosa
+        if (function_exists('RegistrarBitacoraAccion')) {
+            RegistrarBitacoraAccion(
+                $usuarioId,
+                $sesionId,
+                'AJUSTES_DATABASE',
+                'RESTAURAR',
+                null,
+                "Se restauró exitosamente la base de datos a partir del archivo ({$nombreOriginal}).",
+                null,
+                ['archivo' => $nombreOriginal, 'sentencias_ejecutadas' => $ejecutadas]
+            );
+        }
+
+        JsonResponse::success("Base de datos restaurada correctamente desde el archivo SQL.", [
+            "archivo" => $nombreOriginal,
+            "sentencias" => $ejecutadas
+        ], 200);
+
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+            try { $pdo->exec("SET FOREIGN_KEY_CHECKS=1;"); } catch (Throwable $ex) {}
+        }
+
+        error_log("Error crítico al restaurar backup SQL: " . $e->getMessage());
+        JsonResponse::error('Falló la restauración de la base de datos: ' . $e->getMessage(), null, 500);
+    }
+}
+
+function Gestionar_Ticket(array $datos): void {
+    $rutaFuenteNueva = null; // Para borrarla si algo falla después de moverla
+ 
+    try {
+        // 1. Asegurar que la sesión esté iniciada
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+ 
+        // 2. Obtener la instancia única de PDO
+        $pdo = Conexion();
+ 
+        // 3. Validar sesión activa y obtener usuario y sesión
+        $usuarioId = $_SESSION['usuario']['id'] ?? ($_SESSION['usuario_id'] ?? ($_SESSION['id_usuario'] ?? 0));
+        $sesionId  = $_SESSION['sesion_id'] ?? ($_SESSION['id_sesion'] ?? null);
+ 
+        if (empty($usuarioId)) {
+            JsonResponse::error('No hay una sesión activa. Por favor, inicia sesión nuevamente.', null, 401);
+        }
+ 
+        // 4. Permisos (ajusta el nombre del permiso al que uses)
+        if (!TienePermiso($pdo, 'configurar_ticket')) {
+            JsonResponse::error('No cuentas con los permisos necesarios para modificar la configuración del ticket.', null, 403);
+        }
+ 
+        // 5. IP de origen (para la bitácora)
+        $ipOrigen = $_SERVER['HTTP_CLIENT_IP']
+                    ?? ($_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? null);
+        if ($ipOrigen === '::1') {
+            $ipOrigen = '127.0.0.1';
+        }
+ 
+        // 6. Constantes de validación y almacenamiento (ajusta las rutas a tu proyecto)
+        $raizProyecto    = dirname(__DIR__, 4);
+        $dirFuentes      = $raizProyecto . '/public/uploads/fuentes';
+        $rutaRelativaDir = 'public/uploads/fuentes/';
+        $extPermitidas   = ['ttf', 'otf', 'woff', 'woff2'];
+        $maxBytesFuente  = 2 * 1024 * 1024;
+        $firmasFuente    = ["\x00\x01\x00\x00", 'true', 'OTTO', 'wOFF', 'wOF2']; // TTF, TTF (Mac), OTF, WOFF, WOFF2
+        $fuentesBase     = ['Courier New', 'Plus Jakarta Sans', 'Montserrat', 'Arial', 'Consolas'];
+        $alineaciones    = ['left', 'center', 'right'];
+        $papeles         = ['58mm', '80mm'];
+ 
+        // 7. Extraer y validar campos
+        $bool = static fn(string $clave): int => !empty($datos[$clave]) ? 1 : 0;
+        $entero = static fn(string $clave, int $min, int $max) => filter_var(
+            $datos[$clave] ?? null,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => $min, 'max_range' => $max]]
+        );
+ 
+        $espaciadoInicio = $entero('espaciado_inicio', 0, 15);
+        $espaciadoFinal  = $entero('espaciado_final', 0, 15);
+        $fontSize        = $entero('font_size', 8, 16);
+ 
+        if ($espaciadoInicio === false) {
+            JsonResponse::error('Las líneas al principio deben estar entre 0 y 15.', null, 422);
+        }
+        if ($espaciadoFinal === false) {
+            JsonResponse::error('Las líneas al final deben estar entre 0 y 15.', null, 422);
+        }
+        if ($fontSize === false) {
+            JsonResponse::error('El tamaño de fuente debe estar entre 8 y 16 pt.', null, 422);
+        }
+ 
+        $tamanoPapel = trim($datos['tamano_papel'] ?? '');
+        if (!in_array($tamanoPapel, $papeles, true)) {
+            JsonResponse::error('El ancho de papel no es válido.', null, 422);
+        }
+ 
+        $alineacionEncabezado = trim($datos['alineacion_encabezado'] ?? '');
+        $alineacionPie        = trim($datos['alineacion_pie'] ?? '');
+        if (!in_array($alineacionEncabezado, $alineaciones, true) || !in_array($alineacionPie, $alineaciones, true)) {
+            JsonResponse::error('La alineación seleccionada no es válida.', null, 422);
+        }
+ 
+        // El formulario envía `pie`; en la tabla es `leyenda_pie`. Vacío = NULL.
+        $encabezado  = trim($datos['encabezado'] ?? '');
+        $leyendaPie  = trim($datos['pie'] ?? '');
+        $encabezado  = $encabezado === '' ? null : mb_substr($encabezado, 0, 200);
+        $leyendaPie  = $leyendaPie === '' ? null : mb_substr($leyendaPie, 0, 200);
+ 
+        $fontFamily = trim(str_replace(['"', "'", '\\'], '', $datos['font_family'] ?? ''));
+        if ($fontFamily === '' || mb_strlen($fontFamily) > 100) {
+            JsonResponse::error('La familia de fuente no es válida.', null, 422);
+        }
+ 
+        // 8. Configuración anterior (para conservar la fuente y para la bitácora)
+        $stmtAnterior = $pdo->prepare("SELECT * FROM ticket WHERE id = 1 LIMIT 1");
+        $stmtAnterior->execute();
+        $anterior = $stmtAnterior->fetch(PDO::FETCH_ASSOC) ?: null;
+ 
+        $rutaFuenteAnterior   = (string)($anterior['font_family_ruta'] ?? '');
+        $familiaFuenteAnterior = (string)($anterior['font_family'] ?? '');
+ 
+        // 9. Fuente: archivo nuevo, fuente personalizada anterior o fuente base
+        $archivo = $_FILES['font_file'] ?? null;
+        $haySubida = $archivo !== null && ($archivo['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE;
+ 
+        if ($haySubida) {
+            if ($archivo['error'] !== UPLOAD_ERR_OK) {
+                JsonResponse::error('No se pudo subir la fuente (código ' . (int)$archivo['error'] . ').', null, 422);
+            }
+            if (!is_uploaded_file($archivo['tmp_name'])) {
+                JsonResponse::error('El archivo de fuente no es válido.', null, 422);
+            }
+            if ($archivo['size'] > $maxBytesFuente) {
+                JsonResponse::error('La fuente no puede pesar más de 2 MB.', null, 422);
+            }
+ 
+            $ext = strtolower(pathinfo($archivo['name'], PATHINFO_EXTENSION));
+            if (!in_array($ext, $extPermitidas, true)) {
+                JsonResponse::error('La fuente debe ser .ttf, .otf, .woff o .woff2.', null, 422);
+            }
+ 
+            // Verificar el contenido real (primeros 4 bytes), no solo la extensión
+            $gestor = fopen($archivo['tmp_name'], 'rb');
+            $cabecera = $gestor ? fread($gestor, 4) : '';
+            if ($gestor) {
+                fclose($gestor);
+            }
+            if (!in_array($cabecera, $firmasFuente, true)) {
+                JsonResponse::error('El archivo no parece ser una fuente válida.', null, 422);
+            }
+ 
+            if (!is_dir($dirFuentes) && !mkdir($dirFuentes, 0755, true) && !is_dir($dirFuentes)) {
+                JsonResponse::error('No se pudo preparar la carpeta de fuentes.', null, 500);
+            }
+ 
+            $nombreArchivo = 'ticket_' . bin2hex(random_bytes(8)) . '.' . $ext;
+            $destino = $dirFuentes . '/' . $nombreArchivo;
+ 
+            if (!move_uploaded_file($archivo['tmp_name'], $destino)) {
+                JsonResponse::error('No se pudo guardar el archivo de fuente.', null, 500);
+            }
+ 
+            $rutaFuenteNueva = $destino;
+            $fontFamilyRuta  = $rutaRelativaDir . $nombreArchivo;
+ 
+        } elseif ($rutaFuenteAnterior !== '' && $fontFamily === $familiaFuenteAnterior) {
+            // Sigue usando la fuente personalizada que ya estaba guardada
+            $fontFamilyRuta = $rutaFuenteAnterior;
+ 
+        } elseif (in_array($fontFamily, $fuentesBase, true)) {
+            // Fuente del sistema: no lleva archivo
+            $fontFamilyRuta = '';
+ 
+        } else {
+            JsonResponse::error('La fuente seleccionada no es válida.', null, 422);
+        }
+ 
+        // Valores finales a guardar
+        $valores = [
+            'espaciado_inicio'        => $espaciadoInicio,
+            'mostrar_logo'            => $bool('mostrar_logo'),
+            'encabezado'              => $encabezado,
+            'alineacion_encabezado'   => $alineacionEncabezado,
+            'mostrar_vendedor'        => $bool('mostrar_vendedor'),
+            'mostrar_cliente'         => $bool('mostrar_cliente'),
+            'descripcion_completa'    => $bool('descripcion_completa'),
+            'mostrar_precio_unitario' => $bool('mostrar_precio_unitario'),
+            'tamano_papel'            => $tamanoPapel,
+            'font_family_ruta'        => $fontFamilyRuta,
+            'font_family'             => $fontFamily,
+            'font_size'               => $fontSize,
+            'leyenda_pie'             => $leyendaPie,
+            'alineacion_pie'          => $alineacionPie,
+            'espaciado_final'         => $espaciadoFinal,
+        ];
+ 
+        // 10. Guardar (una sola fila: id = 1) dentro de una transacción
+        $pdo->beginTransaction();
+ 
+        $sql = "INSERT INTO ticket (
+                    id, espaciado_inicio, mostrar_logo, encabezado, alineacion_encabezado,
+                    mostrar_vendedor, mostrar_cliente, descripcion_completa, mostrar_precio_unitario,
+                    tamano_papel, font_family_ruta, font_family, font_size,
+                    leyenda_pie, alineacion_pie, espaciado_final, modificado_por
+                ) VALUES (
+                    1, :espaciado_inicio, :mostrar_logo, :encabezado, :alineacion_encabezado,
+                    :mostrar_vendedor, :mostrar_cliente, :descripcion_completa, :mostrar_precio_unitario,
+                    :tamano_papel, :font_family_ruta, :font_family, :font_size,
+                    :leyenda_pie, :alineacion_pie, :espaciado_final, :modificado_por
+                )
+                ON DUPLICATE KEY UPDATE
+                    espaciado_inicio        = VALUES(espaciado_inicio),
+                    mostrar_logo            = VALUES(mostrar_logo),
+                    encabezado              = VALUES(encabezado),
+                    alineacion_encabezado   = VALUES(alineacion_encabezado),
+                    mostrar_vendedor        = VALUES(mostrar_vendedor),
+                    mostrar_cliente         = VALUES(mostrar_cliente),
+                    descripcion_completa    = VALUES(descripcion_completa),
+                    mostrar_precio_unitario = VALUES(mostrar_precio_unitario),
+                    tamano_papel            = VALUES(tamano_papel),
+                    font_family_ruta        = VALUES(font_family_ruta),
+                    font_family             = VALUES(font_family),
+                    font_size               = VALUES(font_size),
+                    leyenda_pie             = VALUES(leyenda_pie),
+                    alineacion_pie          = VALUES(alineacion_pie),
+                    espaciado_final         = VALUES(espaciado_final),
+                    modificado_por          = VALUES(modificado_por)";
+ 
+        $stmt = $pdo->prepare($sql);
+        foreach ($valores as $clave => $valor) {
+            $stmt->bindValue(':' . $clave, $valor, $valor === null ? PDO::PARAM_NULL : (is_int($valor) ? PDO::PARAM_INT : PDO::PARAM_STR));
+        }
+        $stmt->bindValue(':modificado_por', (int)$usuarioId, PDO::PARAM_INT);
+        $stmt->execute();
+ 
+        // Registro centralizado de bitácora y auditoría
+        RegistrarBitacoraAccion(
+            $usuarioId,
+            $sesionId,
+            'TICKET',
+            'ACTUALIZAR',
+            null,
+            "Se actualizó la configuración del ticket (IP: {$ipOrigen}).",
+            $anterior,
+            $valores
+        );
+ 
+        $pdo->commit();
+ 
+        // 11. Con todo confirmado, borrar la fuente anterior si ya no se usa
+        if ($rutaFuenteAnterior !== '' && $rutaFuenteAnterior !== $fontFamilyRuta) {
+            $archivoViejo = realpath($raizProyecto . '/' . $rutaFuenteAnterior);
+            $carpetaBase  = realpath($dirFuentes);
+            if ($archivoViejo && $carpetaBase
+                && strpos($archivoViejo, $carpetaBase . DIRECTORY_SEPARATOR) === 0
+                && is_file($archivoViejo)) {
+                @unlink($archivoViejo);
+            }
+        }
+ 
+        JsonResponse::success('Configuración del ticket actualizada exitosamente.', [
+            'ticket' => $valores
+        ]);
+ 
+    } catch (PDOException $e) {
+        if (isset($pdo) && $pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        if ($rutaFuenteNueva !== null && is_file($rutaFuenteNueva)) {
+            @unlink($rutaFuenteNueva);
+        }
+        error_log("Error de BD al guardar la configuración del ticket: " . $e->getMessage());
+        JsonResponse::error('Error de BD: ' . $e->getMessage(), null, 500);
+ 
+    } catch (Throwable $e) {
+        if (isset($pdo) && $pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        if ($rutaFuenteNueva !== null && is_file($rutaFuenteNueva)) {
+            @unlink($rutaFuenteNueva);
+        }
+        error_log("Error crítico al guardar la configuración del ticket: " . $e->getMessage());
+        JsonResponse::error($e->getMessage() ?: 'Ocurrió un error inesperado en el servidor.', null, 500);
+    }
+}
+function Obtener_Configuracion_Ticket(): array {
+    try {
+        $pdo = Conexion();
+        
+        $sql = "SELECT * FROM ticket WHERE id = 1 LIMIT 1";
+        $stmt = $pdo->query($sql);
+        $config = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$config) {
+            $config = [
+                'id' => 1,
+                'espaciado_inicio' => 1,
+                'mostrar_logo' => 1,
+                'encabezado' => '',
+                'alineacion_encabezado' => 'left',
+                'mostrar_vendedor' => 1,
+                'mostrar_cliente' => 0,
+                'descripcion_completa' => 1,
+                'mostrar_precio_unitario' => 1,
+                'tamano_papel' => '80mm',
+                'font_family_ruta' => '',
+                'font_family' => 'Courier New',
+                'font_size' => 10,
+                'leyenda_pie' => '',
+                'alineacion_pie' => 'center',
+                'espaciado_final' => 3,
+                'font_url' => ''
+            ];
+        } else {
+            // Asignamos directamente la ruta limpiando barras iniciales sobrantes
+            $rutaRelativa = trim($config['font_family_ruta'] ?? '');
+            
+            if (!empty($rutaRelativa)) {
+                // Si la ruta no empieza con http ni con barra, aseguramos el formato web correcto
+                if (!str_starts_with($rutaRelativa, 'http') && !str_starts_with($rutaRelativa, '/')) {
+                    $config['font_url'] = '/' . ltrim($rutaRelativa, '/');
+                } else {
+                    $config['font_url'] = $rutaRelativa;
+                }
+            } else {
+                $config['font_url'] = '';
+            }
+        }
+
+        return $config;
+    } catch (Throwable $e) {
+        error_log("Error al obtener la configuración del ticket: " . $e->getMessage());
+        JsonResponse::error('Error al cargar la configuración del ticket: ' . $e->getMessage(), null, 500);
+        return [];
+    }
+}

@@ -128,7 +128,7 @@ function _enlazarEventosAutenticacion(requiereUsuario, callbackExitoso) {
 
         try {
             const resultado = await AuthService.verificar(payload);
-
+            console.log(resultado)
             if (!resultado.ok) {
                 mostrarErrorSpan('#span-auth-password', resultado.mensaje || 'Credenciales incorrectas.');
                 return; // El modal se queda abierto

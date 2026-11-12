@@ -56,7 +56,10 @@ async function Guardar_Gestion_Variables(data) {
         simbolo_moneda: data.simbolo_moneda || data.simbolo,
         codigo_iso: data.codigo_iso || data.codigo,
         redondear_precios: data.redondear_precios,
-        bloquear_stock_cero: data.bloquear_stock_cero
+        bloquear_stock_cero: data.bloquear_stock_cero,
+        incluir_comision_tarjeta: data.incluir_comision_tarjeta,
+        comision_tarjeta: data.comision_tarjeta,
+        iva_comision: data.iva_comision
     };
 
     try {
@@ -77,10 +80,14 @@ async function Guardar_Gestion_Variables(data) {
             }
             
             // Actualizamos el mapa global en memoria para reflejar los cambios de inmediato
+            window.variablesMap = window.variablesMap || {};
             window.variablesMap['simbolo_moneda'] = datosVariables.simbolo_moneda;
             window.variablesMap['codigo_iso'] = datosVariables.codigo_iso;
             window.variablesMap['redondear_precios'] = datosVariables.redondear_precios;
             window.variablesMap['bloquear_stock_cero'] = datosVariables.bloquear_stock_cero;
+            window.variablesMap['incluir_comision_tarjeta'] = datosVariables.incluir_comision_tarjeta;
+            window.variablesMap['comision_tarjeta'] = datosVariables.comision_tarjeta;
+            window.variablesMap['iva_comision'] = datosVariables.iva_comision;
 
             // Cerramos el modal únicamente si la operación fue exitosa
             setTimeout(() => {

@@ -2,7 +2,7 @@
 $configModulo = [
     'titulo' => 'Usuarios',
     'buscador' => [
-        'placeholder' => 'Ingresa el nombre, RFC o código del usuario',
+        'placeholder' => 'Ingresa el nombre, correo o código del usuario',
         'id_input' => 'buscador-usuario',
         'id_btn_reset' => 'btn-reset-buscador-usuario'
     ],
