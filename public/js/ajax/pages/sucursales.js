@@ -1,4 +1,4 @@
-$(document).ready(async function (e) {
+$(document).off('app:inicializada').on('app:inicializada', function () {
     try {
         // Función auxiliar limpia y segura para evaluar permisos
         const verificarPermiso = (permiso) => {
@@ -38,10 +38,10 @@ $(document).ready(async function (e) {
     }
 });
 
-function Obtener_Sucursales_API(pagina = 1, registrosPorPagina = 25, filtros = {}, orden = {}) {
+function Obtener_Sucursales_API(pagina = 1, registrosPorPagina = null, filtros = {}, orden = {}) {
     console.log("Filtros enviados:", filtros);
     console.log("Orden enviado:", orden);
-
+    const limiteRegistros = registrosPorPagina || window.registrosPorPagina || 50;
     // 1. Sincronizar y cifrar el estado actual en la URL del navegador fusionando con lo que ya existía
     if (window.UrlStateSyncService && typeof window.UrlStateSyncService.generarUrlConEstado === 'function') {
         // Recuperar parámetros anteriores si existen en la URL cifrada
@@ -51,7 +51,7 @@ function Obtener_Sucursales_API(pagina = 1, registrosPorPagina = 25, filtros = {
         window.UrlStateSyncService.generarUrlConEstado({
             ...paramsPrevios, // Mantiene cualquier otro parámetro previo de la sesión
             pagina: pagina,
-            registros: registrosPorPagina,
+            registros: limiteRegistros,
             ...filtros,
             ...orden
         });
@@ -63,7 +63,7 @@ function Obtener_Sucursales_API(pagina = 1, registrosPorPagina = 25, filtros = {
         {
             accion: 'obtener_sucursales_paginadas',
             pagina: pagina,
-            registros_por_p: registrosPorPagina,
+            registros_por_p: limiteRegistros,
             ...filtros, // Expande los filtros dinámicos del módulo
             ...orden // Expande el ordenamiento
         },

@@ -1,3 +1,25 @@
+$.messenger.on('tipo_seleccionado', function (data, sourceWindow, origin) {
+    const formato = typeof data === 'object' && data.formato ? data.formato : data;
+    
+    // Obtenemos la selección bruta del controlador
+    const seleccionBruta = window.UsuariosSelectionController  ? window.UsuariosSelectionController.getSeleccionados() : [];
+
+    // Normalizamos: Aseguramos que sea un arreglo plano de IDs (por si devuelve objetos)
+    const seleccion = seleccionBruta.map(item => {
+        if (typeof item === 'object' && item !== null) {
+            // Extrae la propiedad ID o id si es un objeto, o el primer valor disponible
+            return item.ID || item.id || Object.values(item)[0];
+        }
+        return item;
+    }).filter(id => id !== undefined && id !== null && id !== '');
+
+    let url = '../../../src/controllers/php/controllers/usuarios.php';
+    let accion = 'exportar_usuarios_masivo';
+
+    console.log("IDs limpios a exportar:", seleccion); // Depuración en consola del navegador
+
+    ExportacionService.exportar(url, accion, formato, { seleccion: seleccion });
+});
 window.carga_inicial = window.carga_inicial !== undefined ? window.carga_inicial : true;
 window.UsuariosSelectionController = window.UsuariosSelectionController || CrearSeleccionController('Usuarios');
 window.filtrosAdicionales = window.filtrosAdicionales || {};
@@ -10,8 +32,8 @@ $.messenger.off('usuario_editado').on('usuario_editado', function(data, sourceWi
 });
 
 // Usamos namespace único y evitamos múltiples bindings duplicados
-$(document).off('app:inicializada.usuariosInit datosListos.usuariosInit')
-  .on('app:inicializada.usuariosInit datosListos.usuariosInit', async (event) => {
+$(document).off('datosListos.usuarios')
+  .on('datosListos.usuarios', async (event) => {
     
     window.filtrosAdicionales = window.filtrosAdicionales || {};
 
@@ -177,6 +199,7 @@ function CargarUsuarios() {
                     // Establecemos carga_inicial a falso una única vez aquí de forma definitiva
                     window.carga_inicial = false;
                 }
+                OcultarCargando()
             })
             .catch(error => {
                 console.error("Error al filtrar usuarios:", error);
@@ -283,21 +306,12 @@ async function FuncionesIniciales() {
                 barra: '#barra-seleccion',
                 contador: '#contador-container',
                 contenedorBotones: '#acciones-masivas-container',
-                botones: [
-                    {
-                        id: 'btn-eliminar-masivo',
-                        icon: 'vf-ic_fluent_delete_24_filled',
-                        title: 'Eliminar seleccionados',
-                        permiso: 'eliminar_usuarios',
-                        onclick: 'EliminarUsuariosMasivos()'
-                    },
-                    {
-                        id: 'btn-exportar-masivo',
-                        icon: 'vf-ic_fluent_arrow_export_24_filled',
-                        title: 'Exportar seleccionados',
-                        onclick: 'ExportarUsuariosMasivos()'
-                    }
-                ]
+                botones: () => {
+                    const estadoActual = window.habilitado !== undefined ? parseInt(window.habilitado) : 1;
+                    return (estadoActual === 0) 
+                        ? (window.botones_opciones_deshabilitado || []) 
+                        : (window.botones_opciones_habilitado || []);
+                }
             })
         });
     }
@@ -442,21 +456,6 @@ async function Deshabilitar_Usuario(id_usuario) {
     Deshabilitar_Usuario_AJAX(id_usuario);
 }
 
-async function Eliminar_Usuario_Permanente(id_usuario) {
-    const confirmado = await MostrarPregunta({
-        titulo: 'Eliminación Permanente',
-        texto: '¿Estás completamente seguro? Esta acción borrará al usuario de forma definitiva y no se puede deshacer.',
-        icono: 'vf-ic_fluent_delete_24_filled',
-        confirmarText: 'Sí, elimina',
-        cancelarText: 'Cancelar',
-        colorConfirmar: 'btn-danger',
-        altura: 370
-    });
-
-    if (!confirmado) return false;
-    Eliminar_Usuario_Permanente_AJAX(id_usuario);
-}
-
 async function Habilitar_Usuario(id_usuario) {
     const confirmado = await MostrarPregunta({
         titulo: 'Habilitar usuario',
@@ -470,4 +469,44 @@ async function Habilitar_Usuario(id_usuario) {
 
     if (!confirmado) return false;
     Habilitar_Usuario_AJAX(id_usuario);
+}
+
+function Eliminar_Usuarios_Masivo()
+{
+    const seleccionados = window.UsuariosSelectionController.getSeleccionados();
+    
+    if (seleccionados.length === 0) {
+        return MostrarAlerta('Selecciona al menos un cliente', 230, false);
+    }
+    console.log(seleccionados)
+    Eliminar_Usuarios_Masivo_AJAX(seleccionados)
+}
+
+function Exportar_Usuarios_Masivos() {
+
+    CrearVentanaIframe(
+        'Tipo de archivo',
+        '../components/tipo.archivo.php',
+        '520px',
+        true,
+        true,
+        function (iframeElement) {
+            let datos = {
+                tipos_permitidos: '.pdf, .csv, .xml, .xls, .xlsx',
+                multiple: false,
+            };
+            $.messenger.send(iframeElement, 'datos_iniciales', datos);
+        }
+    );  
+}
+
+function Habilitar_Usuarios_Masivo()
+{
+    const seleccionados = window.UsuariosSelectionController.getSeleccionados();
+    
+    if (seleccionados.length === 0) {
+        return MostrarAlerta('Selecciona al menos un cliente', 230, false);
+    }
+    console.log(seleccionados)
+    Habilitar_Usuarios_Masivo_AJAX(seleccionados)
 }

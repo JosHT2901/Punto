@@ -83,7 +83,7 @@ window.botonesToolbarConfig = [
                         mostrar_plantilla: true,
                         url_plantilla: '/../../../../public/docs/esquemas_fiscales.xlsx',
                         tipo_archivos: '.xlsx,.xls,.csv',
-                        nombre_plantilla:'plantilla_esquemas_fiscales.xlsxs'
+                        nombre_plantilla:'plantilla_esquemas_fiscales.xlsx'
                     };
 
                     $.messenger.send(iframeElement, 'datos_iniciales', datos);

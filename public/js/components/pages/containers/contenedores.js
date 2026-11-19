@@ -57,7 +57,7 @@ function Contenedor_Agregar(texto, contenedor) {
     const $contenedor =$(contenedor);
     if (!$contenedor.length) return;
 
-    const basePath = typeof UI_CONFIG !== 'undefined' ? UI_CONFIG.IMAGE_PATH : '../../icons/';
+    const basePath = typeof UI_CONFIG !== 'undefined' ? UI_CONFIG.ICON_PATH : '../../icons/';
     
     $contenedor.empty();$contenedor.addClass('position-relative');
 

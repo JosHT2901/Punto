@@ -1,11 +1,11 @@
 <?php
 // 1. Definimos el título de la pestaña
-$tituloPage = "Crear Categoría";
-
+$tituloPage = "Gestionar categorías";
+$mostrarBotonGuardar=false;
 // 2. Activamos el búfer para capturar todo el HTML
 ob_start();
 ?>
-<form class="w-p-100 h-p-100 py-2 flex flex-column" id="form-gestion-categoria">
+<form class="w-p-100 h-p-100 p-2 flex flex-column" id="form-gestion-categoria">
     <div class="w-p-100 flex flex-column js-wizard-container flex-1 min-w-0 ocultar-scroll">
         
         <!-- Sección 1: Información básica de la Categoría -->
@@ -59,7 +59,7 @@ ob_start();
             </div>
 
             <!-- Cabeceras de columnas -->
-            <div class="flex-1 min-h-0 flex flex-column" id="categorias-contenedor-tabla">
+            <div class="flex-1 min-h-0 flex flex-column overflow-auto" id="categorias-contenedor-tabla">
                 <div class="flex h-40 gap-2 align-items-center">
                     <div class="w-30"></div> <!-- Espacio para alinear con el checkbox -->
                     <div class="flex-1 flex justify-start items-center px-2">
@@ -88,7 +88,7 @@ ob_start();
 $contenido_componente = ob_get_clean();
 
 // Incluimos tu layout principal de componentes
-include_once __DIR__ . '/../layouts/componente.php';
+include_once __DIR__ . '/../layouts/protegido.boton.guardar.php';
 ?>
 <script src="../../../public/js/ajax/components/gestionar.categorias.js" defer></script>
 <!-- Script JS específico para gestionar categorías y atributos -->

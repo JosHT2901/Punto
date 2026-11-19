@@ -22,7 +22,7 @@ $.messenger.on('tipo_seleccionado', function (data, sourceWindow, origin) {
 });
 
 
-$(document).ready(async function (e) {
+$(document).off('app:inicializada').on('app:inicializada', function () {
     try {
         // Función auxiliar limpia y segura para evaluar permisos
         const verificarPermiso = (permiso) => {
@@ -77,10 +77,9 @@ $(document).ready(async function (e) {
  * @param {Object} orden - Objeto con el ordenamiento (ej. { columna: 'Nombre', direccion: 'DESC' }).
  * @returns {Promise} - Promesa con la respuesta del servidor.
  */
-function Obtener_Clientes_API(pagina = 1, registrosPorPagina = 25, filtros = {}, orden = {}) {
-    console.log("Filtros enviados:", filtros);
-    console.log("Orden enviado:", orden);
-
+function Obtener_Clientes_API(pagina = 1, registrosPorPagina = null, filtros = {}, orden = {}) {
+    const limiteRegistros = registrosPorPagina || window.registrosPorPagina || 50;
+    console.log(window.registrosPorPagina)
     // 1. Sincronizar y cifrar el estado actual en la URL del navegador fusionando con lo que ya existía
     if (window.UrlStateSyncService && typeof window.UrlStateSyncService.generarUrlConEstado === 'function') {
         // Recuperar parámetros anteriores si existen en la URL cifrada
@@ -91,7 +90,7 @@ function Obtener_Clientes_API(pagina = 1, registrosPorPagina = 25, filtros = {},
         window.UrlStateSyncService.generarUrlConEstado({
             ...paramsPrevios, // Mantiene cualquier otro parámetro previo de la sesión
             pagina: pagina,
-            registros: registrosPorPagina,
+            registros: limiteRegistros,
             ...filtros,
             ...orden
         });
@@ -103,7 +102,7 @@ function Obtener_Clientes_API(pagina = 1, registrosPorPagina = 25, filtros = {},
         {
             accion: 'obtener_clientes_paginados',
             pagina: pagina,
-            registros_por_p: registrosPorPagina,
+            registros_por_p: limiteRegistros,
             ...filtros, // Expande los filtros dinámicos del módulo
             ...orden    // Expande el ordenamiento
         },

@@ -276,7 +276,10 @@ $(document).ready(async function () {
             const payload = recolectarConfiguracion();
             await Guardar_Ticket_AJAX(payload);
         });
-
+        $(document).on('click', '#btn-atras', async function (e) {
+            e.preventDefault();
+            window.location.href="ajustes.php"
+        });
         OcultarCargando();
     } catch (error) {
         OcultarCargando();

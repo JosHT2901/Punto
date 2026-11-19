@@ -58,8 +58,8 @@ $.messenger.on('tipo_seleccionado', function (data, sourceWindow, origin) {
 
 
 // 🌟 Blindaje contra doble ejecución al cargar la página
-$(document).off('app:inicializada datosListos.sucursales')
-  .on('app:inicializada datosListos.sucursales', async (event) => {
+$(document).off('datosListos.sucursales')
+  .on('datosListos.sucursales', async (event) => {
     if (bloqueandoCargaInicial) return;
     bloqueandoCargaInicial = true;
 

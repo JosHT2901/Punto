@@ -1,7 +1,7 @@
 <?php
 // 1. Definimos el título de la pestaña
 $tituloPage = "Gestión de productos, costos y precios";
-
+$mostrarBotonGuardar=false;
 // 2. Activamos el búfer para capturar todo el HTML que escribamos abajo
 ob_start();
 ?>
@@ -306,9 +306,9 @@ ob_start();
 </form>
 
 <?php
-$contenido_protegido = ob_get_clean();
+$contenido_componente = ob_get_clean();
 
-include_once __DIR__ . '/../layouts/protegido.php';
+include_once __DIR__ . '/../layouts/protegido.boton.guardar.php';
 ?>
 <script src="../../../public/js/components/pages/views/nuevo.producto/tablas.js" defer></script>
 <script src="../../../public/js/components/pages/views/nuevo.producto/paginas.js" defer></script>

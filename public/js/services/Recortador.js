@@ -1,42 +1,89 @@
-/**
- * Servicio Independiente y UI para el Recortador Profesional (Croppie + Drag & Drop + Flujo de Logo + BD)
- */
 const RecortadorUI = {
 
     configDefault: {
-        ancho: 650,
-        alto: 150,
-        altura: 250,
-        minAncho: 650,
-        minAlto: 150,
-        colorPrimario: '#3b82f6'
+        ancho: 250,
+        alto: 250,
+        altura: 350,
+        forma: 'square',
+        minAncho: 200,
+        minAlto: 200,
+        validarDimensiones: true,
+        etiquetaTipo: 'imagen',
+        colorPrimario: '#3b82f6',
+        contenedorBotonGuardar: '#contenedor-boton-guardar',
+        botonGuardarId: 'boton-guardar-imagen',
+        onImagenLista: null
     },
 
-    _inyectarEstilos: function(colorPrimario) {
+    presets: {
+        logoEmpresa: {
+            ancho: 650,
+            alto: 150,
+            altura: 250,
+            forma: 'square',
+            minAncho: 650,
+            minAlto: 150,
+            validarDimensiones: true,
+            etiquetaTipo: 'logotipo'
+        },
+        perfilUsuario: {
+            ancho: 250,         // Tamaño final del recorte (ancho)
+            alto: 250,         // Tamaño final del recorte (alto)
+            altura: 340,       // Altura visual del contenedor en la interfaz
+            forma: 'circle',   // Forma del recorte circular
+            minAncho: 150,     // Mínimo ancho permitido para validar (coherente con el recorte)
+            minAlto: 150,      // Mínimo alto permitido para validar
+            validarDimensiones: false, // En false permite subir cualquier imagen y la adapta
+            etiquetaTipo: 'foto de perfil'
+        },
+        portada: {
+            ancho: 800,
+            alto: 220,
+            altura: 320,
+            forma: 'square',
+            minAncho: 800,
+            minAlto: 220,
+            validarDimensiones: true,
+            etiquetaTipo: 'portada'
+        }
+    },
+
+    _inyectarEstilos: function (colorPrimario) {
         if ($('#editor-croppie-v5-styles').length) return;
         $('head').append(`
             <style id="editor-croppie-v5-styles">
                 .editor-container { 
                     display: flex; flex-direction: column; overflow: hidden; 
                     border: 1px solid #f1f5f9; position: relative; background: #fff;
-                    border-radius: 8px;
+                    border-radius: 8px; width: 100%; box-sizing: border-box;
                 }
-                .editor-viewport { flex: 1; background: #f8fafc; min-height: 0; cursor: move; position: relative; }
+                .editor-viewport { 
+                    flex: 1; background: #f8fafc; min-height: 0; cursor: move; 
+                    position: relative; width: 100%; 
+                }
                 .editor-toolbar { 
-                    display: flex; align-items: center; justify-content: center;
-                    gap: 8px; padding: 12px; border-top: 1px solid #f1f5f9; background: #fff;
+                    display: flex; align-items: center; justify-content: space-between;
+                    flex-wrap: wrap; width: 100%; box-sizing: border-box;
+                    gap: 8px; padding: 10px 12px; border-top: 1px solid #f1f5f9; background: #fff;
+                }
+                .editor-toolbar .btn {
+                    flex-shrink: 0; margin: 0 !important;
+                }
+                .editor-toolbar-grupo {
+                    display: flex; align-items: center; gap: 6px;
+                }
+                .editor-toolbar-zoom {
+                    display: flex; align-items: center; gap: 8px; flex: 1; min-width: 140px;
                 }
                 .editor-range { 
-                    flex: 1; max-width: 120px; accent-color: ${colorPrimario}; cursor: pointer;
+                    flex: 1; width: 100%; min-width: 60px; max-width: none; 
+                    accent-color: ${colorPrimario}; cursor: pointer;
                 }
             </style>
         `);
     },
 
-    /**
-     * Inicializa el recortador genérico
-     */
-    init: function(selector, opciones) {
+    init: function (selector, opciones) {
         const $padre = $(selector);
         if (!$padre.length) return null;
 
@@ -52,30 +99,41 @@ const RecortadorUI = {
         $padre.addClass('editor-container').css('height', config.altura + 'px').html(`
             <div class="editor-viewport"></div>
             <div class="editor-toolbar">
-                <button type="button" class="btn w-40 h-40 btn-secondary rounded-md flex justify-center items-center mx-auto btn-rot-l" title="Girar Izquierda">
-                    <i class="icon vf-ic_fluent_arrow_rotate_clockwise_24_filled fs-5"></i>
-                </button>
-                <button type="button" class="btn w-40 h-40 btn-secondary rounded-md flex justify-center items-center mx-auto btn-rot-r" title="Girar Derecha">
-                    <i class="icon vf-ic_fluent_arrow_rotate_counterclockwise_24_filled fs-5"></i>
-                </button>
+                <div class="editor-toolbar-grupo">
+                    <button type="button" class="btn h-40 px-3 btn-secondary rounded-md flex justify-center items-center gap-2 btn-cambiar-img" title="Cambiar imagen">
+                        <i class="icon vf-ic_fluent_folder_open_24_filled fs-5"></i>
+                        <span class="fs-3 fw-medium">Cambiar</span>
+                    </button>
+                    <input type="file" class="editor-input-archivo d-none" accept=".png,.jpg,.jpeg,image/png,image/jpeg">
+
+                    <div style="width: 1px; height: 24px; background: #e2e8f0; margin: 0 2px;"></div>
+
+                    <button type="button" class="btn w-40 h-40 btn-secondary rounded-md flex justify-center items-center btn-rot-l" title="Girar Izquierda">
+                        <i class="icon vf-ic_fluent_arrow_rotate_clockwise_24_filled fs-5"></i>
+                    </button>
+                    <button type="button" class="btn w-40 h-40 btn-secondary rounded-md flex justify-center items-center btn-rot-r" title="Girar Derecha">
+                        <i class="icon vf-ic_fluent_arrow_rotate_counterclockwise_24_filled fs-5"></i>
+                    </button>
+                </div>
                 
-                <div style="width: 1px; height: 24px; background: #e2e8f0; margin: 0 5px;"></div>
-                
-                <button type="button" class="btn w-40 h-40 btn-secondary rounded-md flex justify-center items-center mx-auto btn-z-out">
-                    <i class="icon vf-ic_fluent_zoom_out_24_filled fs-5"></i>
-                </button>
-                <input type="range" class="editor-range" min="0" max="2" step="0.01" value="1">
-                <button type="button" class="btn w-40 h-40 btn-secondary rounded-md flex justify-center items-center mx-auto btn-z-in">
-                    <i class="icon vf-ic_fluent_zoom_in_24_filled fs-5"></i>
-                </button>
+                <div class="editor-toolbar-zoom">
+                    <button type="button" class="btn w-40 h-40 btn-secondary rounded-md flex justify-center items-center btn-z-out" title="Alejar">
+                        <i class="icon vf-ic_fluent_zoom_out_24_filled fs-5"></i>
+                    </button>
+                    <input type="range" class="editor-range" min="0" max="2" step="0.01" value="1">
+                    <button type="button" class="btn w-40 h-40 btn-secondary rounded-md flex justify-center items-center btn-z-in" title="Acercar">
+                        <i class="icon vf-ic_fluent_zoom_in_24_filled fs-5"></i>
+                    </button>
+                </div>
             </div>
         `);
 
         const $viewport = $padre.find('.editor-viewport');
         const $slider = $padre.find('.editor-range');
+        const $inputArchivo = $padre.find('.editor-input-archivo');
 
         const instancia = new Croppie($viewport[0], {
-            viewport: { width: config.ancho, height: config.alto, type: config.forma || 'square' },
+            viewport: { width: config.ancho, height: config.alto, type: config.forma },
             boundary: { width: '100%', height: '100%' },
             showZoomer: false,
             enableOrientation: true,
@@ -85,12 +143,25 @@ const RecortadorUI = {
         $padre.data('croppieInstance', instancia);
         $viewport.data('croppieInstance', instancia);
 
-        // Eventos toolbar
+        // Evento para abrir el selector de archivos al pulsar "Cambiar"
+        $padre.off('click.cambiarImg').on('click.cambiarImg', '.btn-cambiar-img', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $inputArchivo.val('').trigger('click');
+        });
+
+        // Evento cuando el usuario selecciona un nuevo archivo desde el input
+        $inputArchivo.off('change.cambiarImg').on('change.cambiarImg', function (e) {
+            if (typeof config._onSeleccionarArchivo === 'function' && this.files && this.files[0]) {
+                config._onSeleccionarArchivo(this.files[0]);
+            }
+        });
+
         $padre.off('click.rotL').on('click.rotL', '.btn-rot-l', (e) => { e.preventDefault(); instancia.rotate(-90); });
         $padre.off('click.rotR').on('click.rotR', '.btn-rot-r', (e) => { e.preventDefault(); instancia.rotate(90); });
-        $slider.off('input.zoom').on('input.zoom', function() { instancia.setZoom(parseFloat($(this).val())); });
-        
-        $padre.off('click.zoomBtn').on('click.zoomBtn', '.btn-z-in, .btn-z-out', function(e) {
+        $slider.off('input.zoom').on('input.zoom', function () { instancia.setZoom(parseFloat($(this).val())); });
+
+        $padre.off('click.zoomBtn').on('click.zoomBtn', '.btn-z-in, .btn-z-out', function (e) {
             e.preventDefault();
             const step = $(this).hasClass('btn-z-in') ? 0.1 : -0.1;
             const nuevoZoom = parseFloat($slider.val()) + step;
@@ -113,49 +184,74 @@ const RecortadorUI = {
         };
     },
 
-    /**
-     * =========================================================================
-     * FLUJO COMPLETO PARA LOGOTIPO DE EMPRESA (Soporta Archivos y URLs de BD)
-     * =========================================================================
-     * @param {string} selector Contenedor donde se montará el recortador
-     * @param {File|Blob|string} [archivoInicial] Archivo local o URL de imagen proveniente de la base de datos
-     */
-    inicializarLogoEmpresa: function(selector, archivoInicial = null) {
+    inicializar: function (selector, archivoInicial = null, contextoOConfig = {}) {
         const self = this;
         const $contenedor = $(selector);
         if (!$contenedor.length) return;
 
+        let opcionesContexto = {};
+        if (typeof contextoOConfig === 'string' && this.presets[contextoOConfig]) {
+            opcionesContexto = this.presets[contextoOConfig];
+        } else if (typeof contextoOConfig === 'object' && contextoOConfig !== null) {
+            opcionesContexto = contextoOConfig;
+        }
+
+        const config = $.extend({}, this.configDefault, opcionesContexto);
+
+        const montarEnCroppie = (fuenteImagen) => {
+            // Conectamos el callback para que el botón "Cambiar" reprocese la nueva imagen
+            const configConCallback = $.extend({}, config, {
+                _onSeleccionarArchivo: (nuevoArchivo) => procesarEntrada(nuevoArchivo)
+            });
+
+            const apiRecortador = self.init($contenedor, configConCallback);
+            if (!apiRecortador) return;
+
+            apiRecortador.cargar(fuenteImagen);
+            window.miRecortadorActual = apiRecortador;
+
+            self._inyectarBotonGuardar(config);
+            self._vincularDragDropViewport($contenedor, procesarEntrada);
+
+            if (typeof config.onImagenLista === 'function') {
+                config.onImagenLista(apiRecortador);
+            }
+        };
+
+        const validarDimensionesImagen = (anchoReal, altoReal, esDesdeBD = false) => {
+            if (!config.validarDimensiones) return true;
+
+            if (anchoReal < config.minAncho || altoReal < config.minAlto) {
+                if (typeof MostrarAlerta === 'function') {
+                    const origenTexto = esDesdeBD ? 'de la base de datos ' : '';
+                    MostrarAlerta(
+                        `La imagen ${origenTexto}es muy pequeña (${anchoReal}x${altoReal}px). El tamaño mínimo para ${config.etiquetaTipo} es ${config.minAncho}x${config.minAlto}px.`,
+                        300,
+                        false
+                    );
+                }
+                return esDesdeBD;
+            }
+            return true;
+        };
+
         const procesarEntrada = (entrada) => {
-            // 1. Si la entrada es un string (URL o ruta de la base de datos)
             if (typeof entrada === 'string' && entrada.trim() !== '') {
                 const img = new Image();
-                img.crossOrigin = "anonymous"; // Evitar problemas de CORS si la imagen viene de otro dominio/servidor
+                if (!entrada.startsWith('data:')) {
+                    img.crossOrigin = "anonymous";
+                }
                 img.onload = function () {
-                    const anchoReal = this.width;
-                    const altoReal = this.height;
-
-                    if (anchoReal < 650 || altoReal < 150) {
-                        if (typeof MostrarAlerta === 'function') {
-                            MostrarAlerta(`La imagen de la base de datos es muy pequeña (${anchoReal}x${altoReal}px). El tamaño mínimo recomendado es 650x150px.`, 300, false);
-                        }
-                    }
-
-                    // Inicializar recortador con la URL de la base de datos
-                    const apiRecortador = self.init($contenedor, { ancho: 650, alto: 150, altura: 250 });
-                    apiRecortador.cargar(entrada);
-                    window.miRecortadorActual = apiRecortador;
-
-                    self._inyectarBotonGuardar();
-                    self._vincularDragDropViewport($contenedor, procesarEntrada);
+                    validarDimensionesImagen(this.width, this.height, true);
+                    montarEnCroppie(entrada);
                 };
-                img.onerror = function() {
-                    console.error("No se pudo cargar la imagen desde la ruta de la base de datos:", entrada);
+                img.onerror = function () {
+                    console.error("No se pudo cargar la imagen desde la fuente proporcionada:", entrada);
                 };
                 img.src = entrada;
                 return;
             }
 
-            // 2. Si es un archivo local (File, Blob, FileList, etc.)
             let archivoReal = entrada;
             if (entrada && entrada.target && entrada.target.files) archivoReal = entrada.target.files[0];
             else if (entrada && (entrada instanceof FileList || Array.isArray(entrada) || entrada.length)) archivoReal = entrada[0];
@@ -167,33 +263,17 @@ const RecortadorUI = {
             lector.onload = function (e) {
                 const img = new Image();
                 img.onload = function () {
-                    const anchoReal = this.width;
-                    const altoReal = this.height;
-
-                    if (anchoReal < 650 || altoReal < 150) {
-                        if (typeof MostrarAlerta === 'function') {
-                            MostrarAlerta(`La imagen es muy pequeña (${anchoReal}x${altoReal}px). El logotipo debe tener un tamaño mínimo de 650x150px.`, 300, false);
-                        }
-                        return;
-                    }
-
-                    const apiRecortador = self.init($contenedor, { ancho: 650, alto: 150, altura: 250 });
-                    apiRecortador.cargar(e.target.result);
-                    window.miRecortadorActual = apiRecortador;
-
-                    self._inyectarBotonGuardar();
-                    self._vincularDragDropViewport($contenedor, procesarEntrada);
+                    if (!validarDimensionesImagen(this.width, this.height, false)) return;
+                    montarEnCroppie(e.target.result);
                 };
                 img.src = e.target.result;
             };
             lector.readAsDataURL(archivoReal);
         };
 
-        // Si se le pasa una imagen inicial (de BD o archivo), la procesa directamente
         if (archivoInicial) {
             procesarEntrada(archivoInicial);
         } else {
-            // Si no hay imagen inicial, activamos el Drag & Drop en el contenedor vacío
             if (typeof window.DragDropService === 'object') {
                 window.DragDropService.init($contenedor, {
                     tipo: 'imagen',
@@ -207,9 +287,22 @@ const RecortadorUI = {
         }
     },
 
-    _inyectarBotonGuardar: function() {
-        $("#contenedor-boton-guardar").html(`
-            <a class="h-40 min-w-100 flex justify-center items-center rounded-md btn btn-primary" id="boton-guardar-imagen">
+    inicializarLogoEmpresa: function (selector, archivoInicial = null, opcionesExtra = {}) {
+        const config = $.extend({}, this.presets.logoEmpresa, opcionesExtra);
+        this.inicializar(selector, archivoInicial, config);
+    },
+
+    inicializarPerfilUsuario: function (selector, archivoInicial = null, opcionesExtra = {}) {
+        const config = $.extend({}, this.presets.perfilUsuario, opcionesExtra);
+        this.inicializar(selector, archivoInicial, config);
+    },
+
+    _inyectarBotonGuardar: function (config) {
+        const $contenedorBtn = $(config.contenedorBotonGuardar);
+        if (!$contenedorBtn.length) return;
+
+        $contenedorBtn.html(`
+            <a class="h-40 min-w-100 flex justify-center items-center rounded-md btn btn-primary" id="${config.botonGuardarId}">
                 <div class="h-p-100 flex justify-center items-center">
                     <span>Guardar</span>
                 </div>
@@ -221,7 +314,7 @@ const RecortadorUI = {
         }
     },
 
-    _vincularDragDropViewport: function($contenedor, callbackProcesar) {
+    _vincularDragDropViewport: function ($contenedor, callbackProcesar) {
         const $viewport = $contenedor.find('.editor-viewport');
         if (typeof window.DragDropService === 'object') {
             window.DragDropService.init($viewport, {
@@ -235,7 +328,7 @@ const RecortadorUI = {
         }
     },
 
-    destruir: function(selector) {
+    destruir: function (selector) {
         const $padre = $(selector);
         if (!$padre.length) return;
         const instancia = $padre.data('croppieInstance');

@@ -1,4 +1,4 @@
-$(document).ready(async function (e) {
+$(document).off('app:inicializada').on('app:inicializada', function () {
     try {
         // Función auxiliar limpia y segura para evaluar permisos
         const verificarPermiso = (permiso) => {
@@ -40,8 +40,8 @@ $(document).ready(async function (e) {
     }
 });
 
-function Obtener_Usuarios_API(pagina = 1, registrosPorPagina = 25, filtros = {}, orden = {}) {
-    // 1. Sincronizar y cifrar el estado actual en la URL del navegador fusionando con lo que ya existía
+function Obtener_Usuarios_API(pagina = 1, registrosPorPagina = null, filtros = {}, orden = {}) {
+    const limiteRegistros = registrosPorPagina || window.registrosPorPagina || 50;
     if (window.UrlStateSyncService && typeof window.UrlStateSyncService.generarUrlConEstado === 'function') {
         // Recuperar parámetros anteriores si existen en la URL cifrada
         const paramsPrevios = (typeof window.UrlStateSyncService.obtenerParametros === 'function') 
@@ -51,7 +51,7 @@ function Obtener_Usuarios_API(pagina = 1, registrosPorPagina = 25, filtros = {},
         window.UrlStateSyncService.generarUrlConEstado({
             ...paramsPrevios, // Mantiene cualquier otro parámetro previo de la sesión
             pagina: pagina,
-            registros: registrosPorPagina,
+            registros: limiteRegistros,
             ...filtros,
             ...orden
         });
@@ -63,7 +63,7 @@ function Obtener_Usuarios_API(pagina = 1, registrosPorPagina = 25, filtros = {},
         {
             accion: 'obtener_usuarios_paginados',
             pagina: pagina,
-            registros_por_p: registrosPorPagina,
+            registros_por_p: limiteRegistros,
             ...filtros, // Expande los filtros dinámicos del módulo
             ...orden    // Expande el ordenamiento
         },
@@ -182,52 +182,6 @@ async function Deshabilitar_Usuario_AJAX(id_usuario) {
     }
 }
 
-async function Eliminar_Usuario_Permanente_AJAX(id_usuario) {
-    if (!id_usuario) {
-        if (typeof MostrarMensaje === 'function') {
-            MostrarAlerta('ID de usuario no válido.', 230, false);
-        }
-        return false;
-    }
-
-    try {
-        if (typeof MostrarCargando === 'function') {
-            MostrarCargando('Eliminando usuario permanentemente...', false);
-        }
-
-        const respuesta = await window.AjaxService.enviar('../../../src/controllers/php/controllers/usuarios.php', {
-            accion: 'eliminar_usuario_permanente',
-            usuario_id: id_usuario
-        });
-
-        if (typeof OcultarCargando === 'function') {
-            OcultarCargando();
-        }
-
-        if (respuesta && (respuesta.success || respuesta.ok)) {
-            if (typeof MostrarMensaje === 'function') {
-                MostrarMensaje(respuesta.mensaje || 'Usuario eliminado correctamente.', true, false, false);
-            }
-
-            setTimeout(() => {
-                ModalAPI.cerrar()
-                CargarUsuarios()
-            }, 1000);
-        } else {
-            if (typeof MostrarMensaje === 'function') {
-                MostrarMensaje(respuesta?.mensaje || 'Error al eliminar el usuario.', false, false, false);
-            }
-        }
-    } catch (error) {
-        if (typeof OcultarCargando === 'function') {
-            OcultarCargando();
-        }
-        console.error("Error crítico al eliminar usuario:", error);
-        if (typeof MostrarMensaje === 'function') {
-            MostrarMensaje('Ocurrió un error inesperado en la red.', false, false, false);
-        }
-    }
-}
 
 async function Habilitar_Usuario_AJAX(id_usuario) {
     try {
@@ -266,5 +220,87 @@ async function Habilitar_Usuario_AJAX(id_usuario) {
         if (typeof MostrarMensaje === 'function') {
             MostrarMensaje('Ocurrió un error inesperado en la red.', false, false, false);
         }
+    }
+}
+
+function Eliminar_Usuarios_Masivo_AJAX(idsSeleccionados) {
+    EliminarService.ejecutar('../../../src/controllers/php/controllers/usuarios.php', 'eliminar_usuarios_masivo', idsSeleccionados, {
+        titulo: 'Eliminar usuarios seleccionados',
+        onSuccess: function(response) {
+            setTimeout(() => {
+                let idsArray = Array.isArray(idsSeleccionados) ? idsSeleccionados : (typeof idsSeleccionados === 'string' ? idsSeleccionados.split(',') : [idsSeleccionados]);
+                idsArray.forEach(id => {
+                    $(`.card[data-id="${id}"], tr[data-id="${id}"]`).fadeOut(300, function() {
+                        $(this).remove();
+                    });
+                });
+
+                if (typeof CargarUsuarios === 'function') {
+                    CargarUsuarios();
+                }
+            }, 1000);
+        }
+    });
+}
+
+function Habilitar_Usuarios_Masivo_AJAX(idsSeleccionados) {
+    HabilitarService.ejecutar('../../../src/controllers/php/controllers/usuarios.php', 'habilitar_usuarios_masivo', idsSeleccionados, {
+        titulo: 'Habilitar usuarios seleccionados',
+        onSuccess: function(response) {
+            setTimeout(() => {
+                let idsArray = Array.isArray(idsSeleccionados) ? idsSeleccionados : (typeof idsSeleccionados === 'string' ? idsSeleccionados.split(',') : [idsSeleccionados]);
+                idsArray.forEach(id => {
+                    $(`.card[data-id="${id}"], tr[data-id="${id}"]`).fadeOut(300, function() {
+                        $(this).remove();
+                    });
+                });
+
+                if (typeof CargarUsuarios === 'function') {
+                    CargarUsuarios();
+                }
+            }, 1000);
+        }
+    });
+}
+
+async function Procesar_Archivo_Importar_Usuarios(archivoSeleccionado) {
+    try {
+        console.log(archivoSeleccionado);
+        const respuesta = await FileUploadService.subir(
+            '../../../src/controllers/php/controllers/usuarios.php', // URL del endpoint
+            archivoSeleccionado,
+            'importar_usuarios', // La acción que leerá tu PHP en el despachador
+            {},                  // Parámetros extra (objeto vacío si no requieres extras)
+            'procesando archivo...' // Texto personalizado para el modal de carga en minúsculas
+        );
+
+        OcultarCargando()
+        if (respuesta && respuesta.ok) {
+            MostrarMensaje(respuesta.mensaje, true, false, false);
+            setTimeout(() => {
+                if (typeof ModalAPI !== 'undefined' && typeof ModalAPI.cerrar === 'function') {
+                    ModalAPI.cerrar();
+                }
+                    CrearVentanaIframe(
+                        'información del proceso',
+                        '../components/informacion.php',
+                        '620px',
+                        true,
+                        true,
+                        function (iframeElement) {
+                            $.messenger.send(iframeElement, 'informacion', respuesta);
+                        }
+                    );  
+               
+            }, 1000);
+        } else {
+            const mensajeError = (respuesta && respuesta.mensaje) ? respuesta.mensaje : 'no se pudo procesar la importación del archivo.';
+            if (typeof MostrarMensaje === 'function') {
+                MostrarMensaje(mensajeError, false, false, false);
+            }
+        }
+    } catch (error) {
+        console.error("fallo en la subida:", error);
+        MostrarAlerta(error.mensaje || 'error al procesar el archivo', 250, true);
     }
 }

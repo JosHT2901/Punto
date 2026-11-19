@@ -30,7 +30,14 @@ $accion = trim($_POST['accion'] ?? '');
 $accionesPermitidas = [
     'obtener_categorias'         => 'Obtener_Categorias',
     'gestionar_categorias'=>'Gestionar_Categorias',
-    'obtener_atributos'=>'Obtener_Atributos'
+    'obtener_atributos'=>'Obtener_Atributos',
+    'obtener_categorias_paginadas'=>'Obtener_Categorias_Paginadas',
+    'obtener_categoria_por_id'=>'Obtener_Categoria_Por_ID',
+    'cambiar_estado_categoria'=>'Cambiar_Estado_Categoria',
+    'deshabilitar_masivo_categorias'=>'Deshabilitar_Masivo_Categorias',
+    'habilitar_masivo_categorias'=>'Habilitar_Masivo_Categorias',
+    'exportar_categorias'=>'Exportar_Categorias',
+    'importar_categorias'=>'Importar_Categorias'
 ];
 
 // Ejecutar el despachador central

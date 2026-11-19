@@ -1,44 +1,40 @@
 <?php
-// Ya no usamos session_start() aquí para evitar conflictos de headers enviados, 
-// solo validamos que la sesión exista y esté activa.
+include_once dirname(__DIR__, 4) . "/src/config/bootstrap.php";
+
 $usuarioId = $_SESSION['usuario']['id'] ?? ($_SESSION['usuario_id'] ?? ($_SESSION['id_usuario'] ?? 0));
 
-/**
- * Función para verificar si el usuario actual posee al menos un permiso 
- * utilizando Consultar_PDO.
- */
-function UsuarioTienePermisoModulo($usuarioId, $permisosRequeridos): bool {
-    if (empty($usuarioId) || empty($permisosRequeridos)) {
-        return false;
-    }
+$modulosPermitidos = [];
 
-    $permisosArray = is_array($permisosRequeridos) ? $permisosRequeridos : [$permisosRequeridos];
-    $permisosArray = array_filter($permisosArray);
-
-    if (empty($permisosArray)) {
-        return false;
-    }
-
-    $placeholders = implode(',', array_fill(0, count($permisosArray), '?'));
-    
-    $sql = "SELECT COUNT(up.id) as total 
+if (!empty($usuarioId)) {
+    // Consulta optimizada para traer los módulos permitidos del usuario en una sola ejecución
+    $sql = "SELECT DISTINCT 
+                COALESCE(NULLIF(TRIM(p.modulo), ''), SUBSTRING_INDEX(p.nombre_permiso, '.', 1)) AS modulo_calculado,
+                p.nombre_permiso
             FROM usuarios_permisos up
             JOIN permisos p ON up.permiso_id = p.id
-            WHERE up.usuario_id = ? AND p.nombre_permiso IN ($placeholders)";
+            WHERE up.usuario_id = ?";
 
     try {
-        $params = array_merge([$usuarioId], $permisosArray);
-        $resultado = Consultar_PDO($sql, $params);
-
-        if (!empty($resultado) && isset($resultado[0]['total'])) {
-            return ((int)$resultado[0]['total'] > 0);
+        $resultado = Consultar_PDO($sql, [$usuarioId]);
+        if (!empty($resultado)) {
+            foreach ($resultado as $row) {
+                $moduloKey = $row['modulo_calculado'] ?? ($row['MODULO'] ?? '');
+                if (!empty($moduloKey)) {
+                    $modulosPermitidos[] = strtolower(trim($moduloKey));
+                }
+            }
         }
-
-        return false;
     } catch (Throwable $e) {
-        error_log("Error al validar permisos de menú con Consultar_PDO: " . $e->getMessage());
+        error_log("Error al obtener módulos permitidos con Consultar_PDO: " . $e->getMessage());
+    }
+}
+
+function UsuarioTienePermisoModuloLocal($moduloRequerido, array $modulosPermitidos): bool {
+    if (empty($moduloRequerido)) {
         return false;
     }
+    $moduloLimpio = strtolower(trim($moduloRequerido));
+    return in_array($moduloLimpio, $modulosPermitidos, true);
 }
 
 // Cargar Módulos
@@ -46,12 +42,12 @@ $path_modulos = __DIR__ . '/../../../../src/json/routes/menu.json';
 $modulosCrudos = file_exists($path_modulos) ? json_decode(file_get_contents($path_modulos), true) : [];
 if (!is_array($modulosCrudos)) $modulosCrudos = [];
 
-$modulos = array_filter($modulosCrudos, function($item) use ($usuarioId) {
-    if (empty($item['permiso']) && empty($item['permisos'])) {
-        return true;
+$modulos = array_filter($modulosCrudos, function($item) use ($modulosPermitidos) {
+    $modulo = $item['modulo'] ?? ($item['permiso'] ?? '');
+    if (empty($modulo)) {
+        return false; 
     }
-    $permisosToCheck = $item['permisos'] ?? $item['permiso'];
-    return UsuarioTienePermisoModulo($usuarioId, $permisosToCheck);
+    return UsuarioTienePermisoModuloLocal($modulo, $modulosPermitidos);
 });
 
 // Cargar Utilidades
@@ -59,12 +55,12 @@ $path_utilidades = __DIR__ . '/../../../../src/json/routes/utilidades.json';
 $utilidadesCrudas = file_exists($path_utilidades) ? json_decode(file_get_contents($path_utilidades), true) : [];
 if (!is_array($utilidadesCrudas)) $utilidadesCrudas = [];
 
-$utilidades = array_filter($utilidadesCrudas, function($item) use ($usuarioId) {
-    if (empty($item['permiso']) && empty($item['permisos'])) {
-        return true;
+$utilidades = array_filter($utilidadesCrudas, function($item) use ($modulosPermitidos) {
+    $modulo = $item['modulo'] ?? ($item['permiso'] ?? '');
+    if (empty($modulo)) {
+        return false;
     }
-    $permisosToCheck = $item['permisos'] ?? $item['permiso'];
-    return UsuarioTienePermisoModulo($usuarioId, $permisosToCheck);
+    return UsuarioTienePermisoModuloLocal($modulo, $modulosPermitidos);
 });
 ?>
 <div class="w-300 h-vh-100 box-sizing p-2 flex flex-column bg-gray-100 position-absolute top-0 overflow-auto d-none"
@@ -82,6 +78,8 @@ id="menu-contenedor-lateral" style="z-index: 10000;">
     <!-- Contenedor principal -->
     <div class="w-p-100 flex-1 min-h-0 flex flex-column box-sizing">
 
+        <!-- Sección de Módulos (Se oculta si no hay ninguno permitido) -->
+        <?php if (!empty($modulos)): ?>
         <div class="w-p-100 flex-1 min-h-100 flex flex-column items-start justify-between py-2 box-sizing">
             <div class="h-30 px-3 flex items-center text-blue-03618d fs-3 bg-option rounded-2xl fw-600">
                 <span class="texto-truncado">Módulos</span>
@@ -122,6 +120,10 @@ id="menu-contenedor-lateral" style="z-index: 10000;">
                 </div>
             </div>
         </div>
+        <?php endif; ?>
+
+        <!-- Sección de Utilidades (Se oculta si no hay ninguna permitida) -->
+        <?php if (!empty($utilidades)): ?>
         <div class="w-p-100 h-180 shrink-0 flex flex-column items-start justify-between py-2 box-sizing">
             <div class="h-30 px-3 flex items-center text-blue-03618d fs-3 bg-option rounded-2xl fw-600">
                 <span class="texto-truncado">Utilidades</span>
@@ -151,8 +153,8 @@ id="menu-contenedor-lateral" style="z-index: 10000;">
                     ?>
                 </div>
             </div>
-
         </div>
+        <?php endif; ?>
 
     </div>
 </div>

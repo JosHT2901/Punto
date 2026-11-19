@@ -97,6 +97,7 @@ async function Verificar_Codigo(codigo) {
             MostrarMensaje(respuesta.mensaje, true, false, true);
             setTimeout(() => {
                 ModalAPI.cerrar();
+                window.location.href="login.php"
             }, 1000);
             return true;
         }

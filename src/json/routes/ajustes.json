@@ -58,5 +58,12 @@
         "descripcion": "Cargar y restaurar un respaldo previo de la base de datos a partir de un archivo en formato SQL",
         "icono": "fa-solid fa-database",
         "permiso": "database"
+    },
+    {
+        "id": "card-configurar-ticket",
+        "titulo": "Configuración de Tickets",
+        "descripcion": "Personalizar el diseño, tamaño de papel, tipografía, fuentes personalizadas y campos visibles para la impresión de tickets",
+        "icono": "fa-solid fa-receipt",
+        "permiso": "configurar_ticket"
     }
 ]

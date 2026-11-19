@@ -1,3 +1,6 @@
+<?php 
+include_once "sesion.php"
+?>
 <!DOCTYPE html>
 <html lang="es">
 
@@ -124,6 +127,79 @@
 
         </div>
     </div>
+
+    <div class="w-vw-100 h-vh-100 flex flex-column bg-white top-0 left-0 position-absolute" id="contenedor-carga">
+    <!-- Menús del Sistema (Fondo Gris) -->
+    <div class="w-p-100 bg-gray-200">
+        <div class="w-p-100 h-p-100 box-sizing p-2 flex items-center justify-between gap-4 bg-gray-200">
+            <div class="flex-center">
+                <div class="w-40 h-40 bg-gray-300 rounded-md animate-pulse"></div>
+            </div>
+            <div class="flex-1 min-w-0">
+                <div class="w-p-100 h-40 bg-gray-300 rounded-md animate-pulse"></div>
+            </div>
+            <div class="flex items-center gap-1 shrink-0">
+                <div class="w-40 h-40 bg-gray-300 rounded-md animate-pulse"></div>
+                <div class="w-40 h-40 bg-gray-300 rounded-md animate-pulse"></div>
+                <div class="w-40 h-40 bg-gray-300 rounded-md animate-pulse"></div>
+            </div>
+            <div class="flex-center shrink-0 px-2">
+                <div class="w-40 h-40 bg-gray-300 rounded-circle animate-pulse"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenedor Principal de la Página (Fondo Blanco con Skeletons Grises) -->
+    <div class="w-p-100 h-calc-100-60 flex flex-column flex-1 min-h-0 p-2 gap-2 bg-white">
+        
+        <!-- Botón Atrás Simulado -->
+        <div class="flex">
+            <div class="w-90 h-40 bg-gray-100 rounded-md animate-pulse"></div>
+        </div>
+
+        <!-- Título Simulado -->
+        <div class="w-p-100 h-40 bg-gray-100 rounded-8 animate-pulse" style="border-left: 6px solid #cbd5e1;"></div>
+
+        <!-- Barra de Acciones Superior Simulada -->
+        <div class="w-p-100 h-50 bg-gray-100 flex p-2 items-center box-sizing rounded-8 gap-2">
+            <div class="w-130 h-30 bg-gray-200 rounded-md animate-pulse"></div>
+            <div class="w-100 h-30 bg-gray-200 rounded-md animate-pulse"></div>
+        </div>
+
+        <!-- Contenedor Dinámico Simulado -->
+        <div class="flex-1 min-h-0 flex flex-column overflow-hidden gap-2">
+
+            <!-- Buscador Simulado -->
+            <div class="w-p-100 h-40 bg-gray-100 rounded-md animate-pulse"></div>
+
+            <!-- Filtros Simulados -->
+            <div class="w-p-100 h-30 flex gap-2">
+                <div class="w-100 h-30 bg-gray-100 rounded-md animate-pulse"></div>
+                <div class="w-90 h-30 bg-gray-100 rounded-md animate-pulse"></div>
+            </div>
+
+            <!-- Resultados y Tarjetas Simuladas -->
+            <div class="flex-1 flex flex-column position-relative overflow-hidden gap-2">
+                <div class="w-p-100 h-30 bg-gray-100 rounded-md animate-pulse"></div>
+                
+                <div class="flex-1 flex flex-column gap-2">
+                    <div class="w-p-100 h-70 bg-gray-100 rounded-8 animate-pulse"></div>
+                    <div class="w-p-100 h-70 bg-gray-100 rounded-8 animate-pulse"></div>
+                    <div class="w-p-100 h-70 bg-gray-100 rounded-8 animate-pulse"></div>
+                    <div class="w-p-100 h-70 bg-gray-100 rounded-8 animate-pulse"></div>
+                </div>
+            </div>
+
+            <!-- Paginador Simulado -->
+            <div class="w-p-100 h-40 bg-gray-100 rounded-md flex items-center justify-between px-3 animate-pulse">
+                <div class="w-30 h-30 bg-gray-200 rounded-full"></div>
+                <div class="w-90 h-30 bg-gray-200 rounded-md"></div>
+            </div>
+
+        </div>
+    </div>
+</div>
+    
 </body>
 
 </html>

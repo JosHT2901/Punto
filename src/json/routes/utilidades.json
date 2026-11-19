@@ -3,6 +3,6 @@
       "titulo": "Biblioteca",
       "icono": "vf-ic_fluent_book_24_filled",
       "href": "/punto_1/public/pages/views/biblioteca.php",
-      "modulo": "Catálogo"
+      "modulo": "biblioteca"
     }
   ]

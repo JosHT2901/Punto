@@ -78,6 +78,27 @@ window.CardTemplateService = (() => {
         $('<style>').attr("id", "card-template-styles").html(css).appendTo('head');
     };
 
+    // Resuelve el id del registro aunque idKey no coincida exactamente con la columna devuelta
+    const resolverId = (element, idKey) => {
+        const tieneValor = (v) => v !== undefined && v !== null && v !== '';
+
+        // 1. Clave exacta indicada por el módulo
+        if (idKey && tieneValor(element[idKey])) return String(element[idKey]);
+
+        // 2. Misma clave sin importar mayúsculas/minúsculas
+        if (idKey) {
+            const clave = Object.keys(element).find(k => k.toLowerCase() === String(idKey).toLowerCase());
+            if (clave && tieneValor(element[clave])) return String(element[clave]);
+        }
+
+        // 3. Respaldos comunes
+        for (const k of ['ID', 'id', 'Id']) {
+            if (tieneValor(element[k])) return String(element[k]);
+        }
+
+        return '';
+    };
+
     const render = (contenedor, datos, options = {}) => {
         if (!contenedor) return;
         const $target = $(contenedor);
@@ -92,21 +113,21 @@ window.CardTemplateService = (() => {
         const {
             idKey = 'ID',
             tituloKey = 'nombre_completo',
-            badgeKey = null,                    
-            imagenKey = null,                    
+            badgeKey = null,
+            imagenKey = null,
             imagenDefault = '../..//imges/default.png',
-            configuracionCampos = [],            
-            permisoOpciones = false,             
-            callbackOpciones = '',               
-            botonesCabecera = [],                
-            botonesFooter = []                   
+            configuracionCampos = [],
+            permisoOpciones = false,
+            callbackOpciones = '',
+            botonesCabecera = [],
+            botonesFooter = [],
+            renderHtmlExtra = null               // Soporte para contenido HTML adicional dinámico
         } = options;
 
         const htmlTarjetas = listaElementos.map(element => {
-            console.log(element)
-            const recordId = element[idKey] || '';
+            const recordId = resolverId(element, idKey);
             const esActual = element.es_actual == 1;
-            
+
             // Título principal con respaldo automático
             let titulo = element[tituloKey];
             if (!titulo) {
@@ -125,7 +146,7 @@ window.CardTemplateService = (() => {
             } else {
                 const inner = configuracionCampos.map(c => {
                     let val = element[c.columna] ?? element[c.columna?.replace('_Fmt', '')] ?? '---';
-                    
+
                     return `
                         <div class="flex flex-column gap-1 p-2 border-bottom-light" style="flex: 1 1 200px;">
                             <label class="fs-1 fw-700 text-uppercase letter-spacing-1 text-slate-400">${c.label}</label>
@@ -134,6 +155,9 @@ window.CardTemplateService = (() => {
                 }).join('');
                 htmlDetalleCampos = `<div class="flex flex-wrap gap-2 w-p-100">${inner}</div>`;
             }
+
+            // 1.1 Renderizado de HTML extra opcional (ej: atributos de categorías)
+            const htmlExtraContenido = typeof renderHtmlExtra === 'function' ? renderHtmlExtra(element) : '';
 
             // 2. Imagen / Miniatura opcional con marco estilizado
             const htmlImagen = imagenKey ? `
@@ -151,10 +175,10 @@ window.CardTemplateService = (() => {
                 <span class="rounded-6 bg-brand-blue text-brand-dark px-3 py-1 fs-1 fw-600 ml-2" style="background-color: #eff6ff; color: #03618d; border: 1px solid #bfdbfe;">Actual</span>
             ` : '';
 
-            // 🌟 4. Input Checkbox con parada de propagación para evitar bloqueos por el contenedor clickeable
+            // 4. Input Checkbox con parada de propagación para evitar bloqueos por el contenedor clickeable
             const htmlSeleccion = `
                 <div class="flex items-center justify-center pr-1" onclick="event.stopPropagation();">
-                    <input type="checkbox" class="checkbox-round check-item" data-id="${recordId}" title="Seleccionar sucursal">
+                    <input type="checkbox" class="checkbox-round check-item" data-id="${recordId}" title="Seleccionar registro">
                 </div>
             `;
 
@@ -162,13 +186,13 @@ window.CardTemplateService = (() => {
             let htmlBotonesCabecera = botonesCabecera
                 .filter(btn => {
                     if (!btn.permiso) return true;
-                    return window.PermisosService && typeof window.PermisosService.tienePermiso === 'function' 
-                        ? PermisosService.tienePermiso(btn.permiso) 
+                    return window.PermisosService && typeof window.PermisosService.tienePermiso === 'function'
+                        ? PermisosService.tienePermiso(btn.permiso)
                         : true;
                 })
                 .map(btn => {
-                    const fnClick = typeof btn.onclick === 'function' 
-                        ? btn.onclick(element) 
+                    const fnClick = typeof btn.onclick === 'function'
+                        ? btn.onclick(element)
                         : (btn.onclick || '').replace(/\${ID}/g, recordId);
 
                     return `
@@ -180,12 +204,12 @@ window.CardTemplateService = (() => {
 
             // Botón de opciones unificado (3 puntos) con validación de permiso global
             if (permisoOpciones && callbackOpciones) {
-                const tienePermisoOpciones = permisoOpciones === true || 
+                const tienePermisoOpciones = permisoOpciones === true ||
                     (typeof permisoOpciones === 'string' && window.PermisosService?.tienePermiso(permisoOpciones));
 
                 if (tienePermisoOpciones && !esActual) {
-                    const onclickFn = typeof callbackOpciones === 'function' 
-                        ? callbackOpciones(element) 
+                    const onclickFn = typeof callbackOpciones === 'function'
+                        ? callbackOpciones(element)
                         : callbackOpciones.replace(/\${ID}/g, recordId);
 
                     htmlBotonesCabecera += `
@@ -202,13 +226,13 @@ window.CardTemplateService = (() => {
                 const btnsFooterHtml = botonesFooter
                     .filter(btn => {
                         if (!btn.permiso) return true;
-                        return window.PermisosService && typeof window.PermisosService.tienePermiso === 'function' 
-                            ? PermisosService.tienePermiso(btn.permiso) 
+                        return window.PermisosService && typeof window.PermisosService.tienePermiso === 'function'
+                            ? PermisosService.tienePermiso(btn.permiso)
                             : true;
                     })
                     .map(btn => {
-                        const fnClick = typeof btn.onclick === 'function' 
-                            ? btn.onclick(element) 
+                        const fnClick = typeof btn.onclick === 'function'
+                            ? btn.onclick(element)
                             : (btn.onclick || '').replace(/\${ID}/g, recordId);
 
                         return `
@@ -234,7 +258,7 @@ window.CardTemplateService = (() => {
                 <!-- CABECERA -->
                 <div class="card-header-main js-header-toggle">
                     ${htmlSeleccion}
-                    
+
                     ${htmlImagen}
                     ${htmlBadge}
 
@@ -258,6 +282,7 @@ window.CardTemplateService = (() => {
                 <!-- CUERPO DESPLEGABLE -->
                 <div class="w-p-100 p-3 bg-white js-panel-toggle" style="display:none">
                     ${htmlDetalleCampos}
+                    ${htmlExtraContenido}
                 </div>
 
                 <!-- FOOTER / ACCIONES INFERIORES -->

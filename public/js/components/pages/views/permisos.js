@@ -72,7 +72,7 @@ async function Obtener_Permisos() {
                     htmlPermisosLista += `
                         <div class="flex items-center justify-between btn-ghost p-2 rounded-8 border btn permiso-row gap-2 tarjeta-permiso-item">
                             <label class="flex items-center gap-2 flex-1 cursor-pointer m-0">
-                                <div class="w-30">
+                                <div class="flex justify-center items-center">
                                     <input type="checkbox" id="chk_${perm.id}" class="checkbox-round check-item flex-shrink-0" name="permisos[]" value="${perm.id}" data-id="${perm.id}" data-modulo="${moduloSlug}" ${isChecked}>
                                 </div>
                                 <div class="flex flex-column px-3 gap-1">

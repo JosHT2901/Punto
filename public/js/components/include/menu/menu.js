@@ -61,6 +61,5 @@ const UserMenuComponent = {
 
 // Inicializar al cargar el documento
 $(document).ready(() => {
-    console.log("##")
     UserMenuComponent.init();
 });

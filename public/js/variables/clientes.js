@@ -145,22 +145,23 @@ window.opcionesClienteDeshabilitado = [{
     callback: (id) => HabilitarClientes(id)
 }];
 
-window.ordenClientes = window.ordenClientes || {
+window.ordenCategorias = window.ordenCategorias || {
     columna: 'ID',
     direccion: 'DESC'
 };
 
-window.opcionesMenuOrdenar = [{
+window.opcionesMenuOrdenar = [
+    {
         id: 'recientes',
         texto: 'Más recientes primero',
         icono: 'fa-solid fa-arrow-down-1-9',
         callback: (id, elemento) => {
-            window.ordenClientes = {
+            window.ordenCategorias = {
                 columna: 'ID',
                 direccion: 'DESC'
             };
             window.pagina = 1; // Volvemos a la primera página
-            CargarClientes();
+            CargarCategorias();
         }
     },
     {
@@ -168,12 +169,12 @@ window.opcionesMenuOrdenar = [{
         texto: 'Más antiguos primero',
         icono: 'fa-solid fa-arrow-up-9-1',
         callback: (id, elemento) => {
-            window.ordenClientes = {
+            window.ordenCategorias = {
                 columna: 'ID',
                 direccion: 'ASC'
             };
             window.pagina = 1;
-            CargarClientes();
+            CargarCategorias();
         }
     },
     {
@@ -181,12 +182,12 @@ window.opcionesMenuOrdenar = [{
         texto: 'Nombre (A - Z)',
         icono: 'fa-solid fa-arrow-down-a-z',
         callback: (id, elemento) => {
-            window.ordenClientes = {
+            window.ordenCategorias = {
                 columna: 'Nombre',
                 direccion: 'ASC'
             };
             window.pagina = 1;
-            CargarClientes();
+            CargarCategorias();
         }
     },
     {
@@ -194,16 +195,15 @@ window.opcionesMenuOrdenar = [{
         texto: 'Nombre (Z - A)',
         icono: 'fa-solid fa-arrow-up-z-a',
         callback: (id, elemento) => {
-            window.ordenClientes = {
+            window.ordenCategorias = {
                 columna: 'Nombre',
                 direccion: 'DESC'
             };
             window.pagina = 1;
-            CargarClientes();
+            CargarCategorias();
         }
     }
 ];
-
 window.botones_opciones_habilitado=[
     {
         id: 'btn-eliminar-masivo',

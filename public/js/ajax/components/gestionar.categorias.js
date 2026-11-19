@@ -2,59 +2,90 @@ $(document).ready(async function () {
     try {
         MostrarCargando('Obteniendo información...', false);
         
-        // Ejecutamos ambas peticiones en paralelo mediante Promise.all
-        const [respuestaAtributos, respuestaCategorias] = await Promise.all([ 
+        // 1. Obtener y desencriptar el ID de la categoría desde la URL (para modo edición)
+        const urlParams = new URLSearchParams(window.location.search);
+        let idCategoriaCifrado = urlParams.get('id');
+        let idCategoria = idCategoriaCifrado ? Descifrar_Payload(idCategoriaCifrado) : null;
+
+        console.log("ID de categoría desencriptado:", idCategoria);
+        
+        // Asignación directa a variables globales
+        window.idCategoriaActual = idCategoria;
+        window.esModoEdicion = Boolean(idCategoria);
+
+        // Preparamos las peticiones AJAX en paralelo
+        const promesas = [
             CargarJSON('../../../src/json/data/atributos.json'),
             window.AjaxService.enviar('../../../src/controllers/php/controllers/categorias.php', {
                 accion: 'obtener_categorias'
             })
-        ]);
+        ];
+
+        // Si estamos editando, solicitamos mediante AJAX los datos específicos de la categoría
+        if (window.esModoEdicion) {
+            promesas.push(
+                window.AjaxService.enviar('../../../src/controllers/php/controllers/categorias.php', {
+                    accion: 'obtener_categoria_por_id',
+                    id: idCategoria
+                })
+            );
+        }
+
+        const [respuestaAtributos, respuestaCategorias, respuestaDetalle] = await Promise.all(promesas);
         
         OcultarCargando();
 
-        // 1. Procesamos y guardamos el catálogo de atributos en window.atributos
-        if (respuestaAtributos) {
-            // Si el JSON viene estructurado con catalogo_tipos_datos o es plano
-            window.atributos = respuestaAtributos.catalogo_tipos_datos || respuestaAtributos;
+        // 2. Almacenamiento en variables globales
+        window.atributos = respuestaAtributos ? (respuestaAtributos.catalogo_tipos_datos || respuestaAtributos) : [];
+        window.categorias = (respuestaCategorias && respuestaCategorias.ok) 
+            ? (respuestaCategorias.data || respuestaCategorias.categorias || []) 
+            : (Array.isArray(respuestaCategorias) ? respuestaCategorias : []);
+
+        if (window.esModoEdicion && respuestaDetalle) {
+            window.categoriaActualData = respuestaDetalle.data || respuestaDetalle.categoria || respuestaDetalle;
         } else {
-            window.atributos = [];
+            window.categoriaActualData = null;
         }
 
-        // 2. Procesamos y guardamos las categorías en window.categorias
-        if (respuestaCategorias && respuestaCategorias.ok) {
-            // Ajusta según cómo devuelva tu controlador los datos (ej: respuestaCategorias.data o directo el array)
-            window.categorias = respuestaCategorias.data || respuestaCategorias.categorias || [];
-        } else if (Array.isArray(respuestaCategorias)) {
-            window.categorias = respuestaCategorias;
-        } else {
-            window.categorias = [];
-        }
-
-        console.log("Datos cargados correctamente:", {
+        console.log("Datos AJAX almacenados en variables globales:", {
+            esModoEdicion: window.esModoEdicion,
+            idCategoriaActual: window.idCategoriaActual,
             atributos: window.atributos,
-            categorias: window.categorias
+            categorias: window.categorias,
+            categoriaActualData: window.categoriaActualData
         });
 
-        // 3. Disparamos el evento para inicializar la interfaz
+        // 3. Disparamos el evento limpio para que la otra función procese leyendo las variables window
         $(document).trigger('datosListos');
 
     } catch (error) {
         OcultarCargando();
         console.error("Error al obtener la información inicial:", error);
-
-        // Mensaje de error general para fallos de red o excepciones
         MostrarMensaje('Ocurrió un error inesperado al conectar con el servidor.', false, false, false);
     }
 });
-
 async function Guardar_Gestion_Categorias(datosGuardar) {
     try {
         MostrarCargando('Procesando información...', false); 
 
+        // Detectamos si estamos en modo edición ya sea por el ID global o por los datos pasados
+        const idEdicion = window.idCategoriaActual || datosGuardar.id || datosGuardar.id_categoria || null;
+        const tipoAccion = idEdicion ? 'editar' : 'crear';
+
+        // Aseguramos que el objeto enviado contenga el tipo y el id si estamos editando
+        const payloadFinal = {
+            ...datosGuardar,
+            tipo: datosGuardar.tipo || tipoAccion,
+        };
+
+        if (idEdicion && !payloadFinal.id && !payloadFinal.id_categoria) {
+            payloadFinal.id = idEdicion;
+        }
+
         // Ajusta la ruta del controlador de PHP según tu estructura de carpetas
         const respuesta = await window.AjaxService.enviar('../../../src/controllers/php/controllers/categorias.php', {
             accion: 'gestionar_categorias',
-            data: datosGuardar
+            data: payloadFinal
         });
         
         console.log("Respuesta del servidor:", respuesta);
@@ -69,12 +100,12 @@ async function Guardar_Gestion_Categorias(datosGuardar) {
                 window.categorias = [];
             }
 
-            const tipo = datosGuardar.tipo || 'crear';
+            const tipo = payloadFinal.tipo;
 
             if (tipo === 'editar') {
-                const idEditado = Number(datosGuardar.id_categoria || datosGuardar.id);
-                const nuevoNombre = (datosGuardar.nombre_categoria || '').trim().toUpperCase();
-                const nuevosAtributos = datosGuardar.atributos || [];
+                const idEditado = Number(payloadFinal.id_categoria || payloadFinal.id || idEdicion);
+                const nuevoNombre = (payloadFinal.nombre_categoria || '').trim().toUpperCase();
+                const nuevosAtributos = payloadFinal.atributos || [];
 
                 window.categorias = window.categorias.map(cat => {
                     let catId = Number(cat.id || cat.ID || cat.id_categoria);
@@ -91,9 +122,9 @@ async function Guardar_Gestion_Categorias(datosGuardar) {
 
             } else {
                 // Creación de categoría con sus atributos
-                let nombreUnico = (datosGuardar.nombre_categoria || '').trim().toUpperCase();
+                let nombreUnico = (payloadFinal.nombre_categoria || '').trim().toUpperCase();
                 let nuevoId = respuesta.data && (respuesta.data.id || respuesta.data.id_categoria) ? (respuesta.data.id || respuesta.data.id_categoria) : null;
-                let atributosCreados = datosGuardar.atributos || [];
+                let atributosCreados = payloadFinal.atributos || [];
 
                 if (nombreUnico) {
                     window.categorias.push({
@@ -142,15 +173,18 @@ async function Guardar_Gestion_Categorias(datosGuardar) {
             }
 
             $.messenger.send(
-                window.parent,                        // Ventana padre
-                notificacion,                         // Nombre de la acción
+                window.parent,                    // Ventana padre
+                notificacion,                     // Nombre de la acción
                 { status: 'success', mensaje: 'Proceso completado', tipo: tipo },
                 '*'
             );
 
             // Cerramos el modal solo si el proceso fue completamente exitoso
             setTimeout(() => {
-                ModalAPI.cerrar();
+                if (typeof ModalAPI !== 'undefined' && typeof ModalAPI.cerrar === 'function') {
+                    ModalAPI.cerrar();
+                }
+                window.location.href = "../views/categorias.php";
             }, 1000);
 
         } else {

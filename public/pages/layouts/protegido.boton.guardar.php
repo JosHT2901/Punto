@@ -1,3 +1,6 @@
+<?php 
+include_once "sesion.php"
+?>
 <!DOCTYPE html>
 <html lang="es">
 

@@ -159,8 +159,7 @@ function Eventos_Seccion_Informacion_Basica() {
     });
 }
 
-function Eventos_Seccion_Identidad() {
-    console.log(window.informacion);
+function Eventos_Seccion_Identidad(){
     
     const usuarioActualID = window.id_usuario ? Number(window.id_usuario) : null;
     
@@ -334,6 +333,205 @@ function Eventos_Seccion_Identidad() {
             id: window.id_usuario,
             curp: curpVal,
             rfc: rfcVal
+        };
+
+        Guardar_Edicion_Usuario(payload);
+    });
+}
+
+function Eventos_Seccion_Contacto() {
+    console.log(window.informacion);
+
+    const usuarioActualID = window.id_usuario ? Number(window.id_usuario) : null;
+
+    const telefonoOriginal = (window.informacion && window.informacion.telefono) ? window.informacion.telefono.trim() : '';
+    const correoOriginal = (window.informacion && window.informacion.correo) ? window.informacion.correo.trim().toLowerCase() : '';
+
+    // Banderas lógicas para controlar la validez de los campos
+    let correoValido = true;
+    let telefonoValido = true;
+
+    // Inicializar componentes externos usando el módulo centralizado
+    TelefonosUI.init("#input-telefono");
+    AutocompletarCorreo("#input-correo");
+
+    const validarInputInicial = ($elemento) => {
+        $elemento.trigger('input');
+    };
+
+    // Establecer valor inicial del teléfono utilizando el módulo
+    TelefonosUI.setValor("#input-telefono", telefonoOriginal);
+    
+    // Validar estado inicial del teléfono si ya viene con datos
+    if (telefonoOriginal !== '') {
+        telefonoValido = TelefonosUI.esValido("#input-telefono");
+    }
+
+    $("#input-correo").val(window.informacion.correo || '');
+    validarInputInicial($("#input-correo"));
+
+    // ==========================================
+    // VALIDACIÓN EN TIEMPO REAL: TELÉFONO
+    // ==========================================
+    $('#input-telefono').off('input.telVal countrychange.telVal').on('input.telVal countrychange.telVal', function (e) {
+        let $input = $(this);
+        let valorRaw = $input.val().trim();
+        let $span = $("#span-telefono"); // Asegúrate de tener <span id="span-telefono"></span> en tu HTML
+
+        if (valorRaw === '') {
+            if ($span.length) {
+                $span.text('')
+                    .removeClass('text-success text-danger')
+                    .addClass('text-muted');
+            }
+            telefonoValido = true; // Si es opcional, o ponlo en false si es obligatorio
+            return;
+        }
+
+        // Usamos el método nativo esValido() de tu módulo TelefonosUI
+        let esValidoIntl = TelefonosUI.esValido("#input-telefono");
+        const telefonoFormateado = TelefonosUI.getValor("#input-telefono");
+
+        if (!esValidoIntl) {
+            if ($span.length) {
+                $span.text('Número de teléfono incompleto o no válido para el país')
+                    .removeClass('text-success text-muted')
+                    .addClass('text-danger');
+            }
+            telefonoValido = false;
+            return;
+        }
+
+        // Si es el mismo valor normalizado que ya tenía el usuario actual, se aprueba
+        if (telefonoFormateado === telefonoOriginal || valorRaw === telefonoOriginal) {
+            if ($span.length) {
+                $span.text('Teléfono válido y disponible')
+                    .removeClass('text-danger text-muted')
+                    .addClass('text-success');
+            }
+            telefonoValido = true;
+            return;
+        }
+
+        // Verificación de duplicados excluyendo al usuario actual
+        let yaExiste = window.usuarios && window.usuarios.some(u => {
+            const idComparar = Number(u.ID || u.id);
+            return idComparar !== usuarioActualID && u.telefono && u.telefono.trim() === telefonoFormateado;
+        });
+
+        if (yaExiste) {
+            if ($span.length) {
+                $span.text('Este teléfono ya está registrado por otro usuario')
+                    .removeClass('text-success text-muted')
+                    .addClass('text-danger');
+            }
+            telefonoValido = false;
+        } else {
+            if ($span.length) {
+                $span.text('Teléfono válido y disponible')
+                    .removeClass('text-danger text-muted')
+                    .addClass('text-success');
+            }
+            telefonoValido = true;
+        }
+    });
+
+    // ==========================================
+    // VALIDACIÓN EN TIEMPO REAL: CORREO
+    // ==========================================
+    $('#input-correo').off('input.correoVal').on('input.correoVal', function (e) {
+        let $input = $(this);
+        let valorOriginal = $input.val();
+        let valor = valorOriginal.trim().toLowerCase();
+
+        if (valorOriginal !== valor) {
+            $input.val(valor);
+        }
+
+        let $span = $("#span-correo");
+
+        if (valor.length === 0) {
+            if ($span.length) {
+                $span.text('El correo electrónico es requerido')
+                    .removeClass('text-success text-danger')
+                    .addClass('text-muted');
+            }
+            correoValido = false;
+            return;
+        }
+
+        let esSintaxisValida = ValidacionService.validarCorreo ? ValidacionService.validarCorreo(valor) : true;
+
+        if (!esSintaxisValida) {
+            if ($span.length) {
+                $span.text('Correo electrónico no válido')
+                    .removeClass('text-success text-muted')
+                    .addClass('text-danger');
+            }
+            correoValido = false;
+            return;
+        }
+
+        // Si es el mismo valor que ya tenía el usuario actual, se aprueba
+        if (valor === correoOriginal) {
+            if ($span.length) {
+                $span.text('Correo válido y disponible')
+                    .removeClass('text-danger text-muted')
+                    .addClass('text-success');
+            }
+            correoValido = true;
+            return;
+        }
+
+        // Verificación de duplicados excluyendo al usuario actual
+        let yaExiste = window.usuarios && window.usuarios.some(u => {
+            const idComparar = Number(u.ID || u.id);
+            return idComparar !== usuarioActualID && u.correo && u.correo.trim().toLowerCase() === valor;
+        });
+
+        if (yaExiste) {
+            if ($span.length) {
+                $span.text('Este correo ya está registrado por otro usuario')
+                    .removeClass('text-success text-muted')
+                    .addClass('text-danger');
+            }
+            correoValido = false;
+        } else {
+            if ($span.length) {
+                $span.text('Correo válido y disponible')
+                    .removeClass('text-danger text-muted')
+                    .addClass('text-success');
+            }
+            correoValido = true;
+        }
+    });
+
+    // ==========================================
+    // BOTÓN GUARDAR CON VALIDACIÓN DIRECTA
+    // ==========================================
+    $("#editar-usuario-boton-guardar").off('click').on('click', function(e) {
+        e.preventDefault();
+
+        const telefonoLimpioInput = $("#input-telefono").val().trim();
+        const telefonoVal = TelefonosUI.getValor("#input-telefono");
+        const correoVal = $("#input-correo").val().trim().toUpperCase();
+
+        // Validar si escribió algo pero el plugin lo marca como inválido
+        if (telefonoLimpioInput !== '' && !telefonoValido) {
+            MostrarAlerta('El teléfono no es válido o está incompleto para el país seleccionado.', 230, false);
+            return;
+        }
+
+        if (correoVal !== '' && !correoValido) {
+            MostrarAlerta('El correo electrónico no es válido o ya se encuentra registrado por otro usuario.', 250, false);
+            return;
+        }
+
+        const payload = {
+            ejecutar: 'editar_contacto',
+            id: window.id_usuario,
+            telefono: telefonoVal,
+            correo: correoVal
         };
 
         Guardar_Edicion_Usuario(payload);

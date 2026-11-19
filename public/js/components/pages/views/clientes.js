@@ -131,6 +131,7 @@ function CargarClientes() {
             .then(response => {
                 OcultarCargando();
                 if (response && response.ok) {
+                    console.log(response)
                     const listaDatos = response.data?.datos || [];
 
                     // 🌟 GUARDAR EL UNIVERSO TOTAL DE IDS FILTRADOS CON NORMALIZACIÓN A STRING

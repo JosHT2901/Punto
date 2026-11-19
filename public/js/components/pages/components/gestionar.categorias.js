@@ -3,10 +3,25 @@ const CategoriasSelectionController = CrearSeleccionController('GestionMarcas');
 $(document).ready(function (e) {
     function InicilizarGestionarCategorias() {
         console.log("Atributos cargados:", window.atributos);
-        const $contenedor =$("#categorias-contenedor-tabla");
+        console.log("Modo edición:", window.esModoEdicion, "Datos categoría:", window.categoriaActualData);
+
+        const $contenedor = $("#categorias-contenedor-tabla");
         
-        // Verificamos si hay atributos para precargar (Modo Edición)
-        const listaAtributosExistentes = window.atributos?.lista_atributos || window.atributos?.atributos || [];
+        // Si estamos en modo edición, rellenamos los campos principales de la categoría
+        if (window.esModoEdicion && window.categoriaActualData) {
+            const cat = window.categoriaActualData;
+            
+            // Llena el input de nombre de la categoría (ajusta el selector si tu ID es diferente)
+            $('#crear-categoria-input-nombre').val(cat.Nombre || cat.nombre || '');
+            
+            // Llena el estado de habilitado si aplica
+            if (cat.Habilitado !== undefined) {
+                $('#habilitado-categoria').prop('checked', parseInt(cat.Habilitado) === 1);
+            }
+        }
+
+        // Verificamos si hay atributos asociados a esta categoría (Modo Edición) o del catálogo
+        const listaAtributosExistentes = window.categoriaActualData?.atributos || window.atributos?.lista_atributos || window.atributos?.atributos || [];
         
         if (listaAtributosExistentes.length > 0) {
             // Limpiamos el contenedor y creamos la estructura de la tabla
@@ -29,9 +44,9 @@ $(document).ready(function (e) {
             // Iteramos e insertamos cada atributo existente
             listaAtributosExistentes.forEach((attr, idx) => {
                 AgregarNuevoAtributoCategoria({
-                    id: attr.id || (idx + 1),
-                    nombre: attr.nombre || attr.nombre_atributo || '',
-                    tipo: attr.tipo || attr.tipo_atributo || 'texto'
+                    id: attr.ID || attr.id || (idx + 1),
+                    nombre: attr.Nombre_Atributo || attr.nombre || attr.nombre_atributo || '',
+                    tipo: attr.Tipo_Dato || attr.tipo || attr.tipo_atributo || 'texto'
                 });
             });
         } else if (typeof Contenedor_Agregar === 'function') {
@@ -51,16 +66,21 @@ $(document).ready(function (e) {
                 const cantidad = seleccionadas.size;
                 const textoPlural = `${cantidad} atributo${cantidad !== 1 ? 's' : ''}`;
 
-                const $panelAcciones =$("#contenedor-atributos-acciones");
-                const $contadorTexto =$("#contador-atributos-acciones");
+                const $panelAcciones = $("#contenedor-atributos-acciones");
+                const $contadorTexto = $("#contador-atributos-acciones");
 
                 if (cantidad > 0) {
                     $panelAcciones.css("display", "flex");
                     $contadorTexto.text(textoPlural);
                 } else {
-                    $panelAcciones.hide();$contadorTexto.text('0');
+                    $panelAcciones.hide();
+                    $contadorTexto.text('0');
                 }
             }
+        });
+
+        $("#btn-atras").off('click').on('click', function(e) {
+            window.location.href = "../views/categorias.php";
         });
     }
 
@@ -266,7 +286,7 @@ $(document).on('click', '#btn-guardar-categoria', function (e) {
 
     // Validar si la categoría ya existe localmente en window.categorias (evitar duplicados en cliente)
     if (window.categorias && Array.isArray(window.categorias)) {
-        const idActualEditando = window.id_categoria_a_editar || null;
+        const idActualEditando = window.idCategoriaActual || null;
         const yaExiste = window.categorias.some(cat => {
             const catNombre = (cat.Nombre || cat.nombre_categoria || "").trim().toUpperCase();
             const catId = cat.ID || cat.id || cat.id_categoria;
@@ -279,7 +299,7 @@ $(document).on('click', '#btn-guardar-categoria', function (e) {
         }
     }
 
-    const totalAtributos = window.total_atributos_activos || 0;
+    const totalAtributos = window.total_atributos_activos || $('.tarjeta-atributo-item').length;
     if (totalAtributos === 0 || $('.tarjeta-atributo-item').length === 0) {
         MostrarAlerta("Debes agregar al menos un atributo para la categoría.");
         return;
@@ -310,7 +330,7 @@ $(document).on('click', '#btn-guardar-categoria', function (e) {
         // Obtenemos el tipo directamente del input oculto que actualiza tu CustomSelect
         const tipo = $tarjeta.find('input[name*="[tipo]"]').val() || 'texto';
         
-        // Obtenemos el id del checkbox de la tarjeta
+        // Obtenemos el id del checkbox de la tarjeta (útil para atributos existentes en edición)
         const checkboxId = $tarjeta.find('.check-item').data('id') || null;
         
         atributosArray.push({
@@ -320,9 +340,10 @@ $(document).on('click', '#btn-guardar-categoria', function (e) {
         });
     });
 
+    // Construcción del payload soportando edición con las variables globales
     const datosPayload = {
-        tipo: window.id_categoria_a_editar ? 'editar' : 'crear',
-        id_categoria: window.id_categoria_a_editar || null,
+        tipo: window.esModoEdicion ? 'editar' : 'crear',
+        id_categoria: window.idCategoriaActual || null,
         nombre_categoria: nombre_categoria,
         atributos: atributosArray
     };

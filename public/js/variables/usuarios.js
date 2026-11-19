@@ -59,7 +59,30 @@ window.botonesToolbarConfig = [{
     id: 'btn-finalizar',
     icon: 'vf-ic_fluent_arrow_import_24_filled',
     onClick: (e, $btn) => {
-      
+        CrearVentanaIframe(
+            'Importar esquemas',
+            '../components/carga.archivo.php',
+            '600px',
+            true,
+            true,
+            function (iframeElement) {
+                let datos = {
+                    multiple: false,
+                    mostrar_plantilla: true,
+                    url_plantilla: '/../../../../public/docs/usuarios.xlsx',
+                    tipo_archivos: '.xlsx,.xls,.csv',
+                    nombre_plantilla:'plantilla_usuarios.xlsx'
+                };
+
+                $.messenger.send(iframeElement, 'datos_iniciales', datos);
+
+                $.messenger.on('Archivos_cargados', function (data, sourceWindow, origin) {
+                    ModalAPI.cerrar();
+                    MostrarCargando('Procesando...', false);
+                    Procesar_Archivo_Importar_Usuarios(data.data);
+                });
+            }
+        );
     }
 }
 ];
@@ -116,6 +139,14 @@ window.opcionesUsuarioHabilitado = [
         }
     },
     {
+        texto: 'Ver movimientos',
+        icono: 'vf-ic_fluent_history_24_filled text-info',
+        permiso: 'ver_movimientos_usuario',
+        callback: (id, elemento) => {
+            window.location.href = "movimientos.php?id=" + id;
+        }
+    },
+    {
         texto: 'Deshabilitar usuario',
         icono: 'vf-ic_fluent_prohibited_24_filled text-danger',
         permiso: 'eliminar_usuarios',
@@ -134,14 +165,106 @@ window.opcionesUsuarioDeshabilitado = [
         callback: (id, elemento) => {
             Habilitar_Usuario(id)
         }
-    },
-    {
-        texto: 'Eliminar permanentemente',
-        icono: 'vf-ic_fluent_delete_24_filled text-danger',
-        permiso: 'eliminar_usuarios',
-        callback: (id, elemento) => {
-            Eliminar_Usuario_Permanente(id)
-        }
     }
 ];
 
+
+
+window.botones_opciones_habilitado=[
+    {
+        id: 'btn-eliminar-masivo',
+        icon: 'vf-ic_fluent_delete_24_filled',
+        title: 'Eliminar seleccionados',
+        permiso:'eliminar_clientes',
+        onclick: 'Eliminar_Usuarios_Masivo()'
+    },
+    {
+        id: 'btn-exportar-masivo',
+        icon: 'vf-ic_fluent_arrow_export_24_filled',
+        title: 'Exportar seleccionados',
+        onclick: 'Exportar_Usuarios_Masivos()'
+    }
+]
+
+window.botones_opciones_deshabilitado=[
+    {
+        id: 'btn-habilitar-masivo',
+        icon: 'vf-ic_fluent_arrow_clockwise_24_filled',
+        title: 'Habiltar seleccionados',
+        permiso:'exportar_usuarios',
+        onclick: 'Habilitar_Usuarios_Masivo()'
+    }
+]
+
+window.ordenUsuarios = window.ordenUsuarios || {
+    columna: 'ID',
+    direccion: 'DESC'
+};
+
+window.opcionesMenuOrdenar = [
+    {
+        id: 'recientes',
+        texto: 'Más recientes primero',
+        icono: 'fa-solid fa-arrow-down-1-9',
+        callback: (id, elemento) => {
+            window.ordenUsuarios = {
+                columna: 'ID',
+                direccion: 'DESC'
+            };
+            window.pagina = 1;
+            CargarUsuarios();
+        }
+    },
+    {
+        id: 'antiguos',
+        texto: 'Más antiguos primero',
+        icono: 'fa-solid fa-arrow-up-9-1',
+        callback: (id, elemento) => {
+            window.ordenUsuarios = {
+                columna: 'ID',
+                direccion: 'ASC'
+            };
+            window.pagina = 1;
+            CargarUsuarios();
+        }
+    },
+    {
+        id: 'nombre_asc',
+        texto: 'Nombre (A - Z)',
+        icono: 'fa-solid fa-arrow-down-a-z',
+        callback: (id, elemento) => {
+            window.ordenUsuarios = {
+                columna: 'nombre',
+                direccion: 'ASC'
+            };
+            window.pagina = 1;
+            CargarUsuarios();
+        }
+    },
+    {
+        id: 'nombre_desc',
+        texto: 'Nombre (Z - A)',
+        icono: 'fa-solid fa-arrow-up-z-a',
+        callback: (id, elemento) => {
+            window.ordenUsuarios = {
+                columna: 'nombre',
+                direccion: 'DESC'
+            };
+            window.pagina = 1;
+            CargarUsuarios();
+        }
+    },
+    {
+        id: 'usuario_asc',
+        texto: 'Usuario de acceso (A - Z)',
+        icono: 'fa-solid fa-user-check',
+        callback: (id, elemento) => {
+            window.ordenUsuarios = {
+                columna: 'nombre_usuario',
+                direccion: 'ASC'
+            };
+            window.pagina = 1;
+            CargarUsuarios();
+        }
+    }
+];

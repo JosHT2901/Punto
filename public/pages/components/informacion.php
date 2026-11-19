@@ -46,7 +46,7 @@ ob_start();
     </div>
 
     <!-- Contenedor dinámico de la lista de detalles -->
-    <div class="flex-1 box-sizing p-1 overflow-auto contenedor flex flex-column" id="contenedor-lista">
+    <div class="flex-1 box-sizing p-1 contenedor flex flex-column" id="contenedor-lista">
         
         <!-- Sección 1: Procesados -->
         <div class="flex-1 flex flex-column">

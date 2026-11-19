@@ -9,6 +9,5 @@ $_SESSION['usuario'] = [
     'id' => 48,
     'nombre' => 'Josthin Hernandez',
     'correo' => 'josthin@correo.com',
-    'imagen' => 'uploads/usuarios/48_perfil.jpg', // Ruta relativa o URL de su imagen de perfil
     'sucursal_actual'=>31
 ];

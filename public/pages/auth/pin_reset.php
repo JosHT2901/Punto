@@ -64,7 +64,7 @@ try {
     echo $e->getMessage();
     error_log("Error al validar el token de restablecimiento: " . $e->getMessage());
 }
-$tituloPage = 'Restablecer contraseña';
+$tituloPage = 'Restablecer pin';
 ob_start();
 ?>
 <div class="w-p-100 overflow-auto">

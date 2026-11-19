@@ -1,26 +1,50 @@
 [
-    {
-      "titulo": "Clientes",
-      "icono": "vf-ic_fluent_person_board_24_filled",
-      "href": "/punto_1/public/pages/views/clientes.php",
-      "modulo": "Clientes"
-    },
-    {
-      "titulo": "Usuarios",
-      "icono": "vf-ic_fluent_person_24_filled",
-      "href": "/punto_1/public/pages/views/usuarios.php",
-      "modulo": "Clientes"
-    },
-    {
-      "titulo": "Sucursales",
-      "icono": "vf-ic_fluent_building_retail_24_filled",
-      "href": "/punto_1/public/pages/views/sucursales.php",
-      "modulo": "Sucursales"
-    },
-    {
-      "titulo": "Ajustes",
-      "icono": "vf-ic_fluent_settings_24_filled",
-      "href": "/punto_1/public/pages/views/ajustes.php",
-      "modulo": "Ajustes"
-    }
+  {
+    "titulo": "Clientes",
+    "icono": "vf-ic_fluent_person_board_24_filled",
+    "href": "/punto_1/public/pages/views/clientes.php",
+    "permiso": "clientes"
+  },
+  {
+    "titulo": "Usuarios",
+    "icono": "vf-ic_fluent_person_24_filled",
+    "href": "/punto_1/public/pages/views/usuarios.php",
+    "modulo": "usuarios"
+  },
+  {
+    "titulo": "Sucursales",
+    "icono": "vf-ic_fluent_building_retail_24_filled",
+    "href": "/punto_1/public/pages/views/sucursales.php",
+    "modulo": "sucursales"
+  },
+  {
+    "titulo": "Ajustes",
+    "icono": "vf-ic_fluent_settings_24_filled",
+    "href": "/punto_1/public/pages/views/ajustes.php",
+    "modulo": "ajustes"
+  },
+  {
+    "titulo": "Productos",
+    "icono": "vf-ic_fluent_box_24_filled",
+    "href": "/punto_1/public/pages/views/productos.php",
+    "modulo": "productos"
+  },
+  {
+    "titulo": "Inventario",
+    "icono": "vf-ic_fluent_clipboard_task_list_rtl_24_filled",
+    "href": "/punto_1/public/pages/views/inventario.php",
+    "modulo": "inventario"
+  },
+  {
+    "titulo": "Compras",
+    "icono": "vf-ic_fluent_cart_24_filled",
+    "href": "/punto_1/public/pages/views/compras.php",
+    "modulo": "compras"
+  },
+  {
+    "titulo": "Ventas",
+    "icono": "vf-ic_fluent_money_hand_24_filled",
+    "href": "/punto_1/public/pages/views/ventas.php",
+    "modulo": "ventas"
+  }
 ]

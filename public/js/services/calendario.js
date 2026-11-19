@@ -110,7 +110,7 @@ window.Calendario = (function ($) {
                     <button type="button" class="calendar-dp-arrow ${config.tipo === 'rango' ? 'hidden-arrow' : 'btn-next-m'} idx-next">▶</button>
                 </div>
                 <div class="calendar-dp-weekdays-container" style="display:grid; grid-template-columns: repeat(7, 1fr);"></div>
-                <div class="calendar-dp-grid-wrapper" style="max-height: 160px; overflow-y: auto; overflow-x: hidden;">
+                <div class="calendar-dp-grid-wrapper ocultar-scroll" style="max-height: 160px; overflow-y: auto; overflow-x: hidden;">
                     <div class="calendar-dp-grid"></div>
                 </div>
             </div>
@@ -125,7 +125,7 @@ window.Calendario = (function ($) {
                         <button type="button" class="calendar-dp-arrow btn-next-m">▶</button>
                     </div>
                     <div class="calendar-dp-weekdays-container" style="display:grid; grid-template-columns: repeat(7, 1fr);"></div>
-                    <div class="calendar-dp-grid-wrapper" style="max-height: 160px; overflow-y: auto; overflow-x: hidden;">
+                    <div class="calendar-dp-grid-wrapper ocultar-scroll" style="max-height: 160px; overflow-y: auto; overflow-x: hidden;">
                         <div class="calendar-dp-grid"></div>
                     </div>
                 </div>

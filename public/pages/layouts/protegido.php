@@ -1,5 +1,8 @@
+<?php 
+include_once "sesion.php"
+?>
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class=" min-w-400 custom-scroll">
 
 <head>
     <meta charset="UTF-8">
